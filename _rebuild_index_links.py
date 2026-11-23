@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-通用手册重编译流水线：引擎 -> makeindex -> 引擎 -> 引擎，收敛交叉引用与索引页码。
+通用手册重编译流水线：引擎 -> bibtex -> makeindex -> 引擎 -> 引擎，收敛交叉引用、文献表与索引页码。
 - 目录自动定位到脚本所在位置；编译器 / makeindex / gnuplot 优先从 PATH 查找，找不到再回退常见安装路径。
 - 换文档时只需修改下方「可配置项」，无需改动下面的流程代码。
 """
@@ -12,6 +12,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 MAIN_TEX         = "pgfplots.tex"        # 主文档文件名（相对脚本目录）
 JOBNAME          = "pgfplots"            # 任务名（与主文档同名，不含扩展名）
 INDEX_STYLE      = "_gind_fix.ist"       # makeindex 样式文件；不需要样式可置 None
+USE_BIBTEX       = True                   # 第一遍后运行 bibtex 生成 .bbl；无参考文献的文档置 False
 EXTRA_TEXINPUTS  = [".", "./acrotex/", "./acrotex-js/", "./plotdata/"]  # 额外宏包/数据子目录
 ENGINE           = "lualatex"             # 引擎: lualatex / xelatex / pdflatex
 SHELL_ESCAPE     = True                   # 需调用 gnuplot / 外部命令时为 True
@@ -48,6 +49,7 @@ os.environ["TEXINPUTS"] = ";".join(EXTRA_TEXINPUTS) + ";" + os.environ.get("TEXI
 
 ENGINE_EXE = resolve(ENGINE, TL_BIN_FALLBACK)
 MAKEINDEX  = resolve("makeindex", TL_BIN_FALLBACK)
+BIBTEX     = resolve("bibtex", TL_BIN_FALLBACK)
 
 latex_base = [ENGINE_EXE]
 if SHELL_ESCAPE:
@@ -72,6 +74,9 @@ def run(name, cmd):
 
 # pass 1: 嵌入新 .ind，刷新 aux/idx
 run("engine-pass1", latex_base)
+# bibtex: 依据 .aux/.bib 生成 .bbl（新增或改动参考文献后必须跑一次）
+if USE_BIBTEX:
+    run("bibtex", [BIBTEX, JOBNAME])
 # 用最新 .idx 重建 .ind（带超链接包裹）
 if INDEX_STYLE:
     run("makeindex", [MAKEINDEX, "-s", INDEX_STYLE, JOBNAME])
