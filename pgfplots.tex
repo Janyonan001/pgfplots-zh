@@ -25,6 +25,13 @@
 %\pdfobjcompresslevel=2
 \documentclass[a4paper,openany]{book}
 
+% 本地捆绑的 AcroTeX 套件目录（eforms / insdljs / exerquiz / web 等）。
+% 本机 TeX 发行版未安装该套件，这里把它们加入 LaTeX 文件搜索路径，
+% 使脱离编译脚本（直接在 IDE 或命令行编译）也能定位到这些宏包及其 .def。
+\makeatletter
+\def\input@path{{acrotex/}{acrotex-js/}}
+\makeatother
+
 % Promote `Missing character' reports to full errors
 % NOTE: lualatex turns this into a fatal \shipout error (no PDF produced);
 % keeping it commented keeps both engines compiling.
