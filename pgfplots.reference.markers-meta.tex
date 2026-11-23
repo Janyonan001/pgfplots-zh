@@ -1,0 +1,4074 @@
+
+\section{标记、线型、（背景）颜色与颜色映射}
+\label{sec:markers}
+
+以下 \Tikz{} 选项可用于绘图。
+
+
+\subsection{标记}
+
+该列表摘录自~\cite[第~29 节]{tikz}：
+%
+\pgfmanualpdflabel{/tikz/mark}{}%
+\begingroup
+\newenvironment{longdescription}[0]{%
+    \begin{list}{}{%
+        \leftmargin=4.7cm
+        \setlength{\labelwidth}{4.7cm}%
+        \renewcommand{\makelabel}[1]{\hfill\textbf{\texttt{##1}}}%
+    }%
+}{%
+    \end{list}%
+}%
+\def\showit#1{%
+    \tikz\draw [
+        gray,
+        thin,
+        mark options={fill=yellow!80!black,draw=black,scale=2},
+        x=0.8cm,y=0.3cm,
+        #1,
+    ] plot coordinates {(0,0) (1,1) (2,0) (3,1)};%
+}%
+\def\showitpgfplots#1{%
+\begin{tikzpicture}[baseline]
+    \begin{axis}[
+        anchor=north,
+        xticklabels=,
+        yticklabels=,
+        zticklabels=,
+        width=5cm,
+    ]
+        \addplot3 [
+            gray,
+            thin,
+            mark options={
+                scale=2,
+                fill=yellow!80!black,
+                draw=black,
+            },
+            #1,
+        ] coordinates {(0,0,0) (0.3,0.6,0.3) (2,0,0.1) (2.3,1,0.2)};
+    \end{axis}
+\end{tikzpicture}%
+}%
+\begin{longdescription}
+    \item[mark=*] \showit{mark=*}
+    \item[mark=x] \showit{mark=x}
+    \item[mark=+] \showit{mark=+}
+%    \item[mark=ball] \showit{mark=ball}
+\end{longdescription}
+%
+配合 |\usetikzlibrary{plotmarks}| 后还可用：
+%
+\begin{longdescription}
+    \item[mark=$-$] \showit{mark=-}
+    \item[mark=$\vert$] \showit{mark=|}
+    \item[mark=o] \showit{mark=o}
+    \item[mark=asterisk] \showit{mark=asterisk}
+    \item[mark=star] \showit{mark=star}
+    \item[mark=10-pointed star] \showit{mark=10-pointed star}
+    \item[mark=oplus] \showit{mark=oplus}
+    \item[mark=oplus*] \showit{mark=oplus*}
+    \item[mark=otimes] \showit{mark=otimes}
+    \item[mark=otimes*] \showit{mark=otimes*}
+    \item[mark=square] \showit{mark=square}
+    \item[mark=square*] \showit{mark=square*}
+    \item[mark=triangle] \showit{mark=triangle}
+    \item[mark=triangle*] \showit{mark=triangle*}
+    \item[mark=diamond] \showit{mark=diamond}
+    \item[mark=diamond*] \showit{mark=diamond*}
+    \item[mark=halfdiamond*] \showit{mark=halfdiamond*}
+    \item[mark=halfsquare*] \showit{mark=halfsquare*}
+    \item[mark=halfsquare right*] \showit{mark=halfsquare right*}
+    \item[mark=halfsquare left*] \showit{mark=halfsquare left*}
+    \item[mark=Mercedes star] \showit{mark=Mercedes star}
+    \item[mark=Mercedes star flipped] \showit{mark=Mercedes star flipped}
+    \item[mark=halfcircle] \showit{mark=halfcircle}
+
+        其中一半以白色填充（更准确地说，是以 |mark color| 填充）。
+
+    \item[mark=halfcircle*] \showit{mark=halfcircle*}
+
+        其中一半以白色填充（更准确地说，是以 |mark color| 填充），
+        另一半则以实际的 |fill| 颜色填充。
+
+    \item[mark=pentagon] \showit{mark=pentagon}
+    \item[mark=pentagon*] \showit{mark=pentagon*}
+    \item[mark=ball] \showit{mark=ball,mark options={ball color=yellow!80!black,scale=2}}
+
+        该标记较为特殊；若使用数量很大，很容易生成过大的输出文件。
+        它的另一特殊之处在于需要设置 |ball color|（在本例中为
+        |ball color=yellow!80!black|）。
+
+    \item[mark=text] \showit{mark=text,every mark/.append style={scale=0.5}}
+
+        该标记较为特殊，因为其样式可自由配置。所使用的字符
+        （甚至整段文字）由一组变量配置，详见下文。
+
+    \item[mark=cube] \showitpgfplots{mark=cube}
+
+        该标记仅在 \PGFPlots{} 坐标轴内部可用；它绘制一个面与坐标轴
+        平行的立方体。其尺寸可分别配置，详见下文。
+
+    \item[mark=cube*] \showitpgfplots{mark=cube*}
+    \item[用户自定义] 可以使用 |\pgfdeclareplotmark| 定义新的标记，
+        详见下文。
+\end{longdescription}
+%
+以下额外选项用于绘制上述所有标记：
+%
+\begin{codeexample}[code only]
+\draw [
+    gray,
+    thin,
+    mark options={
+        scale=2,fill=yellow!80!black,draw=black,
+    },
+]
+\end{codeexample}
+%
+请参阅第~\ref{sec:colors} 节了解如何修改 |draw| 与 |fill| 颜色。
+注意，所提供的每个标记都可以通过 |mark options={rotate=90}| 或
+|every mark/.append style={rotate=90}| 自由旋转。
+
+\begin{key}{/tikz/mark size=\marg{dimension} (initially 2pt)}
+    该 \Tikz{} 选项用于将标记尺寸设置为 \meta{dimension}。对于圆形标记，
+    \meta{dimension} 为半径；对于其他绘图标记，则约为其宽度和高度的一半。
+\end{key}
+
+\begin{pgfplotsxykey}{cube/size \x=\marg{dimension} (initially |\textbackslash pgfplotmarksize|=2pt)}
+    分别为每个坐标轴设置 |mark=cube| 的尺寸。
+\end{pgfplotsxykey}
+
+\begin{key}{/tikz/every mark}
+    可以重新配置该 \Tikz{} 样式，以设置标记的外观选项，
+    例如颜色或缩放、旋转等变换。\PGFPlots{} 会将其 |cycle list|
+    选项附加到该样式。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[y=2cm]
+    \addplot coordinates
+        {(-2,0) (-1,1) (0,0) (1,1) (2,0)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\tikzset{every mark/.append style={scale=2}}
+\begin{tikzpicture}
+\begin{axis}[y=2cm]
+    \addplot coordinates
+        {(-2,0) (-1,1) (0,0) (1,1) (2,0)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[y=2cm]
+  \addplot+ [
+    mark=halfcircle*,
+    every mark/.append style={rotate=90}]
+  coordinates
+    {(-2,0) (-1,1) (0,0) (1,1) (2,0)};
+
+  \addplot+ [
+    mark=halfcircle*,
+    every mark/.append style={rotate=180}]
+  coordinates
+    {(-2,-0.1) (-1,0.9) (0,-0.1) (1,0.9) (2,-0.1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，|every mark| 在某种程度上是静态的，它只会被求值一次。
+    如果需要在 |scatter| 图中为每个标记分别着色，则需要使用
+    |scatter/use mapped color|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[y=2cm]
+    \addplot+ [
+        mark=ball,
+        mark size=4pt,
+        scatter,% enable scatter
+        scatter src=rand,% the "color data"
+        % configure individual appearances:
+        scatter/use mapped color=
+            {ball color=mapped color}]
+    coordinates
+        {(-2,0) (-1,1) (0,0) (1,1) (2,0)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{key}
+
+\begin{stylekey}{/pgfplots/no markers}
+    该键会覆盖 |\addplot| 之后由选项列表的 |cycle list| 设置的任何
+    |mark| 值。
+
+    如果将该样式作为参数提供给整个坐标轴，它会被附加到
+    |every axis plot post|，从而即使对于包含标记的 |cycle list|
+    也会禁用标记。
+\end{stylekey}
+
+\begin{key}{/tikz/mark repeat=\marg{integer} (initially empty)}
+    允许仅绘制第 $n$ 个 |mark|，其中 $n$ 由 \meta{integer} 给出。
+\end{key}
+
+\begin{key}{/tikz/mark phase=\marg{integer $p$} (initially 1)}
+    该选项用于控制绘制哪些标记。它主要与 \Tikz{} 选项
+    |mark repeat=|$r$ 配合使用：它告诉 \tikzname{}，第一个要绘制的
+    标记应为第 $p$ 个，随后是第 $(p + r)$ 个、第 $(p + 2r)$ 个，依此类推。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[tiny]
+        \addplot+ [scatter] {sin(deg(x))};
+    \end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+    \begin{axis}[tiny]
+        \addplot+ [scatter,
+            mark repeat=3,mark phase=2]
+                {sin(deg(x))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    此处 $p=1$ 表示第一个数据点（即 |\coordindex|$=0$ 的那个点）。
+\end{key}
+
+\begin{key}{/tikz/mark indices=\marg{index list} (initially empty)}
+    允许仅绘制索引编号在参数列表中的标记。
+\end{key}
+
+\begin{key}{/pgf/mark color=\marg{color} (initially empty)}
+    为 |halfcircle|、|halfcircle*|、|halfdiamond*| 与 |halfsquare*|
+    标记定义\emph{额外的}填充颜色。空值使用 |white|（即初始配置）。
+    值 |none| 会禁用该部分的填充。
+
+    这些标记具有两种不同的填充颜色：一种与其他标记一样由 |fill|
+    决定，另一种则是 |mark color|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[y=2cm]
+    \addplot [
+        blue,
+        mark color=blue!50!white,
+        mark=halfcircle*
+    ] coordinates {
+        (-2,0) (-1,1) (0,0) (1,1) (2,0)
+    };
+    \addplot [
+        red,
+        mark color=red!50!white,
+        mark=halfsquare*,
+    ] coordinates {
+        (-2,-0.1) (-1,0.9) (0,-0.1) (1,0.9) (2,-0.1)
+    };
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，该键需要 \PGF{} 2.10 或更高版本。
+\end{key}
+
+\begin{key}{/tikz/mark options=\marg{options}}
+    将 |every mark| 重置为 \marg{options}。
+\end{key}
+
+\begin{key}{/pgf/text mark=\marg{text} (initially p)}
+    修改 |mark=text| 所显示的文字。
+
+    使用 |/pgf/text mark=m|：\pgfkeys{/pgf/text mark=m}\showit{mark=text,every
+    mark/.append style={scale=0.5}}
+
+    使用 |/pgf/text mark=A|：\pgfkeys{/pgf/text mark=A}\showit{mark=text,every
+    mark/.append style={scale=0.5}}
+
+    字符数量等没有任何限制。事实上，任何 \TeX{} 内容都可以作为
+    \meta{text} 插入，包括图片。
+\end{key}
+
+\begin{key}{/pgf/text mark style=\marg{options for \texttt{mark=text}}}
+    定义一组用于控制 |mark=text| 外观的选项。
+
+    若 |/pgf/text mark as node=false|（默认值），则 \meta{options} 作为
+    参数提供给 |\pgftext|——它仅提供 |left|、|right|、|top|、|bottom|、
+    |base| 与 |rotate| 等基本键。
+
+    若 |/pgf/text mark as node=true|，则 \meta{options} 作为参数提供给
+    |\node|。这意味着你可以提供一组功能非常强大的选项，
+    包括 |anchor|、|scale|、|fill|、|draw|、|rounded corners| 等。
+\end{key}
+
+\begin{key}{/pgf/text mark as node=\mchoice{true,false} (initially false)}
+    配置 |mark=text| 的绘制方式：作为 |\node| 或作为 |\pgftext|。
+
+    第一种方式非常灵活，但可能较慢；第二种方式非常快，
+    通常已足够。
+\end{key}
+
+\begin{command}{\pgfdeclareplotmark\marg{plot mark name}\marg{code}}
+    定义一个名为 \meta{plot mark name} 的新标记。每当使用该标记时，
+    就会执行 \meta{code}。其中应包含（最好是 \PGF{} 基础层的）
+    绘图命令。在 \meta{code} 执行期间，坐标系的原点表示标记应放置的
+    坐标位置。
+
+    更详细的信息请参阅~\cite{tikz} 中的 ``Mark Plot Handler'' 一节。
+\end{command}
+
+\begin{stylekey}{/pgfplots/every axis plot post (initially empty)}
+    %\todosp{shall the curly brackets after ``initially'' be shown? Also
+    %this style is again defined in Section~4.18.1 (see corresponding index
+    %entry). Is that intended?}
+    % The replication makes sense imho, but the curly braces appear to
+    % be a tech debt of the manual styles
+    |every axis plot post| 样式可用于覆盖为绘图分配的部分（或全部）
+    绘制样式。
+    %
+\begin{codeexample}[]
+% Overwrite any cycle list:
+\pgfplotsset{
+    every axis plot post/.append style={
+        mark=triangle,
+        every mark/.append style={rotate=90},
+    },
+}
+\begin{tikzpicture}
+    \begin{axis}[y=2cm]
+        \addplot coordinates {
+            (-2,0) (-1,1) (0,0) (1,1) (2,0)
+        };
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{stylekey}
+
+标记路径与图中其他部分不同，不会被裁剪。标记要么完整绘制，要么完全不绘制。
+
+\Tikz{} 还提供了更多用于精细调整标记的选项，详情请参阅~\cite{tikz}。
+
+
+\subsection{线型}
+
+\def\showit#1{%
+    \tikz\draw[
+        black,
+        x=0.8cm,y=0.3cm,
+        #1]
+    plot coordinates {(0,0) (1,1) (2,0) (3,1)};
+}%
+%
+以下线型在 \Tikz{} 中预定义。
+%
+\begin{stylekey}{/tikz/solid}
+    \showit{style=solid}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/dotted}
+    \showit{style=dotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/densely dotted}
+    \showit{style=densely dotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/loosely dotted}
+    \showit{style=loosely dotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/dashed}
+    \showit{style=dashed}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/densely dashed}
+    \showit{style=densely dashed}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/loosely dashed}
+    \showit{style=loosely dashed}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/dashdotted}
+    \showit{style=dashdotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/densely dashdotted}
+    \showit{style=densely dashdotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/loosely dashdotted}
+    \showit{style=loosely dashdotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/dashdotdotted}
+    \showit{style=dashdotdotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/densely dashdotdotted}
+    \showit{style=densely dashdotdotted}
+\end{stylekey}
+
+\begin{stylekey}{/tikz/loosely dashdotdotted}
+    \showit{style=loosely dashdotdotted}
+\end{stylekey}
+%
+\noindent 由于这些样式同样适用于标记，你可能希望在标记样式中考虑使用
+%
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every mark/.append style={solid},
+}
+\end{codeexample}
+%
+\noindent 。
+
+除线型外，\PGF{} 还提供了（大量）箭头。详情请参阅~\cite{tikz}。
+%
+\endgroup
+
+
+\subsection{边及其参数}
+
+当 \PGFPlots{} 连接数据点时，它依赖 \PGF{} 的绘图参数来生成合适的边
+（仅在 |every patch| 样式中才会修改这些参数）。
+
+有时可能需要修改这些参数：
+
+\begin{keylist}{
+    /tikz/line cap=\mchoice{round,rect,butt} (initially butt),
+    /tikz/line join=\mchoice{round,bevel,miter} (initially miter),
+    /tikz/miter limit=\meta{factor} (initially 10)%
+}
+    这些键控制线条在拐角处如何连接。其说明超出了本手册的范围，
+    感兴趣的读者请参阅~\cite{tikz}。
+
+    下面仅举一例，说明为什么研究这些参数可能是有意义的：
+% \usetikzlibrary{spy}
+\begin{codeexample}[]
+% requires \usetikzlibrary{spy}
+\begin{tikzpicture}[spy using outlines=
+    {circle, magnification=6, connect spies}]
+\begin{axis}[no markers,grid=major,
+    every axis plot post/.append style={thick}]
+\addplot  coordinates
+ {(0, 0) (0, 0.9) (1, 0.9) (2, 1) (3, 0.9) (80, 0)};
+\addplot+ [line join=round] coordinates
+ {(0, 0) (0, 0.9) (2, 0.9) (3, 1) (4, 0.9) (80, 0)};
+\addplot+ [line join=bevel] coordinates
+ {(0, 0) (0, 0.9) (3, 0.9) (4, 1) (5, 0.9) (80, 0)};
+\addplot+ [miter limit=5] coordinates
+ {(0, 0) (0, 0.9) (4, 0.9) (5, 1) (6, 0.9) (80, 0)};
+
+    \coordinate (spypoint)     at (3,1);
+    \coordinate (magnifyglass) at (60,0.7);
+\end{axis}
+
+\spy [blue, size=2.5cm] on (spypoint)
+    in node[fill=white] at (magnifyglass);
+\end{tikzpicture}
+\end{codeexample}
+\end{keylist}
+
+
+\subsection{字号与线宽}
+
+通常我们希望修改绘图的线宽和字号。这可以使用 \Tikz{} 的以下选项完成。
+
+\begin{key}{/tikz/font=\marg{font name} (initially \textbackslash normalfont)}
+    设置用于节点中文字的字体（例如刻度标签、
+    图例或说明文字）。
+
+    字体可以是任何 \LaTeX{} 参数，例如 |\footnotesize| 或
+    |\small\bfseries|。\footnote{当然，Con\TeX{}t 和 plain \TeX{} 用户需要提供其他语句。}
+
+    仅为特定的坐标轴描述修改字体可能会很有用，例如使用
+\begin{codeexample}[code only]
+\pgfplotsset{
+    tick label style={font=\small},
+    label style={font=\small},
+    legend style={font=\footnotesize},
+}
+\end{codeexample}
+
+    另请参阅第~\ref{sec:scaling:styles} 节中预定义的样式
+    |normalsize|、|small| 与 |footnotesize|。
+\end{key}
+
+\begin{key}{/tikz/line width=\marg{dimension} (initially 0.4pt)}
+    设置线宽。请注意，刻度线和网格线的线宽是预定义的，
+    因此可能需要覆盖样式 |every tick| 与 |every axis grid|。
+
+    |line width| 键在 \Tikz{} 中经常被修改。你应使用
+\begin{codeexample}[code only]
+\pgfplotsset{every axis/.append style={line width=1pt}}
+\end{codeexample}
+    %
+    或
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis/.append style={thick}}
+\end{codeexample}
+    %
+    来修改整体线宽。若还要调整刻度线和网格线，可以使用
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis/.append style={
+    line width=1pt,
+    tick style={line width=0.6pt}}}
+\end{codeexample}
+    %
+    或类似样式
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis/.append style={
+    thick,
+    tick style={semithick}}}
+\end{codeexample}
+    %
+    `|every axis plot|' 样式可用于仅修改绘图的线宽。
+\end{key}
+
+\begin{keylist}[/tikz]{thin,ultra thin,very thin,semithick,thick,very thick,ultra thick}
+    这些 \Tikz{} 样式提供不同的预定义线宽。
+\end{keylist}
+
+\begin{codeexample}[]
+\pgfplotsset{every axis/.append style={
+    font=\large,
+    line width=1pt,
+    tick style={line width=0.8pt}}}
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    legend pos=south west,
+    xlabel=\textsc{Dof},
+    ylabel=$L_2$ Error
+]
+\addplot coordinates {
+    (5,8.312e-02)    (17,2.547e-02)   (49,7.407e-03)
+    (129,2.102e-03)  (321,5.874e-04)  (769,1.623e-04)
+    (1793,4.442e-05) (4097,1.207e-05) (9217,3.261e-06)
+};
+
+\addplot coordinates{
+    (7,8.472e-02)    (31,3.044e-02)   (111,1.022e-02)
+    (351,3.303e-03)  (1023,1.039e-03) (2815,3.196e-04)
+    (7423,9.658e-05) (18943,2.873e-05)
+    (47103,8.437e-06)};
+
+\addplot coordinates{
+    (9,7.881e-02)     (49,3.243e-02)   (209,1.232e-02)
+    (769,4.454e-03)   (2561,1.551e-03)
+    (7937,5.236e-04)  (23297,1.723e-04)
+    (65537,5.545e-05) (178177,1.751e-05)};
+
+\addplot coordinates{
+    (11,6.887e-02)    (71,3.177e-02)   (351,1.341e-02)
+    (1471,5.334e-03)  (5503,2.027e-03)
+    (18943,7.415e-04) (61183,2.628e-04)
+    (187903,9.063e-05) (553983,3.053e-05)};
+
+\addplot coordinates{
+    (13,5.755e-02)    (97,2.925e-02)   (545,1.351e-02)
+    (2561,5.842e-03)  (10625,2.397e-03)
+    (40193,9.414e-04) (141569,3.564e-04)
+    (471041,1.308e-04) (1496065,4.670e-05)};
+\legend{$d=2$,$d=3$,$d=4$,$d=5$,$d=6$}
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\refstepcounter{pgfmanualentry}\label{page:plotcoords:src}%
+前一个示例定义的数据在本手册中多次使用；它由
+\declareandlabel{\plotcoords} 引用。%
+
+\begin{codeexample}[]
+\pgfplotsset{every axis/.append style={
+    font=\footnotesize,
+    thin,
+    tick style={ultra thin}},
+}
+\begin{tikzpicture}
+    \begin{loglogaxis}[
+        xlabel=\textsc{Dof},
+        ylabel=$L_2$ Error
+    ]
+        % see above for this macro:
+        \plotcoords
+        \legend{$d=2$,$d=3$,$d=4$,$d=5$,$d=6$}
+    \end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+
+\subsection{颜色}
+\label{sec:colors}
+
+{
+\def\showcolorandname#1{%
+    \showcolor{#1}~\texttt{\pgfmanualpdflabel{#1}{#1}}%
+}
+\def\showcolor#1{%
+    \tikz \draw[black,fill={#1}] (0,0) rectangle (1em,0.6em);%
+}
+
+\PGF{} 使用 |xcolor| 的颜色支持。因此，关于如何指定颜色的主要参考是
+|xcolor| 手册~\cite{xcolor}。\PGF{} 手册~\cite{tikz} 则是如何为特定用途
+（如绘制、填充、底纹、图案等）选择颜色的参考。本节概述~\cite{xcolor}
+中颜色的指定方式（不仅限于 \PGFPlots{}）。
+
+|xcolor| 宏包定义了一组预定义颜色，即
+%
+\showcolorandname{red},
+\showcolorandname{green},
+\showcolorandname{blue},
+\showcolorandname{cyan},
+\showcolorandname{magenta},
+\showcolorandname{yellow},
+\showcolorandname{black},
+\showcolorandname{gray},
+\showcolorandname{white},
+\showcolorandname{darkgray},
+\showcolorandname{lightgray},
+\showcolorandname{brown},
+\showcolorandname{lime},
+\showcolorandname{olive},
+\showcolorandname{orange},
+\showcolorandname{pink},
+\showcolorandname{purple},
+\showcolorandname{teal},
+\showcolorandname{violet}.
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[enlarge x limits=false]
+    \addplot [red,samples=500] {sin(deg(x))};
+    \addplot [orange,samples=7] {sin(deg(x))};
+    \addplot [teal,const plot,samples=14]
+        {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+除预定义颜色外，还可以\emph{混合}两种（或多种）颜色。
+例如，\showcolorandname{red!30!white} 包含 $30\%$ 的
+\showcolorandname{red} 和 $70\%$ 的 \showcolorandname{white}。
+因此，可以构造 \showcolorandname{red!70!white} 得到 $70\%$ 红色和
+$30\%$ 白色，或 \showcolorandname{red!10!white} 得到 $10\%$ 红色和
+$90\%$ 白色。这种混合可以用于任何颜色，例如
+\showcolorandname{red!50!green}、\showcolorandname{blue!50!yellow}
+或 \showcolorandname{green!60!black}。
+
+另一种颜色混合方式也受支持，它允许取\emph{每种}分量的 $100\%$。
+例如，\showcolorandname{rgb,2:red,1;green,1} 将加入 $1/2$ 份
+\showcolorandname{red} 和 $1/2$ 份 \showcolorandname{green}，
+我们复现了上面的示例。使用分母~$1$ 而非~$2$ 会得到
+\showcolorandname{rgb,1:red,1;green,1}，它使用 $1$ 份
+\showcolorandname{red} 和 $1$ 份 \showcolorandname{green}。
+许多程序允许在 $0,\dotsc,255$ 之间选择分量，因此分母为 $255$ 很有用。
+于是，\showcolorandname{rgb,255:red,231;green,84;blue,121} 使用
+$231/255$ 红色、$84/255$ 绿色和 $121/255$ 蓝色。这对应于标准
+RGB 颜色 $(231,84,121)$。其他示例有
+\showcolorandname{rgb,255:red,32;green,127;blue,43}、
+\showcolorandname{rgb,255:red,178;green,127;blue,43}、
+\showcolorandname{rgb,255:red,169;green,178;blue,43}。
+
+也可以直接使用 RGB 值、HSV 颜色模型、CMY（或 CMYK）模型或
+HTML 颜色语法。不过这需要更多编程。我认为这是使用颜色最快
+（也可能是最不方便）的方法。例如，
+%
+\begin{codeexample}[]
+\definecolor{color1}{rgb}{1,1,0}
+\tikz \fill[color1]
+    (0,0) rectangle (1em,0.6em);
+\end{codeexample}
+%
+\noindent 创建具有 $100\%$ \showcolorandname{red}、
+$100\%$ \showcolorandname{green} 和 $0\%$ \showcolorandname{blue}
+的颜色；
+%
+\begin{codeexample}[]
+\definecolor{color1}{cmyk}{0.6,0.9,0.5,0.1}
+\tikz \fill[color1]
+    (0,0) rectangle (1em,0.6em);
+\end{codeexample}
+%
+\noindent 创建具有 $60\%$ \showcolorandname{cyan}、
+$90\%$ \showcolorandname{magenta}、$50\%$ \showcolorandname{yellow}
+和 $10\%$ \showcolorandname{black} 的颜色；
+
+\begin{codeexample}[]
+\definecolor{color1}{HTML}{D0B22B}
+\tikz \fill[color1]
+    (0,0) rectangle (1em,0.6em);
+\end{codeexample}
+%
+\noindent 创建具有 $208/255$ 份红色、$178/255$ 份绿色和 $43$ 份蓝色的
+颜色，以标准 HTML 记号指定。更多详情和颜色模型请参阅
+|xcolor| 手册~\cite{xcolor}。
+
+|xcolor| 宏包还提供更多组合颜色的方法，其中包括前缀 `|-|'（减号），
+它将颜色变为其补色（\showcolorandname{-black}、
+\showcolorandname{-white}、\showcolorandname{-red}）或色轮计算。
+请参阅 |xcolor| 手册~\cite{xcolor}。
+}%
+
+\begin{keylist}{
+    /tikz/color=\marg{a color},
+    /tikz/draw=\marg{stroke color},
+    /tikz/fill=\marg{fill color}%
+}
+    这些键（通常）用于设置颜色。使用 |color| 同时设置绘制和填充颜色。
+    可以直接写 \meta{color name}，而不必写 |color=|\marg{color name}。
+    |draw| 和 |fill| 键分别仅设置描边和填充颜色。
+
+    使用 |draw=none| 禁用绘制，使用 |fill=none| 禁用填充。\footnote{到目前为止，
+    绘图标记始终具有描边颜色（有些还有填充颜色）。此限制可能在未来
+    版本中解除。}
+%    This does also work for markers.
+%--------------------------------------------------
+%\ begin{codeexample}[]
+%\begin{tikzpicture}
+%\begin{axis}
+%    \addplot+[only marks,mark=square*,
+%        mark options={fill=red!50!white,draw=none}]
+%        {4*x^2 - 2*x +4 };
+%\end{axis}
+%\end{tikzpicture}
+%\end{codeexample}
+%--------------------------------------------------
+
+    由于这些键属于 \Tikz{}，完整文档可在 \Tikz{} 手册
+    ~\cite[Section ``Specifying a Color'']{tikz} 中找到。
+\end{keylist}
+
+
+\subsubsection{颜色空间}
+
+由于 \PGFPlots{} 依赖 |xcolor|，|xcolor| 中定义颜色空间的所有机制
+在此同样适用。
+
+最有用的方法之一是全局颜色空间转换：如果你希望文档仅使用
+|cmyk| 颜色空间中的颜色，可以写
+
+\begin{codeexample}[code only]
+\usepackage[cmyk]{xcolor}
+\usepackage{pgfplots}
+\end{codeexample}
+%
+\noindent 以将整个文档的所有颜色（包括所有底纹）转换为 |cmyk|。
+
+同样的效果可以通过 |xcolor| 语句
+\declareandlabel{\selectcolormodel} 实现。
+%
+\begin{codeexample}[code only]
+\selectcolormodel{cmyk}
+\end{codeexample}
+
+
+\subsection{颜色映射}
+\label{sec:pgfplots:colormap}
+
+``颜色映射''是一系列颜色，颜色之间平滑过渡。颜色映射常用于在图中
+可视化``颜色数据''：此时一个图具有位置坐标 $(x,y)$ 和某个附加标量值
+（|point meta|），可用作``颜色数据''。遇到的最小 |point meta| 映射到
+|colormap| 的第一个颜色，遇到的最大 |point meta| 值映射到
+|colormap| 的最后一个颜色，中间进行插值。
+
+\begin{pgfplotskey}{colormap name=\marg{color map name} (initially hot)}
+    将当前颜色映射更改为已定义的、名为 \meta{color map name} 的映射。
+    预定义的颜色映射有
+
+    \begin{tabular}{>{\ttfamily}ll}
+        viridis & \pgfplotsshowcolormap{viridis} \\
+        hot     & \pgfplotsshowcolormap{hot}     \\
+    \end{tabular}
+
+    其定义分别见 |colormap/hot| 和 |colormap/viridis| 的文档。
+    这些以及更多颜色映射在下文描述。
+
+    颜色映射可用于例如 |scatter| 图和 |surf|ace 图。
+
+    可以使用 |colormap| 创建新的颜色映射（见下文）。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{colormap=\marg{name}\marg{color specification}}
+    根据 \meta{color specification} 定义一个名为 \meta{name} 的新颜色映射，
+    并使用 |colormap name=|\marg{name} 激活它。
+
+    一个简单的 \meta{color specification} 只是一系列类型为
+
+    \meta{color type}|=(|\meta{color value}|)|
+
+    的颜色定义，以空白符、分号或逗号分隔：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{colormap={CM}{rgb=(0,0,1) color=(black) rgb255=(238,140,238)}}
+\end{codeexample}
+\pgfplotsshowcolormapexample{rgb=(0,0,1) color=(black) rgb255=(238,140,238)}
+
+    此处，三个输入颜色分别构成区间的左端、中点和右端。有多种
+    \meta{color type} 可用，\meta{color value} 取决于实际的
+    \meta{color type}，下文将详细说明。大多数 |colormap| 定义使用
+    简单形式，仅列出合适的颜色定义。
+
+    更高级的 \meta{color specification} 同时定义颜色和位置，
+    以确定每种颜色的位置。此时，\PGFPlots{} 提供语法
+
+    \meta{color type}|(|\meta{offset}|)=(|\meta{color value}|)|：
+
+\begin{codeexample}[code only]
+\pgfplotsset{colormap={CM}{rgb(-500)=(0,0,1) color(0)=(black) rgb255(1500)=(238,140,238)}}
+\end{codeexample}
+\pgfplotsshowcolormapexample{rgb(-500)=(0,0,1) color(0)=(black) rgb255(1500)=(238,140,238)}
+
+    该语法允许使用非均匀距离在区间上分布颜色。
+
+
+    \paragraph{兼容性说明：}
+
+    \PGFPlots{} 至版本 $1.13$（含）仅提供对非均匀颜色映射的初步支持。
+    需要写 |compat=1.14| 或更高版本才能使用非均匀颜色映射。%
+    \index{Color maps!Non uniform, compatibility constraints}
+
+    位置可以是任意数字（或尺寸），\footnote{注意 \PGFPlots{} 至版本 $1.13$（含）
+    仅支持范围 $[0,16300]$。} 但每个新颜色的位置必须大于前一个颜色。
+    位置可以省略，此时将根据上下文推断：如果前两个颜色没有位置，
+    第一个取位置~$0$，第二个取位置 ``$1\text{cm}$''。其后所有颜色取
+    最后遇到的网格宽度。注意，非均匀位置在与
+    |colormap access=piecewise const| 配合时会产生实际差异。
+
+    精确的输入格式在下一节描述。
+
+
+    \subsubsection{颜色映射输入格式参考}
+    \label{sec:colormap:input:format}
+
+    \meta{color specification} 中的每个条目具有形式
+
+    \meta{color model}|(|\meta{position}|)=(|\meta{arguments}|)| 或
+
+    \meta{special mode}|(|\meta{position}|)=(|\meta{argument}| of |\meta{colormap name}|)|
+
+    其中最常见的形式是使用 \meta{color model} 指定颜色，如
+    |rgb=(0,0.5,1)|。\meta{special mode} 在第~\ref{sec:pgfplots:colormaps:based:on:others}
+    节（第~\pageref{sec:pgfplots:colormaps:based:on:others} 页）中讨论；
+    它们用于访问现有颜色映射的颜色。\meta{position} 参数是
+    可选参数，第一个颜色默认为 $0$，第二个颜色默认为 $1\text{cm}$，
+    其余颜色使用自动推导的网格间距。\meta{position} 的取值范围是任意的。
+    请注意，\PGFPlots{} 仅记住 \meta{position} 的相对距离，而不是
+    它们的绝对值。因此，位置为 $0,1,2$ 的颜色映射
+    等价于 $0,10,20$、$-10,0,10$ 或 $-1100,-1000,-900$ 的颜色映射。
+    \PGFPlots{} 在内部将输入位置映射到 $[0,1000]$ 的范围，并
+    使用这些数值。每个新颜色的 \meta{position} 必须
+    大于前一个颜色。
+    is larger than the preceding one.
+
+    \meta{color model} 的可用选择如下：
+    %
+    % ATTENTION : a VERY similar description (actually: the same) is in sec:surf:explicit:color
+    % maintain both; the syntax is different
+    \begin{description}
+        \item \declareandlabel{rgb} 接受形式为
+            |(|\meta{red}|,|\meta{green}|,|\meta{blue}|)| 的
+            \meta{arguments}，每个分量在区间 $[0,1]$ 内，
+        \item \declareandlabel{rgb255} 与 |rgb| 类似，但每个分量
+            应在区间 $|[0,255]|$ 内，
+        \item \declareandlabel{gray} 此时 \meta{arguments} 是区间
+            $[0,1]$ 内的单个数字，
+        \item \declareandlabel{color} 此时 \meta{arguments} 包含
+            预定义（命名）颜色如 `|red|' 或颜色表达式如 `|red!50|'，
+        \item \declareandlabel{cmyk} 接受形式为
+            |(|\meta{cyan}|,|\meta{magenta}|,|\meta{yellow}|,|\meta{black}|)|
+            的 \meta{arguments}，每个分量在区间 $[0,1]$ 内，
+        \item \declareandlabel{cmyk255} 与 |cmyk| 相同，但分量应在
+            区间 $[0,255]$ 内，
+        \item \declareandlabel{cmy} 接受形式为
+            |(|\meta{cyan}|,|\meta{magenta}|,|\meta{yellow}|)| 的
+            \meta{arguments}，每个分量在区间 $[0,1]$ 内，
+        \item \declareandlabel{hsb} 接受形式为
+            |(|\meta{hue}|,|\meta{saturation}|,|\meta{brightness}|)| 的
+            \meta{arguments}，每个分量在区间 $[0,1]$ 内，
+        \item \declareandlabel{Hsb} 与 |hsb| 相同，但 \meta{hue}
+            接受区间 $[0,360]$（度）内的值，
+        \item \declareandlabel{HTML} 与 |rgb255| 类似，但每个分量
+            应为 |00| 到 |FF| 之间的十六进制数，
+        \item \declareandlabel{wave} 接受单个波长作为数值参数，
+            范围为 $[363,814]$。
+    \end{description}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colormap={bw}{
+        gray(0cm)=(0);
+        gray(1cm)=(1);
+    },
+]
+    \addplot+ [
+        scatter,
+        only marks,
+        domain=0:8,
+        samples=100,
+    ] {exp(x)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    \meta{positions} 的选择会影响处理时间：\meta{positions} 之间均匀
+    距离比非均匀距离查找更高效。如果视觉上没有差异，且对数据点数量
+    没有影响，优先使用均匀距离的颜色映射而非非均匀映射。注意，
+    非均匀映射在与 |colormap access=piecewise constant| 配合时会产生
+    巨大差异。\PGFPlots{} 提供了一种简单方法将非均匀颜色定义映射为
+    均匀颜色定义：将目标网格宽度写在说明的\emph{第一项}。只要遇到的
+    所有 \meta{positions} 都能映射到目标网格，\PGFPlots{} 会自动执行
+    插值：\index{Color maps!Non uniform}
+
+\begin{codeexample}[code only]
+% non-uniform spacing example: the mesh width is provided as first
+% part of the specification.
+\pgfplotsset{colormap={violetnew}
+    {[1cm] rgb255(0cm)=(25,25,122) color(1cm)=(white) rgb255(5cm)=(238,140,238)}}
+\end{codeexample}
+\pgfplotsshowcolormapexample{[1cm]
+    rgb255(0cm)=(25,25,122)
+    color(1cm)=(white)
+    rgb255(5cm)=(238,140,238)
+}
+
+    \noindent 在最后这个示例中，网格宽度被显式给出，\PGFPlots{} 自行
+    插值缺失的网格点。如果所给位置不是网格宽度的整数倍，则会出错。
+
+
+    \subsubsection{颜色映射的颜色空间}
+
+    \emph{注意：} 如果你已配置 |xcolor| 宏包全局覆盖颜色空间
+    （例如在加载 \PGFPlots{} 之前使用 |\usepackage[cmyk]{xcolor}|），
+    本节基本多余，见本小节末尾。
+
+    尽管 |colormap| 在\emph{输入}时接受许多颜色空间（事实上接受 |xcolor|
+    提供的大多数或全部），但颜色空间的\emph{输出}颜色有严格限制。
+    输出颜色空间是 \PGFPlots{} 在两种其他颜色之间进行插值的颜色空间。
+    为此，它将输入颜色转换到输出颜色空间。输出颜色空间也称为
+    ``颜色映射的颜色空间''。
+
+    |colormap| 支持三种颜色空间：GRAY、RGB 和 CMYK 颜色空间。每次访问
+    |colormap| 都需要在其颜色空间中进行线性插值。颜色空间会产生差异：
+    不同颜色空间中的颜色可能表示不同，取决于输出设备。许多打印机使用
+    CMYK 进行彩色打印，因此提供 CMYK 颜色可能提高彩色打印机上的打印质量。
+    RGB 颜色空间常用于显示设备。\PGFPlots{} 中预定义的 |colormap| 都使用 RGB。
+
+    每当创建新的 |colormap|，\PGFPlots{} 会确定一个关联的颜色空间。
+    然后，该特定 |colormap| 中的每种颜色都将以其关联的颜色空间表示
+    （必要时自动转换颜色）。此外，对 |colormap| 的每次访问都将在其
+    关联颜色空间中进行，每次返回的 |mapped color| 也将根据该颜色空间
+    表示。此外，由 |shader=interp| 生成的每种底纹都将根据 |colormap|
+    的关联颜色空间表示。
+
+    颜色空间选择如下：若 |colormap default colorspace=auto|（初始配置），
+    颜色空间取决于 \meta{color specification} 中\emph{第一个}遇到的颜色。
+    对于 |rgb| 或 |gray| 或 |color|，关联颜色空间为 RGB
+    （与 \PGFPlots{} 早期版本相同）。对于 |cmyk|，关联颜色空间为 CMYK。
+    若 |colormap default colorspace| 为 |gray|、|rgb| 或 |cmyk| 之一，
+    则使用该特定颜色空间，并自动转换每种颜色。
+
+    \begin{pgfplotskey}{colormap default colorspace=\mchoice{auto,gray,rgb,cmyk} (initially auto)}
+        允许设置每个\emph{新建} |colormap| 的颜色空间。
+        各选项在上一段中说明。
+
+        无法更改现有 |colormap| 的颜色空间；如需转换，请重新创建。
+
+        若有疑问，宏 \declareandlabel{\pgfplotscolormapgetcolorspace}\marg{name}
+        会将 |\pgfplotsretval| 定义为包含现有 |colormap name| 的颜色空间。
+
+        注意，如果你已告知 |xcolor| 全局覆盖颜色空间，该选项\emph{无效}。
+        更准确地说，使用
+\begin{codeexample}[code only]
+\usepackage[cmyk]{xcolor}
+\end{codeexample}
+        %
+        或，替代地，
+        %
+\begin{codeexample}[code only]
+\selectcolormodel{cmyk}
+\end{codeexample}
+        %
+        会导致所有颜色转换为 |cmyk|，\PGFPlots{} 尊重此配置。
+        因此，这两条语句都会使所有颜色在所需颜色空间中插值，
+        所有输出颜色都将使用该颜色空间。这通常正是你所需要的。
+    \end{pgfplotskey}
+
+
+    \subsubsection{预定义颜色映射}
+
+    可用的颜色映射如下所示。
+\end{pgfplotskey}
+
+\begin{stylekey}{/pgfplots/colormap/viridis}
+    该样式安装由 Stèfan van der Walt 和 Nathaniel Smith 为
+    |Matplotlib| 定义的 ``viridis'' 颜色映射。它被指定为
+    |Matplotlib| 从版本~2.0 起的默认 |colormap|，并以
+    CC0\footnote{\url{https://creativecommons.org/about/cc0}} 发布。
+
+    |viridis| 选项是 \PGFPlots{} 中包含的降采样副本。
+
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap name=viridis,
+}
+\end{codeexample}
+    \pgfplotsshowcolormap{viridis}
+
+    与其他选项相比，该 |colormap| 具有明显更好的特性：
+    %
+    \begin{itemize}
+        \item 其颜色分布在感知上是均匀的（参见下方链接中的定义），
+        \item 它适用于中等程度的色盲，
+        \item 黑白打印时仍然良好。
+    \end{itemize}
+    %
+    有关这些特性的详情，请参阅
+    \url{http://bids.github.io/colormap}。
+
+    请使用 |colormap name=viridis| 选项，因为它使用预定义颜色映射，
+    而 |colormap/viridis| 会重新定义它。
+
+    |colormaps| 库中还有一个 |viridis| 的高分辨率副本，
+    称为 |colormap/viridis high res|。它接近作者原始分辨率，
+    但视觉上与 |viridis| 几乎相同，且在 \TeX{} 中占用更少资源。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/hot}
+    该样式安装颜色映射
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={hot}{color(0cm)=(blue); color(1cm)=(yellow); color(2cm)=(orange); color(3cm)=(red)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{hot}
+
+    这是一个预配置的颜色映射。
+    %
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/hot2}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/colormap={hot2}{[1cm]rgb255(0cm)=(0,0,0) rgb255(3cm)=(255,0,0)
+        rgb255(6cm)=(255,255,0) rgb255(8cm)=(255,255,255)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{hot2}
+
+    注意，该特定选项随 \PGFPlots{} 直接提供，无需为该值加载 |colormaps| 库。
+
+    \matlabcolormaptext
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/jet}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/colormap={jet}{rgb255(0cm)=(0,0,128) rgb255(1cm)=(0,0,255)
+        rgb255(3cm)=(0,255,255) rgb255(5cm)=(255,255,0) rgb255(7cm)=(255,0,0) rgb255(8cm)=(128,0,0)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{jet}
+
+    \matlabcolormaptext
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/blackwhite}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={blackwhite}{gray(0cm)=(0); gray(1cm)=(1)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{blackwhite}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/bluered}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={bluered}{
+        rgb255(0cm)=(0,0,180); rgb255(1cm)=(0,255,255); rgb255(2cm)=(100,255,0);
+        rgb255(3cm)=(255,255,0); rgb255(4cm)=(255,0,0); rgb255(5cm)=(128,0,0)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{bluered}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[colormap/bluered]
+    \addplot+ [scatter,
+         scatter src=x,samples=50]
+        {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    \paragraph{说明：}
+
+    样式 |bluered|（重新）定义颜色映射并激活它。如果在导言区调用
+    |\pgfplotsset{colormap/bluered}|（仅创建一次颜色映射），并在需要时
+    使用 |colormap name=bluered|，\TeX{} 会稍快。本说明适用于后续
+    每个颜色映射样式。但你可以直接忽略本说明。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/cool}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={cool}{rgb255(0cm)=(255,255,255); rgb255(1cm)=(0,128,255); rgb255(2cm)=(255,0,255)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{cool}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/greenyellow}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={greenyellow}{rgb255(0cm)=(0,128,0); rgb255(1cm)=(255,255,0)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{greenyellow}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/redyellow}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={redyellow}{rgb255(0cm)=(255,0,0); rgb255(1cm)=(255,255,0)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{redyellow}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colormap/violet}
+    该样式等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colormap={violet}{rgb255=(25,25,122) color=(white) rgb255=(238,140,238)}
+}
+\end{codeexample}
+
+    \pgfplotsshowcolormap{violet}
+\end{stylekey}
+
+\begin{command}{\pgfplotscolormaptoshadingspec\marg{colormap name}\marg{right end size}\marg{\textbackslash macro}}
+    该命令将颜色映射转换为 \PGF{} 底纹的颜色说明。它可用于
+    |\pgfdeclare...shading| 等命令（详情见 \PGF{} 手册~\cite{tikz}）。
+
+    第一个参数是（已定义的）颜色映射名称，第二个是说明最右端的尺寸。
+    结果将存储在 \meta{\textbackslash macro} 中。
+    %
+\begin{codeexample}[]
+    % convert `hot' -> \result
+    \pgfplotscolormaptoshadingspec{hot}{8cm}\result
+    % define and use a shading in pgf:
+    \def\tempb{\pgfdeclarehorizontalshading{tempshading}{1cm}}%
+    % where `\result' is inserted as last argument:
+    \expandafter\tempb\expandafter{\result}%
+    \pgfuseshading{tempshading}%
+\end{codeexample}
+    %
+    结果 \meta{\textbackslash macro} 的使用有点底层。
+
+
+    \paragraph{注意：}
+
+    \PGF{} 底纹始终根据 RGB 颜色空间表示。因此，使用此方法时，
+    即使是 CMYK \meta{colormap name} 也会产生 RGB 底纹说明。\footnote{
+    如果 \PGF{} 将来支持 CMYK 底纹，而你仍看到本说明，可以在导言区添加
+    宏定义 \texttt{\textbackslash def\textbackslash
+    pgfplotscolormaptoshadingspectorgb\{0\}}。}
+\end{command}
+
+\begin{command}{\pgfplotscolorbardrawstandalone\oarg{options}}
+    该命令绘制一个 |tikzpicture| 和其中使用当前颜色条设置的
+    |colorbar|。其目的是简化文档。
+
+    由于此 |colorbar| 是``独立''图片，它定义以下选项
+    %
+\begin{codeexample}[code only]
+    point meta min=0,
+    point meta max=1000,
+    parent axis width/.initial=6cm,
+    parent axis height/.initial=6cm,
+\end{codeexample}
+    %
+    然后才求值 \meta{options} 并绘制颜色条。
+\end{command}
+
+\begin{command}{\pgfplotscolormaptodatafile\oarg{options}\marg{colormap name}\marg{output file}}
+    允许将 |colormap| 数据导出到文件。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[y=1cm,table/col sep=comma]
+        \pgfplotscolormaptodatafile{hot}{hot.dat}
+    \addplot[red,mark=|]   table[y index=1] {hot.dat};
+    \addplot[green,mark=|] table[y index=2] {hot.dat};
+    \addplot[blue,mark=|]  table[y index=3] {hot.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[y=1cm,table/col sep=comma]
+    \pgfplotscolormaptodatafile{viridis}{viridis.dat}
+    \addplot[red]   table[y index=1] {viridis.dat};
+    \addplot[green] table[y index=2] {viridis.dat};
+    \addplot[blue]  table[y index=3] {viridis.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    有效的 \meta{options} 有
+    %
+    \begin{pgfplotskey}{/pgfplots/colormap/output each nth=\meta{num} (initially 1)}
+        允许通过仅写入每第 \meta{num} 个条目来降采样颜色映射。
+    \end{pgfplotskey}
+
+    \begin{pgfplotskey}{/pgfplots/colormap/output format=\mchoice{cvs,native} (initially csv)}
+        选项 \declaretext{csv} 生成 CSV 文件，其中第一列是颜色映射的偏移，
+        其余列是颜色分量。
+
+        选项 \declaretext{native} 生成 \TeX{} 文件，可 |\input| 以定义
+        颜色映射供 \PGFPlots{} 使用。
+    \end{pgfplotskey}
+\end{command}
+
+注意，相关库中\emph{有更多可用颜色映射选择}，即 |colorbrewer| 库和
+|colormaps| 库，需通过 |\usepgfplotslibrary{colorbrewer,colormaps}| 加载。
+
+
+\subsubsection{基于其他颜色映射构建颜色映射}
+\label{sec:pgfplots:colormaps:based:on:others}
+
+{
+\tikzset{
+    /pdflinks/search key prefixes in/.add={}{,/pgfplots/of colormap/},
+}
+形如 |colormap=|\marg{name}\marg{color specification} 的颜色映射定义
+通常由单个颜色组成的 \meta{color specifications} 构成，
+每个颜色有自己的 \meta{color model}。如第~\ref{sec:colormap:input:format}
+节所述，\meta{color specification} 中每个条目具有形式
+
+    \meta{color model}|(|\meta{position}|)=(|\meta{arguments}|)| 或
+
+    \meta{special mode}|(|\meta{position}|)=(|\meta{argument}| of |\meta{colormap name}|)|。
+
+\noindent 本节说明如何利用 \meta{special mode} 基于现有 |colormap|
+构建 |colormap|。为此，\PGFPlots{} 在 \meta{color specification} 内
+提供以下值：
+
+\begin{enumerate}
+    \item
+        \declareandlabel{samples of colormap}|(|\meta{position}|)=(|\meta{number}| of |\meta{colormap name}|)| 或\\
+        \declaretext{samples of colormap}|(|\meta{position}|)=(|\meta{number}|)| 或\\
+        \declaretext{samples of colormap}|(|\meta{position}|)={|\meta{number}| of |\meta{colormap name}|, |\meta{options}|}|%
+            \index{samples of colormap!In colormap specification}%
+
+        该方法接受 \meta{colormap name} 作为输入，从中采样 \meta{number}
+        个颜色（使用均匀网格宽度），并插入当前正在构建的 |colormap|。
+        它等价于选项 |colors of colormap||(|\meta{position}|)=(0,h,...,1000)|，
+        其中 |h| 的选择使你得到位于等距网格上的 \meta{number} 个样本。
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap=(4 of viridis)
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap=(4 of viridis)
+    },
+    colorbar horizontal,
+    colormap access=map,
+]
+\end{codeexample}
+
+        特殊后缀 ``| of |\meta{colormap name}'' 是可选的；
+        它默认为 |colormap name| 的当前值：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap=(4)
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap=(4)
+    },
+    colorbar horizontal,
+    colormap access=map,
+]
+\end{codeexample}
+
+        参数可以用圆括号或花括号包围，两者都接受。\PGFPlots{} 也接受
+        参数内的一系列选项；如果需要选项，最好使用花括号：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap={
+            5 of viridis,
+            target pos={0,800,850,950,1000},
+        }
+    },
+    colorbar horizontal,
+    colormap access=map,
+]
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        % simpler alternative:
+        % of colormap={viridis,target pos={...}}
+        samples of colormap={
+            5 of viridis,
+            target pos={0,400,500,700,800,1000},
+            sample for=const,
+        }
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+
+        参数内选项的使用在下一小节讨论，见 |of colormap| 与 |target pos|。
+
+        与普通颜色定义一样，\meta{position} 参数是可选的，可以省略。
+        如果给出，则用于列表中第一个遇到的条目，其余自动推断。
+        如果同时给出 |target pos| 和 \meta{position}，则忽略
+        \meta{position}。
+
+        注意，\PGFPlots{} 为 |target pos| 和采样颜色映射提供了特殊语法：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={
+            viridis,
+            target pos={0,400,500,700,800,1000},
+            sample for=const,
+        }
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+        %
+        该语法同样从源颜色映射（此处为 |viridis|）采样颜色。
+        它选择足够的样本以满足给定的 |target pos|；
+        详情见 `|of colormap|' 的文档。
+    \item
+        \declareandlabel{index of colormap}|(|\meta{position}|)=(|\meta{index}| of |\meta{colormap name}|)| 或\\
+        \declaretext{index of colormap}|(|\meta{position}|)=(|\meta{index}|)|%
+            \index{index of colormap!In colormap specification}%
+
+        该键允许标识 \meta{colormap name} 中的\emph{单个}颜色，
+        并将其用作 \meta{color specification} 的一部分。
+        \meta{index} 是数值索引 $0,1,\dotsc,N-1$，其中 $N$ 是
+        \meta{colormap name} 的大小。
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        color=(green),
+        index of colormap=(2 of viridis)
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+
+        注意，|index of colormap| 也可用作绘图操作的键：
+
+        \begin{pgfplotskey}{index of colormap=\meta{index} of \meta{colormap name}}
+            使用特殊颜色名 `|.|' 选择 \meta{colormap name} 的指定颜色，
+            并赋值 |color=.|：
+            %
+\begin{codeexample}[]
+\pgfplotsset{
+ colormap={example}{color=(red) color=(blue)}}
+\tikz \draw[index of colormap=0 of example] (0,0) -- (1,0);
+\end{codeexample}
+            %
+\begin{codeexample}[]
+\pgfplotsset{
+ colormap={example}{color=(red) color=(blue)}}
+\tikz \fill[index of colormap=1 of example] (0,0) rectangle (1,1);
+\end{codeexample}
+            %
+            注意，某些绘图指令需要的不只是设置 |color|。此时，
+            你必须在该键之后引用颜色 `|.|'：
+            %
+\begin{codeexample}[]
+\pgfplotsset{
+ colormap={example}{color=(red) color=(blue)}}
+\tikz \shade[
+    index of colormap=0 of example,left color=.,
+    color of colormap=500 of example,right color=.] (0,0) rectangle (1,1);
+\end{codeexample}
+        \end{pgfplotskey}
+
+        |samples of colormap| 的所有特殊说明（如花括号、选项列表支持、
+        位置）在此同样适用。
+    \item
+        \declareandlabel{indices of colormap}|(|\meta{position}|)=(|\meta{list of indices}| of |\meta{colormap name}|)| 或\\
+        \declaretext{indices of colormap}|(|\meta{position}|)=(|\meta{list of indices}|)|%
+            \index{indices of colormap!In colormap specification}%
+
+        一个便捷键，等价于一系列 |index of colormap||(|\meta{position}|)|，
+        \meta{list} 中每个元素一个。\meta{list} 使用 |\foreach| 求值。
+        注意，参数需要用圆括号包围。
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        indices of colormap=(0,5,10,12,
+          \pgfplotscolormaplastindexof{viridis}
+          of viridis)
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+
+        |samples of colormap| 的所有特殊说明（如花括号、选项列表支持、
+        位置）在此同样适用。
+    \item
+        \declareandlabel{color of colormap}|(|\meta{position}|)=(|\meta{value}| of |\meta{colormap name}|)| 或\\
+        \declaretext{color of colormap}|(|\meta{position}|)=(|\meta{value}|)|%
+            \index{color of colormap!In colormap specification}%
+
+        该键允许在 \meta{colormap name} 内插值一个颜色，并将结果用作
+        \meta{color specification} 的一部分。插值点是范围 $[0,1000]$
+        内的浮点数，使用 |colormap access=map| 插值
+        （即使用分段线性插值）。
+
+        注意，|color of colormap| 也可用作绘图操作的键：
+
+        \begin{pgfplotskey}{color of colormap=\meta{value} of \meta{colormap name}}
+            使用特殊颜色名 `|.|' 选择 \meta{colormap name} 的指定颜色，
+            并赋值 |color=.|：
+            %
+\begin{codeexample}[]
+\pgfplotsset{
+ colormap={example}{color=(red) color=(blue)}}
+\tikz \shade[
+    color of colormap=250 of example,left color=.,
+    color of colormap=500 of example,right color=.] (0,0) rectangle (1,1);
+\end{codeexample}
+        \end{pgfplotskey}
+
+        |samples of colormap| 的所有特殊说明（如花括号、选项列表支持、
+        位置）在此同样适用。
+    \item
+        \declareandlabel{colors of colormap}|(|\meta{position}|)=(|\meta{list}| of |\meta{colormap name}|)| 或\\
+        \declaretext{colors of colormap}|(|\meta{position}|)=(|\meta{list}|)| 或\\
+        \declaretext{colors of colormap}|(|\meta{position}|)={|\meta{list}| of |\meta{colormap name}|, |\meta{options}|}|%
+            \index{colors of colormap!In colormap specification}%
+
+        一个便捷键，等价于一系列 |color of colormap||(|\meta{position}|)|，
+        \meta{list} 中每个元素一个。\meta{list} 使用 |\foreach| 求值。
+        注意，参数需要用圆括号包围。
+
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+      colors of colormap=(0,400,800,900,
+          1000 of viridis)
+    },
+    colorbar horizontal,
+    colormap access=const,
+]
+\end{codeexample}
+
+        注意，|colors of colormap| 在 |cycle list| 定义期间也可用。
+
+        |samples of colormap| 的所有特殊说明（如花括号、选项列表支持、
+        位置）在此同样适用。
+    \item \declaretext{of colormap}|(|\meta{position}|)=(|\meta{colormap name}|, |\meta{options}|)|
+
+        通过从输入 |colormap name| 中\emph{采样}足够颜色来构建新的
+        |colormap|。该模式是从另一个 |colormap| 采样颜色的两种方法之一；
+        如果你想分配 |target pos|，应优先使用它。另见
+        |samples of colormap|；如果你只想指定样本数量，它更简单。
+
+        语法 `|of colormap=|' 最适合想从另一个颜色映射
+        \emph{在特定位置} 采样颜色时：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={
+            viridis,
+            target pos={0,400,500,700,800,1000},
+        },
+    },
+    colorbar horizontal,
+    colormap access=map,
+]
+\end{codeexample}
+        %
+        此处，\PGFPlots{} 解析 \meta{options}。每个未识别选项要么被视为
+        `|colormap name|' 的值，要么被视为定义 |colormap|（如
+        |colormap/PuOr|）的样式参数。前一个示例识别出
+        |colormap name=viridis|（因为 |viridis| 不是已知选项）并分配
+        |target pos|。颜色映射由 $6$ 个样本构成，这些样本取自 |viridis|。
+        注意，在此上下文中无需指定 \meta{colormap name}。如果缺失，
+        将使用 |colormap name| 的当前值（即当前颜色映射）。
+
+        类似地，`|of colormap|' 可以采样 |colormap| 以配合
+        |colormap access=const| 使用：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={
+            viridis,
+            target pos={0,400,500,700,800,1000},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+        %
+        注意，在此上下文中\emph{需要}写 |sample for=const|，
+        以便 \PGFPlots{} 知道结果要配合 |colormap access=const| 使用。
+        详情见下文。
+
+        与所有颜色映射构建块一样，|target pos| 可以有任意数字范围。
+        不过，绝对值没有意义；它们始终被映射到范围 $[0,1000]$。
+        就 |colormap| 本身而言，只有它们的相对距离重要：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={viridis,
+            target pos={-10,-3,0,1,2},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+        %
+        但是，如果 |point meta| 范围等于颜色映射定义范围，
+        你会看到它们完全吻合：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={viridis,
+            target pos={-10,-3,0,1,2},
+            sample for=const,
+        },
+    },
+    point meta min=-10,point meta max=2,
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+        %
+        注意，你可以在 |colorbar| 样式内使用 |xtick=data| 或 |ytick=data|，
+        以将刻度标签放在 |colormap| 的位置处：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={viridis,
+            target pos={-10,-3,0,1,2},
+            sample for=const,
+        },
+    },
+    point meta min=-10,point meta max=2,
+    colorbar horizontal,
+    colorbar style={xtick=data},
+    colormap access=const]
+\end{codeexample}
+
+        最后，`|of colormap|' 可用于\emph{复制}另一个 |colormap|：
+        如果没有关于如何构建新 |colormap| 的合适提示，
+        \PGFPlots{} 复制输入映射：
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={viridis},
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+
+        \meta{options} 被所有颜色映射构建块接受：如果需要，你也可以在
+        |samples of colormap| 或 |colors of colormap| 之后指定它们。
+
+        以下选项可用：
+
+        \begin{pgfplotskey}{of colormap/target pos=\marg{position(s)} (initially empty)}
+            允许为零个、一个或多个相关颜色定义 \meta{position}。
+            空值表示在定义中使用圆括号 `|(|\meta{position}|)|' 中的参数，
+            例如 |color of colormap(100)=(4)| 中的值 $100$。如果只涉及
+            一种颜色，这就足够了。但是，如果 |target pos| 有非空值，
+            它会覆盖 |(|\meta{position}|)| 参数。
+
+            键 |target pos| 主要用于为多个颜色定义提供位置，
+            特别是在
+            `|of colormap|'. 在此上下文中，使用所指定数量的 \meta{position(s)}。
+
+            如果你有 |colors of colormap| 和非空的
+            |target pos| 值，\PGFPlots{} 将使用尽可能多的可用 |target pos|itions。
+            如果数量太少而无法覆盖所有涉及的颜色，则
+            剩余的位置将自动推导。更精确地说：
+            \PGFPlots{} 将使用当前网格宽度作为到
+            前一个位置的距离。``当前网格宽度'' 被定义为
+            相邻位置之间的最小差值。多余的位置
+            将被忽略（并在日志文件中写入警告）。
+
+
+            注意，|target pos| 与 |colormap access=const| 一起使用时需要注意：
+            此时，有\emph{区间}颜色恒定，位置成为区间边界。因此，
+            |target pos| 中 $N$ 个元素构成 $N-1$ 种不同颜色！
+
+            注意，|target pos| 作为 |samples of colormap| 的选项也是可能的。
+            但是，你必须指定所有所需位置，数量不匹配则为错误。如果还将
+            此情况与 |sample for=const| 组合，$N$ 个样本需要 $N+1$ 个位置。
+        \end{pgfplotskey}
+
+        \begin{pgfplotskey}{of colormap/sample for=\mchoice{default,const} (initially default)}
+            该键允许配置 |samples of colormap|，使生成的 |colormap|
+            适用于 |colormap access| 的特定值。
+
+            特别是，它允许优化依赖\emph{采样}的 \meta{colormap definitions}，
+            以适应 |colormap access=const| 的情况。
+
+            注意，|colormap access|$\neq$|const| 的情况通常无需修改此键，
+            使用默认值效果最佳。
+
+            策略 |colormap access=const| 意味着颜色与整个\emph{区间}关联，
+            而不再与 |colormap| 中的单个位置关联。在此上下文中，
+            你必须写 |sample for=const|，以便 \PGFPlots{} 正确处理。
+
+            以下是 |colormap| 参考及其与 |sample for| 的关系：
+            %
+            \begin{itemize}
+                \item 一般来说，|colormap| 可与 |colormap access| 的任何值
+                    配合使用。如果 \meta{colormap definition} 中没有位置
+                    （既不在圆括号中，也不在 |target pos| 中），
+                    则无需特别注意即可直接使用。
+                    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap={
+            5 of viridis,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+                    %
+                \item 一旦有了位置，如果颜色映射在 |colormap access=const|
+                    上下文中使用，\PGFPlots{} 就会产生冲突：它无法扩大
+                    显示范围，但又无法同时尊重给定位置\emph{和}所需的
+                    颜色数量！它只能选择省略一种颜色，或添加一个人工位置
+                    并重新缩放所有其他位置。
+                \item 在存在 |colormap access=const| 和输入位置时，
+                    \PGFPlots{} 的默认策略是：\PGFPlots{} 选择保留输入位置
+                    并省略一种颜色。
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={
+            viridis,
+            target pos={0,500,850,950,1000},
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+
+                    技术上，这意味着它隐式设置
+                    |colormap access/extra interval width=0|
+                    （默认是 |colormap access/extra interval width=h|）。
+                    与 $1000$ 关联的颜色没有区间，实际上不可见。
+
+                    恢复 |colormap access/extra interval width=h| 会导致
+                    位置重新缩放，这通常不是你想要的：
+                    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap={
+            5 of viridis,
+            target pos={0,500,850,950,1000},
+        },
+    },
+    colormap access/extra interval width=h,
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+                    %
+                \item 最后，\PGFPlots{} 提供 |sample for=const|。
+
+                    对 `|of colormap|' 应用 |sample for=const| 可确保
+                    尊重任何给定位置。为此，它减少可用颜色数量，
+                    但修改采样过程，使整个输入颜色范围在结果中可见：
+                    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={
+            viridis,
+            target pos={0,500,850,950,1000},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+                    %
+                    此处，结果有 $4$ 种颜色，但最右端颜色也是输入映射
+                    |viridis| 的最右端颜色。注意，|of colormap| 已为位置
+                    $1000$ 分配了一种不可见颜色：该虚拟颜色被定义为
+                    |viridis| 的最右端颜色。这意味着，如果你用
+                    |sample for=const| 定义 |colormap| 并配合
+                    |colormap access=map| 使用，区间右端会比预期长：
+                    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        of colormap={
+            viridis,
+            target pos={0,500,850,950,1000},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=map]
+\end{codeexample}
+
+                    应用于 |samples of colormap| 的策略 |sample for=const|
+                    以类似方式工作。请记住，此组合要求要么省略
+                    |target pos|，要么添加\emph{恰好} $N+1$ 个目标位置：
+                    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        samples of colormap={
+            5 of viridis,
+            target pos={0,100,500,850,950,1000},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+
+                    这会正确尊重位置并完全尊重输入颜色映射的范围。
+            \end{itemize}
+
+            每当 \meta{colormap definition} 涉及采样时（即仅对
+            |of colormap| 和 |samples of colormap|），键 |sample for|
+            就会生效。它不适用于显式固定的颜色。其效果是样本数量
+            减少~$1$，最后提供的样本被复制一次。
+
+            另见 |colormap access/extra interval width|。
+        \end{pgfplotskey}
+
+        \begin{pgfplotskey}{of colormap/colormap access=\marg{argument}}
+             |/pgfplots/colormap access=|\marg{argument} 的别名。
+        \end{pgfplotskey}
+
+        \begin{pgfplotskey}{of colormap/source range=\marg{min:max} (initially 0:1000)}
+             为基于插值的说明（即 |color of colormap| 和
+             |const color of colormap|）定义源范围。它默认为 |0:1000|，
+             意味着只能提供区间 $[0,1000]$ 内的值。
+
+             更改该值允许使用任意数字范围来标识数字。
+             %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        colors of colormap={
+            -30000,-10000,0,100000,110000 of viridis,
+            source range=-30000:120000,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+            %
+        \end{pgfplotskey}
+
+%        \begin{pgfplotskey}{of colormap/source name=\marg{colormap name} (initially empty)}
+%            The name of the source color map. An empty value means ``use the
+%            current value of |colormap name|''.
+%        \end{pgfplotskey}
+
+        \noindent 注意，这些构建块可以根据需要任意组合。
+        这允许组合不同的颜色映射：
+        %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    point meta min=-7046,
+    point meta max=2895,
+    colormap={whiteblue}{color=(blue) color=(white)},
+    colormap={gb}{color=(green) color=(yellow)
+        color=(brown)},
+    colormap={CM}{
+        of colormap={
+            whiteblue,
+            target pos={-7046,-6000,-5000,-3000,
+                -1000,-750,-500,-250,-100,-50,0},
+            sample for=const,
+        },
+        of colormap={
+            gb,
+            target pos={10,100,200,500,1000,1100,
+                1200,1500,2000,2895},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const]
+\end{codeexample}
+        %
+        \noindent 前一个示例首先定义了两个简单颜色映射 |whiteblue| 和 |gb|。
+        它们仅用作构建块，不用于可视化。最后，颜色映射 |CM| 由两个
+        |of colormap| 说明构成，它们对构建块重新采样并分配特定的
+        |target pos|itions。
+
+        \begin{pgfplotskeylist}{%
+            of colormap/target pos min=\marg{lower limit} (initially empty),
+            of colormap/target pos min*=\marg{lower limit} (initially empty),
+            of colormap/target pos max=\marg{upper limit} (initially empty),
+            of colormap/target pos max*=\marg{upper limit} (initially empty)%
+        }
+            这些键允许\emph{修改} |target pos| 的参数。
+            它们的主要用途是简化样式定义的编写。因此，大多数用户可能
+            想忽略这些键并跳过其文档。如果直接使用 |target pos| 的参数，
+            这些键就不必要。
+
+            不带星号的版本（|target pos min| 和 |target pos max|）
+            丢弃 |target pos| 中所有超出边界的元素。带星号的版本
+            （|target pos min*| 和 |target pos max*|）也丢弃所有不匹配项，
+            但它们确保过滤后边界成为 |target pos| 的一部分。
+
+            如果你想从先前定义的 |target pos| 中选择匹配位置，
+            这些过滤边界会很方便，例如当同一个 |target pos| 是可复用
+            样式的一部分时：
+            %
+\begin{codeexample}[width=8cm]
+\pgfplotsset{
+    of colormap/ocean height/.style={
+        target pos={-12000,-10000,-6000,-5000,-3000,
+            -1000,-750,-500,-250,-100,-50,0,10,100,
+            200,500,1000,1100,1200,1500,2000,4000,
+            6000,8000},
+    },
+}
+\pgfplotscolorbardrawstandalone[
+  point meta min=-7046,
+  point meta max=2895,
+  colormap={whiteblue}{color=(blue) color=(white)},
+  colormap={gb}{color=(green) color=(yellow)
+      color=(brown)},
+  colormap={CM}{
+      of colormap={
+        whiteblue,
+        ocean height,
+        target pos min*=
+          \pgfkeysvalueof{/pgfplots/point meta min},
+        target pos max=0,
+        sample for=const,
+      },
+      of colormap={
+        gb,
+        ocean height,
+        target pos min=0.1,
+        target pos max*=
+          \pgfkeysvalueof{/pgfplots/point meta max},
+        sample for=const,
+      },
+  },
+  colorbar horizontal,
+  colormap access=const]
+\end{codeexample}
+            %
+            \noindent 该示例在文档某处定义了一个名为 `|ocean height|' 的
+            样式，其中包含合适的位置列表。然后，它定义了颜色映射 `|CM|'，
+            该颜色映射使用这些键——但仅在范围 $[-7046,2895]$ 内，
+            并以两个其他 |colormap| 的特殊组合。第一个 |of colormap|
+            说明仅选择落在范围 $[-7046,0]$ 内的目标位置，并确保
+            $-7046$ 实际成为 |target pos| 的元素。第二个 |of colormap|
+            说明选择范围 $[0.1,2895]$ 内的所有位置，并确保 $2895$
+            成为 |target pos| 的元素。注意，$0.1$ 仅用作指示符，
+            表示\emph{不}再次选择 $0$。因此，该选择本质上等价于
+            %
+\begin{codeexample}[code only]
+...
+target pos={-7046,-6000,-5000,-3000,-1000,-750,-500,-250,-100,-50,0}
+...
+target pos={10,100,200,500,1000,1100,1200,1500,2000,2895}
+\end{codeexample}
+            %
+            区别仅在于预定义样式定义了合适的位置列表。从 |whiteblue|
+            取的\emph{颜色}与写 |samples of colormap={11}| 时相同，
+            即它们从输入颜色映射均匀抽取。只是它们在结果中的目标位置
+            被修改。从 |bg| 取的颜色同理；它们被均匀抽取并移到规定边界。
+
+            \PGFPlots{} 使用这些键来实现 |contour filled|。
+
+            注意，颜色映射定义不绑定于特定坐标，尽管这在 |contour|
+            图的上下文中很有意义。原则上，你可以在任何上下文中使用
+            生成的颜色映射，就像所有其他颜色映射一样：
+            %
+\begin{codeexample}[]
+\pgfplotsset{
+  colormap={whiteblue}{color=(blue) color=(white)},
+  colormap={gb}{color=(green) color=(yellow)
+      color=(brown)},
+  of colormap/ocean height/.style={
+      target pos={-12000,-10000,-6000,-5000,-3000,
+          -1000,-750,-500,-250,-100,-50,0,10,100,
+          200,500,1000,1100,1200,1500,2000,4000,
+          6000,8000},
+  },
+  colormap={CM}{
+      of colormap={
+          whiteblue,
+          ocean height,
+          target pos max=0,
+          sample for=const,
+      },
+      of colormap={
+          gb,
+          ocean height,
+          target pos min=0.1,
+          sample for=const,
+      },
+  },
+}
+\begin{tikzpicture}
+\begin{axis}[small,colorbar]
+    \addplot3[surf] {x*y};
+\end{axis}
+\end{tikzpicture}
+~
+\begin{tikzpicture}
+\begin{axis}[small,colorbar,
+    colorbar style={colormap access=const}
+]
+    \addplot3[surf,shader=interp,colormap access=const] {x*y};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+            注意，最后一个示例的外观与 |contour filled| 生成的相同。
+            区别在于 |contour filled| 接受输入颜色映射，并根据所选
+            等高线层级\emph{重新采样}它。上面的示例只是一个使用特殊
+            颜色映射的``普通''曲面图。
+        \end{pgfplotskeylist}
+    \item
+        \declareandlabel{const color of colormap}|(|\meta{position}|)=(|\meta{value}| of |\meta{colormap name}|)|%
+            \index{const color of colormap!In colormap specification}%
+
+        该键与上面提到的 |color of colormap| 几乎相同，但它使用与
+        |colormap access=piecewise constant| 相同的功能，同时从\emph{源}
+        颜色映射确定颜色（包括 |colormap access/extra interval width|）。
+        注意，生成的颜色映射仍可与 |colormap access| 的任何值配合使用，
+        包括 |colormap access=const| 和 |colormap access=map|。
+
+        注意，|const color of colormap| 也可用作绘图操作的键：
+
+        \begin{pgfplotskey}{const color of colormap=\meta{value} of \meta{colormap name}}
+           使用特殊颜色名 `|.|' 选择 \meta{colormap name} 的指定颜色，
+           并赋值 |color=.|：
+            %
+\begin{codeexample}[]
+\pgfplotsset{
+  colormap={example}{color=(red) color=(blue) color=(yellow)}}
+\tikz \fill[const color of colormap=50 of example] (0,0) rectangle (1,1);
+\tikz \fill[const color of colormap=750 of example] (0,0) rectangle (1,1);
+\end{codeexample}
+        \end{pgfplotskey}
+
+        |samples of colormap| 的所有特殊说明（如花括号、选项列表支持、
+        位置）也适用于此。
+    \item
+        \declareandlabel{const colors of colormap}|(|\meta{position}|)=(|\meta{list}| of |\meta{colormap name}|)|%
+            \index{const colors of colormap!In colormap specification}%
+
+        一个便捷键，等价于 |const color of colormap(|\meta{position}|)| 序列，
+        \meta{list} 中每个元素一个。\meta{list} 使用 |\foreach| 求值。
+
+        注意，|const colors of colormap| 在 |cycle list| 定义期间也可用。
+
+        |samples of colormap| 的所有特殊说明（如花括号、选项列表支持、
+        位置）也适用于此。
+\end{enumerate}
+
+\begin{pgfplotskey}{colormap access/extra interval width=\marg{fraction} (initially h)}
+    \paragraph{注意：}
+
+    此键应是实现的技术部分。你可能想跳过其文档，因为它通常开箱即用。
+    你只需注意 |sample for|。
+
+    此键\emph{仅}适用于 |colormap access=piecewise constant|：它确保
+    |colormap| 中的每种颜色获得自己的\emph{区间}。这确保每种颜色在输出中
+    实际可见。因此，每种提供的颜色类似一个\emph{区间}。这与
+    |colormap access=map| 不同，其中每种提供的颜色类似一个\emph{区间边界}。
+
+    通常，\PGFPlots{} 仅在自动计算位置时激活此功能。因此，以下示例隐式
+    使用 |extra interval width=h|（默认）：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        color=(blue)
+        color=(red)
+        color=(black)
+    },
+    colorbar horizontal,
+    colorbar style={xtick=data},
+    colormap access=const,
+]
+\end{codeexample}
+
+    一旦手动提供位置，\PGFPlots{} 默认使用
+    |extra interval width=0| 以尊重输入设置：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        color(0)=(blue)
+        color(500)=(red)
+        color(1000)=(black)
+    },
+    colorbar horizontal,
+    colorbar style={xtick=data},
+    colormap access=const,
+]
+\end{codeexample}
+    %
+    \noindent 注意，位置构成了 |colormap| 的输入节点，其结果是最后一种
+    颜色\emph{未被使用}；它仅用作区间边界。在此上下文中，``手动提供''
+    指圆括号中的位置或 |target pos| 的非空值。
+
+    要覆盖输入位置并获得额外区间，你必须设置选项：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={example}{
+        color(0)=(blue)
+        color(500)=(red)
+        color(1000)=(black)
+    },
+    colorbar horizontal,
+    colorbar style={xtick=data},
+    colormap access/extra interval width=h,
+    colormap access=const,
+]
+\end{codeexample}
+    %
+    注意 |colormap access=const| 的额外区间如何修改颜色映射定义的位置：
+    它们都向左移动，所选输入位置相应缩放。下面的示例中这一点更明显。
+    首先，我们用默认设置生成一个颜色映射，它禁用额外区间，但省略最后
+    （最亮）的颜色：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={nonuniform}{
+        of colormap={
+            viridis,
+            target pos={0,200,300,500,700,1000}
+        },
+    },
+    colorbar horizontal,
+    colormap access=const,
+    colorbar style={xtick=data,font=\tiny,
+        /pgf/number format/precision=0},
+    colormap access=const,
+]
+\end{codeexample}
+
+    接下来，我们显式启用额外区间，看到输入位置向左缩放。
+    注意它们保持相对距离，但颜色映射的最后一种颜色终于可见：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={nonuniform}{
+        of colormap={
+            viridis,
+            target pos={0,200,300,500,700,1000}
+        },
+    },
+    colorbar horizontal,
+    colormap access=const,
+    colormap access/extra interval width=h,
+    colorbar style={xtick=data,font=\tiny,
+        /pgf/number format/precision=0},
+    colormap access=const,
+]
+\end{codeexample}
+
+    最后一个示例依赖 |of colormap| 和\emph{采样}过程。在此上下文中，
+    \PGFPlots{} 提供 |sample for=const|，产生预期外观：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={nonuniform}{
+        of colormap={
+            viridis,
+            target pos={0,200,300,500,700,1000},
+            sample for=const,
+        },
+    },
+    colorbar horizontal,
+    colormap access=const,
+    colorbar style={xtick=data,font=\tiny,
+        /pgf/number format/precision=0},
+    colormap access=const,
+]
+\end{codeexample}
+    %
+    请参阅 |sample for| 的文档。
+
+    该区间的默认宽度是颜色映射的网格宽度（值 \declaretext{h}），
+    即它始终与其他区间一样宽。如果颜色映射有非均匀距离，
+    则使用遇到的最小网格宽度作为额外区间。如果我们省略该键并在右端
+    手动添加一些人工颜色，就可以看到这一点——我们只需确保最右端区间
+    长度正确。在上面的示例中，最小网格宽度为 $100$，因此我们可以通过
+    以下方式生成等效结果
+    %
+    \index{Color maps!Non uniform}
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colormap={nonuniform}{
+        of colormap={
+            viridis,
+            target pos={0,200,300,500,700,1000}
+        },
+        color(1100)=(red)
+    },
+    colorbar horizontal,
+    colormap access=const,
+    colorbar style={xtick=data,font=\tiny,
+        /pgf/number format/precision=0},
+    colormap access=const,
+]
+\end{codeexample}
+    %
+    \noindent 如前所述，|colormap access=const| 忽略最右端颜色（``|red|''）。
+    注意，此方法几乎与 |sample for=const| 的内部实现相同。
+
+    |colormap access/extra interval width=|\meta{fraction} 的值也可用于
+    自定义人工区间的宽度：它是总宽度的分数，接受值为
+    $0\le$\meta{fraction}$\le 0.9$，其中 $0$ 禁用额外区间，
+    $0.9$ 对应结果宽度的 $90\%$。\meta{fraction} 的任何非 $0$ 值都会
+    创建一个额外区间，其宽度为整个颜色映射的 \meta{fraction} 百分比。
+    特殊魔术值 |colormap access/extra interval width=|\declaretext{h}
+    将使用颜色映射的网格宽度。如果颜色映射有非均匀距离，它将使用遇到的
+    最小网格宽度。这是默认值。
+
+    注意，\meta{fraction} 是 |colormap| 的属性。该键仅为\emph{当前}颜色映射
+    定义它。定义新的 |colormap| 时，新 |colormap| 使用默认宽度
+    （但保留旧 |colormap| 的配置值）。
+
+
+    \paragraph{注意：}
+
+    在撰写本文时，均匀颜色映射仅支持默认区间宽度 `|h|' 和
+    \meta{fraction}$=0$，进一步自定义仅适用于非均匀颜色映射。
+    如果你需要绕过此限制，应提交功能请求，并移动某个颜色位置，
+    直到颜色映射变为非均匀颜色映射。
+\end{pgfplotskey}
+
+}%
+
+
+\subsubsection{将颜色映射条目选为普通颜色}
+
+\begin{pgfplotskeylist}{%
+    color of colormap=\meta{value},
+    color of colormap=\meta{value} of \meta{colormap name}%
+}
+    [另见第~\ref{sec:pgfplots:colormaps:based:on:others} 节
+    （第~\pageref{sec:pgfplots:colormaps:based:on:others} 页），
+    了解如何在 |colormap| 定义中使用它]
+
+    将 \tikzname{} |color| 定义为 \meta{colormap name} 的 \meta{value}。
+    如果省略 \meta{colormap name}，则求值 |colormap name| 的值
+    （即使用当前颜色映射）。
+
+    参数 \meta{value} 应为范围 $[0,1000]$ 内的数字，其中 $0$ 表示颜色映射
+    的下端，$1000$ 表示上端。
+
+    \pgfkeysgetvalue{/pgfplots/colormap name}\colormapname
+    当前颜色映射（\colormapname）：\pgfplotsshowcolormap{\colormapname}
+
+\begin{codeexample}[]
+\tikz\fill [color of colormap={800}, thick,
+    draw=.!60!black]
+        (0,0) -- (1,1) -- (2,1) circle (10pt);
+\end{codeexample}
+
+    该键计算请求的颜色并调用 |color=.|。请记住，魔术颜色名 `|.|'
+    始终反映``当前颜色''，即 |color=|\meta{some color} 的结果。
+    还要记住，|color| 是 \tikzname{} 命令，它仅定义颜色，
+    你还必须提供 `|draw|' 或 `|fill|' 之一才能生效。由于 `|.|'
+    是普通颜色，我们可以写 |draw=.!60!black| 将其与另一种颜色组合。
+
+    viridis: \pgfplotsshowcolormap{viridis}
+
+\begin{codeexample}[]
+\pgfplotsset{colormap name=viridis}
+\tikz\fill [color of colormap={1000},thick,
+    draw=.!60!black]
+        (0,0) -- (1,1) -- (2,1) circle (10pt);
+\end{codeexample}
+
+\begin{codeexample}[]
+\tikz\fill [color of colormap={300 of viridis},thick,
+    draw=.!60!black]
+        (0,0) -- (1,1) -- (2,1) circle (10pt);
+\end{codeexample}
+
+    参数 \meta{colormap name} 既可以是 |colormap name| 的有效参数，
+    \emph{也}可以是样式名，如 |colormap/cool|：
+
+    cool: \pgfplotsshowcolormap{cool}
+
+\begin{codeexample}[]
+\tikz\fill [color of colormap={300 of colormap/cool},
+    thick,draw=.!60!black]
+        (0,0) -- (1,1) -- (2,1) circle (10pt);
+\end{codeexample}
+
+    后一种语法允许惰性求值颜色映射。但是，如果你多次引用同一颜色映射，先写
+    |\pgfplotsset{colormap/cool}|，再多次引用
+    |color of colormap={... of cool}| 是有意义的，以避免不必要的
+    惰性求值。
+
+    可以编写大量不带显式 \meta{colormap name} 的调用，即大量
+    |color of colormap=|\meta{value} 形式的调用。它们都将使用当时
+    激活的 |colormap name|。
+
+    注意，实际上有两个键前缀的键：|/pgfplots/color of colormap|
+    和别名 |/tikz/color of colormap|。这允许将这些键同时用于普通
+    \tikzname{} 图形和 \PGFPlots{}。
+
+    另见 |colormap access=map|。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    index of colormap=\meta{index},
+    index of colormap=\meta{index} of \meta{colormap name}%
+}
+    [另见第~\ref{sec:pgfplots:colormaps:based:on:others} 节
+    （第~\pageref{sec:pgfplots:colormaps:based:on:others} 页），
+    了解如何在 |colormap| 定义中使用它]
+
+    |color of colormap| 的一个变体，它按索引访问 \meta{colormap name}。
+    因此，参数 \meta{index} 是范围 $0,\dotsc,N-1$ 内的整数，
+    其中 $N$ 是定义 \meta{colormap name} 的颜色数量。
+    超出此范围的 \meta{index} 会自动裁剪到上界。
+
+\begin{codeexample}[]
+    \pgfplotsset{colormap/jet}
+\foreach \i in {
+    0,...,\pgfplotscolormaplastindexof{jet}
+}{
+    \tikz\fill [
+        index of colormap={\i of jet},
+        thick,
+        draw=.!60!black,
+    ] (0,0) rectangle (10pt,6pt);
+}
+\end{codeexample}
+
+    \begin{command}{\pgfplotscolormapsizeof\marg{colormap name}}
+        展开为构成 \meta{colormap name} 的颜色数量。
+
+        如果参数 \meta{colormap name} 是未知颜色映射，则展开为 $0$。
+    \end{command}
+
+    \begin{command}{\pgfplotscolormaplastindexof\marg{colormap name}}
+        展开为 \meta{colormap name} 的最后一个索引，即它是访问
+        $N-1$ 的便捷方法。
+
+        如果参数 \meta{colormap name} 是未知颜色映射，则展开为 $-1$。
+    \end{command}
+
+    另见 |colormap access=direct|。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    const color of colormap=\meta{value},
+    const color of colormap=\meta{value} of \meta{colormap name}%
+}
+    [另见第~\ref{sec:pgfplots:colormaps:based:on:others} 节
+    （第~\pageref{sec:pgfplots:colormaps:based:on:others} 页），
+    了解如何在 |colormap| 定义中使用它]
+
+    将 \tikzname{} |color| 定义为 \meta{colormap name} 的 \meta{value}。
+    如果省略 \meta{colormap name}，则求值 |colormap name| 的值
+    （即使用当前颜色映射）。
+
+    该键与 |color of colormap| 几乎相同，只是它使用
+    |colormap access=piecewise constant| 来确定插值后的值。
+\end{pgfplotskeylist}
+
+
+\subsection{循环列表——控制线样式的选项}
+\label{sec:cycle:list}
+
+\begin{pgfplotskeylist}{cycle list=\marg{list},cycle list name=\marg{name} (initially color)}
+    允许指定一系列绘图说明，用于每个没有显式绘图说明的
+    \hbox{|\addplot|} 命令。因此，如果你写
+    |\addplot+|\oarg{keys}| ...;|，或者像
+    |\addplot|\oarg{explicit plot specification}| ...;| 那样\emph{不}使用
+    方括号，就会使用当前激活的 |cycle list|。
+
+    将选择索引为~$i$ 的列表元素，其中~$i$ 是当前 |\addplot| 命令的索引
+    （另见 |cycle list shift| 键，它允许改用 $i+n$）。此索引也包括
+    不使用 |cycle list| 的绘图命令。
+
+    有多种方法可以更改当前激活的 |cycle list|：
+
+
+    \subsubsection{预定义列表}
+
+    使用预定义列表之一，\footnote{在早期版本中，这些列表称为
+    \texttt{\textbackslash coloredplotspeclist} 和
+    \texttt{\textbackslash blackwhiteplotspeclist}，显得过长，
+    因此已重命名。不过旧名称仍被接受。}
+    %
+    \begin{itemize}
+        \item \declareandlabel{color}（从上到下）
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=color,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+        \item \declareandlabel{exotic} (from top to bottom)
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=exotic,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+        \item \declareandlabel{black white} (from top to bottom)
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=black white,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+        \item \declareandlabel{mark list} (from top to bottom)
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=mark list,
+]
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+            |mark list| 始终使用当前颜色，但不定义颜色
+            （\verbpdfref{\addplot+} 语句显式将当前颜色设为 |blue|）。
+
+            |mark list| 在与 |cycle multi list| 配合时特别有用，
+            它允许将其与其他列表（例如 |linestyles| 或颜色列表）组合。
+        \item \declareandlabel{mark list*} 一个仅含标记的列表。
+            与 |mark list| 不同，所有这些标记都是填充的。
+            它们定义为（从上到下）
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=mark list*,
+]
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+  \addplot+ [blue] coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+            与 |mark list| 类似，|mark list*| 始终使用当前颜色，
+            但不定义颜色（\verbpdfref{\addplot+} 见上文）。
+        \item \declareandlabel{color list}（从上到下）
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=color list,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+            选项 |cycle list name=color| 也使用标记，而
+            |color list| \emph{仅}使用颜色。
+
+        \item \declareandlabel{linestyles}（从上到下）
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=linestyles,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+        \item \declareandlabel{linestyles*} 比 |linestyles| 包含更多
+            点划线样式（从上到下）
+            %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    stack plots=y,stack dir=minus,
+    cycle list name=linestyles*,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+        \item \declareandlabel{auto} |cycle list name=auto| 始终表示
+            最近由 |cycle list| 或 |cycle list name| 激活的循环列表。
+    \end{itemize}
+
+    所有预定义循环列表的定义如下（语法说明见本段末尾）。
+        %
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{color}{
+    blue,every mark/.append style={fill=blue!80!black},mark=*\\
+    red,every mark/.append style={fill=red!80!black},mark=square*\\
+    brown!60!black,every mark/.append style={fill=brown!80!black},mark=otimes*\\
+    black,mark=star\\
+    blue,every mark/.append style={fill=blue!80!black},mark=diamond*\\
+    red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=*\\
+    brown!60!black,densely dashed,every mark/.append style={
+        solid,fill=brown!80!black},mark=square*\\
+    black,densely dashed,every mark/.append style={solid,fill=gray},mark=otimes*\\
+    blue,densely dashed,mark=star,every mark/.append style=solid\\
+    red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamond*\\
+}
+\end{codeexample}
+
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{black white}{
+    every mark/.append style={fill=gray},mark=*\\
+    every mark/.append style={fill=gray},mark=square*\\
+    every mark/.append style={fill=gray},mark=otimes*\\
+    mark=star\\
+    every mark/.append style={fill=gray},mark=diamond*\\
+    densely dashed,every mark/.append style={solid,fill=gray},mark=*\\
+    densely dashed,every mark/.append style={solid,fill=gray},mark=square*\\
+    densely dashed,every mark/.append style={solid,fill=gray},mark=otimes*\\
+    densely dashed,every mark/.append style={solid},mark=star\\
+    densely dashed,every mark/.append style={solid,fill=gray},mark=diamond*\\
+}
+\end{codeexample}
+
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{exotic}{
+    teal,every mark/.append style={fill=teal!80!black},mark=*\\
+    orange,every mark/.append style={fill=orange!80!black},mark=square*\\
+    cyan!60!black,every mark/.append style={fill=cyan!80!black},mark=otimes*\\
+    red!70!white,mark=star\\
+    lime!80!black,every mark/.append style={fill=lime},mark=diamond*\\
+    red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=*\\
+    yellow!60!black,densely dashed,
+        every mark/.append style={solid,fill=yellow!80!black},mark=square*\\
+    black,every mark/.append style={solid,fill=gray},mark=otimes*\\
+    blue,densely dashed,mark=star,every mark/.append style=solid\\
+    red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamond*\\
+}
+\end{codeexample}
+
+\begin{codeexample}[code only]
+% note that "." is the currently defined Tikz color.
+\pgfplotscreateplotcyclelist{mark list}{
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=square*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=triangle*\\
+    every mark/.append style={solid},mark=star\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=diamond*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill!40},mark=otimes*\\
+    every mark/.append style={solid},mark=|\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=pentagon*\\
+    every mark/.append style={solid},mark=text,text mark=p\\
+    every mark/.append style={solid},mark=text,text mark=a\\
+}
+\end{codeexample}
+    %
+    \noindent 在此上下文中，通用填充颜色表达式可使用
+    |mark list fill| 自定义：
+    %
+    \begin{pgfplotskey}{mark list fill=\marg{color} (initially .!80!black)}
+        允许自定义 |mark list| 和 |mark list*| 的填充颜色。
+
+        例如，如果颜色为 |black|，替代选项
+        |mark list fill=.!50!white| 会产生好得多的效果。
+    \end{pgfplotskey}
+
+    \begin{command}{\pgfplotsmarklistfill}
+        展开为 |\pgfkeysvalueof{||/pgfplots/mark list fill||}|。
+    \end{command}
+    %
+\begin{codeexample}[code only]
+% note that "." is the currently defined Tikz color.
+\pgfplotscreateplotcyclelist{mark list*}{
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=square*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=triangle*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=halfsquare*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=pentagon*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=halfcircle*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill,rotate=180},mark=halfdiamond*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill!40},mark=otimes*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=diamond*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=halfsquare right*\\
+    every mark/.append style={solid,fill=\pgfplotsmarklistfill},mark=halfsquare left*\\
+}
+\end{codeexample}
+
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{color list}{
+    red,blue,black,yellow,brown,teal,orange,violet,cyan,green!70!black,magenta,gray
+}
+\end{codeexample}
+
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{linestyles}{solid,dashed,dotted}
+\pgfplotscreateplotcyclelist{linestyles*}{solid,dashed,dotted,dashdotted,dashdotdotted}
+\end{codeexample}
+
+
+    \subsubsection{定义自己的循环列表}
+
+    循环列表的第二种选择是直接将每个条目作为 |cycle list| 的参数提供，
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    cycle list={
+        {blue,mark=*},
+        {red,mark=square},
+        {dashed,mark=o},
+        {loosely dotted,mark=+},
+        {brown!60!black,mark=otimes*,
+            mark options={fill=brown!40},
+        }% <-- don't add a comma here
+    },
+]
+    \plotcoords
+    \legend{$d=2$,$d=3$,$d=4$,$d=5$,$d=6$}
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    （此示例列表需要 |\usetikzlibrary{plotmarks}|）。
+
+    输入格式在下文更详细地描述。
+
+
+    \subsubsection{定义并命名自己的循环列表}
+
+    循环列表的最后一种方法是在导言区组合定义\emph{命名}循环列表，
+    并使用 `|cycle list name|' 使用它们：
+    %
+    \begin{command}{\pgfplotscreateplotcyclelist\allowbreak\marg{name}\allowbreak\marg{list}}%
+    \end{command}
+    %
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{mylist}{
+    {blue,mark=*},
+    {red,mark=square},
+    {dashed,mark=o},
+    {loosely dotted,mark=+},
+    {brown!60!black,mark options={fill=brown!40},mark=otimes*}% <-- don't add a comma here
+}
+...
+\begin{axis}[cycle list name=mylist]
+    ...
+\end{axis}
+\end{codeexample}
+
+
+    \subsubsection{定义循环列表：输入格式}
+
+    |cycle list| 由形如 |cycle list=|\marg{list} 的键值对或上述等效宏
+    |\pgfplotscreateplotcyclelist|\allowbreak\marg{name}\allowbreak\marg{list} 定义。
+
+    在此上下文中，参数 \meta{list} 通常是以逗号分隔的样式键列表，
+    如颜色、线型、标记类型和标记样式。这种``逗号列表的逗号列表''结构
+    需要用花括号封装内部列表：
+    %
+\begin{codeexample}[code only]
+\pgfplotscreateplotcyclelist{mylist}{
+    {blue,mark=*},
+    {red,mark=square},
+    {dashed,mark=o},
+    {loosely dotted,mark=+},
+    {brown!60!black,mark options={fill=brown!40},mark=otimes*}% <-- don't add a comma here
+}
+\end{codeexample}
+    %
+    或者，可以用 `|\\|' 终止内部列表（即单个绘图的列表）：
+    %
+\begin{codeexample}[code only]
+\begin{axis}[
+    cycle list={
+        blue,mark=*\\
+        red,mark=square\\
+        dashed,mark=o\\
+        loosely dotted,mark=+\\
+        brown!60!black,mark options={fill=brown!40},mark=otimes*\\
+    },
+]
+...
+\end{axis}
+\end{codeexample}
+    %
+    此时，\emph{最后一个}条目也需要终止符 `|\\|'，但可以省略单个条目
+    周围的花括号。
+
+
+    \subsubsection{操作循环列表与绘图的关联}
+
+    \begin{pgfplotskey}{cycle list shift=\marg{integer} (initially empty)}
+        允许\emph{偏移} |cycle list| 中的索引。如果 \meta{integer} 为 $n$，
+        则取列表元素 $i+n$ 而非第 $i$ 个。记住 $i$ 是当前 |\addplot|
+        命令的索引（从~$0$ 开始）。
+
+        由于在调用 |\addplot|（或 |\addplot+|）时\emph{立即}查询
+        |cycle list|，你可以为选定的绘图调整 |cycle list shift|：
+        %
+\begin{codeexample}[code only]
+    \pgfplotsset{cycle list shift=3}
+\addplot ...
+
+    \pgfplotsset{cycle list shift=-1}
+\addplot ...
+\end{codeexample}
+
+        \paragraph{特殊情况：}
+
+        如果结果为负，即 $i+n<0$，则取列表索引 $-(i+n)$。例如，
+        |cycle list shift=-10| 且 $i<10$ 将得到列表索引 $10-i$。
+        注意，你可以使用 |reverse legend| 反转图例，因此此功能
+        可能永远不需要。
+    \end{pgfplotskey}
+
+
+    \subsubsection{基于颜色映射定义循环列表}
+
+        除了从头定义 |cycle list| 外，\PGFPlots{} 还支持
+        |cycle list=|\meta{list} 的专用输入定义，允许从现有
+        |colormap| 获取值。此时，\meta{list} 包含方括号括起的键：
+    \index{Colormap!Convert into Cycle list}
+
+{%
+\pgfplotsset{
+    % ATTENTION: this is documented in this manual!
+    cycle from colormap manual style/.style={
+        x=3cm,y=10pt,ytick=\empty,
+        colorbar style={x=,y=,ytick=\empty},
+        point meta min=0,point meta max=1,
+        stack plots=y,
+        y dir=reverse,colorbar style={y dir=reverse},
+        every axis plot/.style={line width=2pt},
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    },
+}
+
+    第一种语法 \declareandlabel{of colormap} 允许将 |colormap| 的颜色转换为
+    |cycle list|。它可通过
+    |cycle list={[of colormap]}| 无参数指定，以取
+    最近分配的 |colormap name| 的值（即当前 |colormap|）。它也可指定为
+    |cycle list={[of colormap=name]}|，此时使用指定的
+    |colormap name=name|。
+    在两种情况下，定义仅将颜色映射中找到的颜色转换为循环列表，即不涉及
+    插值。将此应用于默认 |colormap name=hot|（有~$4$ 种颜色）得到以下示例：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colormap name=hot,colorbar,
+    cycle list={[of colormap]},
+    %
+    cycle from colormap manual style,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    注意，由于 |hot| 有 $4$ 种颜色，|cycle list| 也包含 $4$ 个条目，
+    每 $4$ 个绘图重复一次。
+
+    第二种方式类似于 |samples of colormap|：它接受
+    \declaretext{samples of colormap}|=|\marg{number}\allowbreak| of |\meta{colormap name}。
+    它选择所选颜色映射的 \meta{number} 个样本。
+
+    第三种方式类似于 |color of colormap|：它接受\linebreak
+    |colors of colormap =|\marg{list} 或\linebreak
+    |colors of colormap=|\marg{list}\allowbreak| of |\meta{colormap name}。
+    该选项\emph{插值}颜色，并接受范围 $[0,1000]$ 内的值 \meta{list}，
+    其中 $0$ 是 |colormap| 的最低元素，$1000$ 是其最高元素：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colormap name=hot,colorbar,
+    cycle list={
+        [colors of colormap={0,100,...,1000}]},
+    %
+    cycle from colormap manual style,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    此处，我们指定了 $11$ 种颜色并有 $11$ 个绘图。显然，插值颜色的用途
+    有限，仅适用于特殊用例。仅当 |colormap| 能适当区分相邻绘图线时，
+    才使用此类 |cycle list|！注意，|colors of colormap| 与基于现有
+    颜色映射构建颜色映射的相关方式非常相似，如第
+    ~\ref{sec:pgfplots:colormaps:based:on:others} 节
+    （第~\pageref{sec:pgfplots:colormaps:based:on:others} 页）所述。
+
+    相关选项是 \declareandlabel{indices of colormap}|=|\marg{list}。
+    同上，它接受可选的 `|of|' 子句，形式为
+    |indices of colormap=|\marg{list}| of |\meta{colormap name}。
+    主参数是索引 $0\le N_i<N$ 的列表，其中 $N$ 是颜色映射定义中的
+    颜色数量（参见 |index of colormap| 的文档）。超出范围的索引被裁剪到
+    最近的索引。例如，|viridis| 有 $\pgfplotscolormapsizeof{viridis}$
+    个元素，我们可以写
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colormap name=viridis,colorbar,
+    cycle list={
+      [indices of colormap={0,4,8,12,17} of viridis]},
+    %
+    cycle from colormap manual style,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    注意，`| of viridis|' 实际上是多余的，因为在此情况下已选择
+    |viridis|。
+
+    有关如何自定义 |of colormap| 的完整语法，与第
+    ~\ref{sec:pgfplots:colormaps:based:on:others} 节
+    （第~\pageref{sec:pgfplots:colormaps:based:on:others} 页）所述的
+    基于其他 |colormap| 定义 |colormap| 的构建块相同——区别在于
+    |cycle list={[of colormap]}| 将所选颜色插入 |cycle list| 而非
+    |colormap|。
+
+    注意，所有这些特殊列表都是 |\pgfplotscreateplotcyclelist| 的有效参数，
+    也可作为 |cycle multi list| 及其变体中的子列表出现。
+
+    由于从 |colormap| 创建 |cycle list| 必然产生没有标记和线型变化的绘图，
+    将结果与 |cycle multiindex* list| 组合是有意义的，即连接两个现有列表。
+    以下示例将纯颜色列表与标记连接：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colormap name=hot,colorbar,
+    cycle multiindex* list={
+        [samples of colormap=11]\nextlist
+        mark list\nextlist
+    },
+    cycle from colormap manual style,
+]
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+    \addplot coordinates {(0,1) (0.5,1) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 有关 |cycle multiindex* list| 的详情，请参阅下一小节。
+
+    注意，前面的示例都使用以下样式。
+
+    \begin{stylekey}{/pgfplots/cycle from colormap manual style}
+        本手册中定义的样式。它的值为
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    cycle from colormap manual style/.style={
+        x=3cm,y=10pt,ytick=\empty,
+        colorbar style={x=,y=,ytick=\empty},
+        point meta min=0,point meta max=1,
+        stack plots=y,
+        y dir=reverse,colorbar style={y dir=reverse},
+        every axis plot/.style={line width=2pt},
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    },
+}
+\end{codeexample}
+    \end{stylekey}
+
+}%
+
+    \paragraph{说明：}
+
+    可以在\emph{两个}绘图之间调用 |\pgfplotsset{cycle list=|\marg{a list}|}|
+    或 |cycle list name|。此类设置在当前 \TeX{} 组（即花括号）结束前有效。
+    每个 |\addplot| 命令使用绘图索引查询 |cycle list|；
+    如果期间 |cycle list| 发生变化也不会有问题。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskey}{cycle list/.define=\marg{name}\marg{{list}}}
+    该命令仅调用
+    |\pgfplotscreateplotcyclelist|\allowbreak\marg{name}\allowbreak\marg{list}，
+    而不实际将其选为当前列表。
+
+    注意，\PGFPlots{} 使用此命令按以下方式实现其 |cycle list| 键：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    cycle list/.style={%
+        cycle list/.define={@internal@}{#1},%
+        cycle list name={@internal@}%
+    },
+}
+\end{codeexample}
+    %
+\end{pgfplotskey}
+
+
+\subsubsection{组合不同循环列表的构建块}
+
+以下键允许组合不同的 |cycle list| 以构建更复杂的列表。
+
+\begin{pgfplotskey}{%
+    cycle multi list=\meta{list 1}\texttt{\textbackslash nextlist}\meta{list 2}%
+    \texttt{\textbackslash nextlist}$\ldots$
+}
+    这是使用多个 |cycle list| 来确定绘图样式的两种方式之一
+    （另一种见 |cycle multiindex list|）。最好用示例说明：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        cycle multi list={
+            red,blue\nextlist
+            solid,{dotted,mark options={solid}}\nextlist
+            mark=*,mark=x,mark=o
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 所提供的 |cycle multi list| 由三个列表组成。单个绘图的样式
+    由三个列表中每个列表的元素构成：第一个绘图样式为
+    |red,solid,mark=*|，第二个为 |red,solid,mark=x|，第三个为
+    |red,solid,mark=o|。第四个绘图重启第三个列表，并使用列表 $2$ 的
+    下一个：它具有 |red,dotted,mark options={solid},mark=*|，依此类推。
+
+    最后一个列表始终为新绘图前进。倒数第二个列表（本例中为第二个列表）
+    在最后一个列表重置后前进。换言之：|cycle multi list| 允许以字典序
+    组合不同的 |cycle list|。\footnote{对于偏好公式的人：索引为
+    $0 \le i < N$ 的绘图将使用循环列表偏移 $i_0,i_1,\dotsc,i_k$，
+    $0 \le i_m < N_m$，其中 $k$ 是提供给
+    \texttt{cycle multi list} 的参数数量，$N_m$ 是第 $m$ 个循环列表
+    中的元素数。偏移 $i_m$ 在循环
+    {\ttfamily \{ int tmp=i; for( int m=k-1; m>=0; m=m-1 ) \{ i\_m =
+    tmp\%N\_m; tmp = tmp/N\_m; \}\}} 中计算。}
+
+    |cycle multi list| 的参数是一系列参数，如为 |cycle list| 提供的那样，
+    以 \declareandlabel{\nextlist} 分隔。除提供新循环列表外，
+    \meta{list $i$} 元素还可以表示 |cycle list name| 值
+    （包括特殊的 |auto| 循环列表，即最近分配的 |cycle list| 或
+    |cycle list name|）。最后的 |\nextlist| 是可选的。
+
+    上面示例中的列表也可以写为
+    %
+\begin{codeexample}[code only]
+\begin{axis}[
+    cycle multi list={
+        red\\blue\\\nextlist
+        solid\\dotted,mark options={solid}\\\nextlist
+        mark=*\\mark=x\\mark=o\\
+    },
+]
+\end{codeexample}
+    %
+    \noindent （注意终止符 |\\| 命令！）。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title={Cycle color between successive plots, then marks},
+        cycle multi list={
+            mark list\nextlist
+            blue,red
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+
+    \paragraph{使用子列表}
+
+    \meta{list $i$} 条目也可以使用语法
+    |[|\meta{number}| of]|\meta{cycle list name} 仅包含已知循环列表名的
+    前 $n$ 个元素。例如 |[2 of]mark list| 将使用 |mark list| 的前 $2$ 个
+    元素：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title={Cycle 2 marks between successive plots, then colors},
+        cycle multi list={
+            color list\nextlist
+            [2 of]mark list
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{%
+    cycle multiindex list=\meta{list 1}\texttt{\textbackslash nextlist}\meta{list 2}%
+    \texttt{\textbackslash nextlist}$\ldots$
+}
+    这是使用多个 |cycle list| 来确定绘图样式的两种方式之一
+    （另一种见 |cycle multi list|）。两种选项的区别在于列表索引如何
+    映射到子列表。我们从示例开始：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        cycle multiindex list={
+            red,blue,teal\nextlist
+            solid\\dotted,mark options={solid}\\only marks\\\nextlist
+            mark=*,mark=x,mark=oplus\nextlist
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 所提供的 |cycle multiindex list| 由三个列表组成。单个绘图的
+    样式由三个列表中每个列表的元素构成：第一个绘图样式为
+    |red,solid,mark=*|，第二个为
+    |blue,dotted,mark options={solid},mark=x|，第三个为
+    |teal,only marks,oplus|。第四个绘图重启所有列表，并使用与第一个
+    相同的样式，即 |red,solid,mark=*|。
+
+    注意，第二个列表使用列表分隔符 `|\\|'，它需要为 |cycle list|
+    定义的最终终止符。
+
+    因此，该样式对每个列表使用\emph{相同}索引（``多索引''）。
+    因此，它的不同选项比 |cycle multi list| 少得多（后者产生所有可能的
+    变化），但其组合方法解决不同的用例。
+
+    |cycle multiindex list| 的参数格式与
+    与 |cycle multi list| 相同，包括特殊的 |[2 of]mark list| 语法
+    以及按名称提供其他周期列表：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title={Same index of each input list},
+        cycle multiindex list={
+            [3 of]mark list\nextlist
+            blue,red\nextlist
+            linestyles\nextlist
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，|cycle multiindex list| 接受不同大小的列表。|cycle multiindex list|
+    的大小是\emph{最大}输入列表的大小，所有较小的输入列表用空选项列表填充。
+    这就是为什么前一个示例每第三个绘图使用颜色 |black|：第二个列表中
+    没有颜色，省略颜色导致 |black|。一旦最大子列表的最后一项被使用，
+    列表就重启。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{%
+    cycle multiindex* list=\meta{list 1}\texttt{\textbackslash nextlist}\meta{list 2}%
+    \texttt{\textbackslash nextlist}$\ldots$
+}
+    |cycle multiindex list| 的一个变体，行为相同——除了不同大小的子列表。
+
+    如上所述，非星号版本 |cycle multiindex list| 用\emph{空}选项列表填充
+    缺失条目，直到所有列表元素大小相同。
+
+    星号键 |cycle multiindex* list| 在子列表到达末尾时独立重启：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title={Same index of each input list, lists restarted},
+        cycle multiindex* list={
+            [3 of]mark list\nextlist
+            blue,red\nextlist
+            linestyles\nextlist
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    这与非星号变体 |cycle multiindex list| 文档中记录的示例完全相同。
+    但是，第二个子列表元素较少——非星号变体产生 |black|，而星号变体
+    在两个现有颜色用完后重启第二个子列表。
+
+    该样式允许以复杂方式连接列表：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title={Same index of each input list},
+        cycle multiindex* list={
+            red,blue,teal,brown\nextlist
+            mark=*,mark=square*,mark=triangle*\nextlist
+            dashed,every mark/.append style={
+                solid,draw=.!50!black,fill=.,}\\
+            \nextlist
+        },
+        samples=3,
+        legend entries={0,...,20},
+        legend pos=outer north east,
+    ]
+        \addplot {x};
+        \addplot {x-1};
+        \addplot {x-2};
+        \addplot {x-3};
+        \addplot {x-4};
+        \addplot {x-5};
+        \addplot {x-6};
+        \addplot {x-7};
+        \addplot {x-8};
+        \addplot {x-9};
+        \addplot {x-10};
+        \addplot {x-11};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    我们看到四种不同颜色按预期周期性出现。我们还看到三种不同标记
+    有各自的周期（如预期每四个绘图重启）。但第三个子列表只包含一个
+    元素，我们可以通过其分隔符 `|\\|' 看到，它只在列表末尾出现一次！
+    因此，该列表为\emph{每个}绘图重启，使每个绘图都获得其参数。
+\end{pgfplotskey}
+
+
+\subsection{坐标轴背景}
+
+\begin{pgfplotskey}{axis background (initially empty)}
+    这是用于配置坐标轴本身外观的样式。可以使用
+    |axis background/.style=|\marg{options} 方法定义和/或修改它。
+    将使用 \meta{options} 生成背景路径，其中可包含填充颜色或底纹。
+    %
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis background/.style={fill=blue!10},
+]
+    \addplot3 [
+        surf,
+        y domain=0:1,
+    ]
+        {sin(deg(x)) * y*(1-y)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    请注意，在默认配置中图例填充为白色。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+    axis background/.style={
+        shade,top color=gray,bottom color=white,
+    },
+    legend style={fill=white},
+]
+    \addplot {exp(-x)};
+    \addplot {exp(-4*x)};
+
+    \legend{$e^{-x}$,$e^{-4x}$}
+\end{semilogyaxis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    有关 |fill| 和 |shade| 的详情，请参阅 \Tikz{} 手册
+    \cite{tikz}。
+\end{pgfplotskey}
+
+
+\section{提供颜色数据——元数据}
+\label{sec:pgfplots:point:meta}
+
+\PGFPlots{} 提供根据特殊坐标（``元数据''）修改绘图的功能。例如，
+散点图可能根据此特殊数据改变标记颜色、大小或外观。曲面图和网格图是
+另一个示例：此处，曲面补丁（或网格部分）的颜色取决于``元数据''。
+节点的``元数据''不是位置（位置由 $(x,y)$ 或 $(x,y,z)$ 给出）。
+它是关于该节点的``某些信息''；可以说：它是节点的特定属性。
+这通常称为``元数据''。
+
+
+\subsection{元数据概述}
+
+在 \PGFPlots{} 中，每个节点都有坐标\emph{和}元数据。因此，二维绘图有
+三个值：$x$、$y$ 和 |point meta| 数据。三维绘图每个坐标有四个值：
+$x$、$y$、$z$ 和 |point meta|。
+
+在许多情况下，|point meta| 被解释为颜色数据。更准确地说：它被解释为
+\emph{标量}颜色数据，映射到 |colormap|（下一段将详细介绍此方法）。
+但是，|point meta| 可以是任何内容。通常，它是一个数字，如颜色数据的情况。
+该数字线性映射到区间 $[0,1000]$，使 $0$ 对应遇到的最小值，$1000$
+对应遇到的最大标量值。映射后的值可作为
+|\pgfplotspointmetatransformed| 使用。此特殊值允许定义绘图的某些属性：
+它可以是颜色（配合 |colormap|）。它也可以是 |mesh| 图中的
+|line width|（更准确地说：|line width| 可定义为取决于变换后的元数据）。
+此方法的示例见第~\pageref{pgfplots:example:pointmeta:quiver} 页，
+其中 |quiver| 图的箭头线取决于 |\pgfplotspointmetatransformed|。
+该值也可用于定义 |mark size|，如
+|\scatter/@pre marker code| 在第~\pageref{pgfplots:example:pointmeta:scatter}
+页的示例。但是，|point meta| 数据不一定是数字。它可以是文本标签
+（任何你喜欢的文本）。例如，|nodes near coords| 使用它。它也可以包含
+元组，如 RGB 颜色信息（参见 |mesh/color input=explicit|）。
+因此，|point meta| 确实是关于单个坐标的某些抽象信息。
+
+注意，每个点只有\emph{一个} |point meta|。如果你需要每个坐标多个元数据
+值，请参见键 |visualization depends on|。
+
+共同思路是告诉 \PGFPlots{} 如何获取元数据。无需显式提供数据——在许多
+情况下，用于着色 |surf|ace 补丁或 |mark|er 颜色的数据是绘图的 $y$ 或
+$z$ 坐标。告诉 \PGFPlots{} 在何处找到``元数据''的方法是
+|point meta| 键。
+
+|point meta| 最常见的用例是颜色信息：如果元数据在区间
+$[m_{\min},m_{\max}]$ 内，遇到的最小值 $m=m_{\min}$ 的元数据坐标将获得
+|colormap| 提供的最低颜色，而遇到的最大值 $m=m_{\max}$ 将获得
+|colormap| 提供的最高颜色。如前所述，这通过
+|\pgfplotspointmetatransformed| $\in [0,1000]$（按惯例）完成。
+最小和最大值之间的任何坐标都将线性映射：例如，均值
+$m=1/2(m_{\max}+m_{\min})$ 将获得颜色映射的中间颜色
+（其 |\pgfplotspointmetatransformed| $=500$）。这就是为什么本手册中
+``元数据''有时称为``颜色数据''。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar]
+        \addplot [mesh,point meta=y,thick] {x^2};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+
+\subsection{元数据的用户输入格式}
+
+\begin{pgfplotskey}{point meta=\mchoice{%
+        none,
+        \meta{expression},
+        x,y,z,f(x),
+        explicit,explicit symbolic%
+    } (initially none)%
+}
+\label{pgfplots:pointmeta}
+    |point meta| 键告诉 \PGFPlots{} 在何处获取特殊元数据。请注意，
+    |point meta| 和 |scatter src| 实际上是相同的——|scatter src| 是
+    |point meta| 的别名。因此，第~\pageref{pgfplots:scatter:src} 页
+    为 |scatter src| 提供的摘要涵盖相同主题。不过，|point meta| 的主要
+    参考在这里。
+    %
+    \begin{description}
+        \item[\declaretext{none}] 初始选项 |none| 禁用元数据，
+            不产生计算开销。任何其他选项将激活元数据上下限范围的计算，
+            即 $[m_{\min},m_{\max}]$ 的计算。
+        \item[\declaretext{x}] 选项 |x| 使用已有的 $x$ 坐标作为元数据。
+            这始终指应用任何用户变换、对数、堆叠绘图计算等之后的
+            \emph{最终} $x$ 坐标。如果你需要此处的未处理坐标值，
+            请考虑使用 |rawx|。
+        \item[\declaretext{y}]
+        \item[\declaretext{z}] 选项 |y| 和 |z| 类似：它们分别使用
+            $y$ 或 $z$ 坐标作为元数据。因此，这三个选项\emph{不需要}
+            任何额外数据。与 |x| 一样，有数学常量 |rawy| 和 |rawz|，
+            分别产生未处理的 $y$ 和 $z$ 值。
+        \item[\declaretext{f(x)}] 这将使用最后一个可用坐标，
+            换言之：二维绘图中与 |y| 相同，三维绘图中与 |z| 相同。
+        \item[\declaretext{explicit}] 该选项告诉 \PGFPlots{} 期望在
+            坐标输入流中显式提供\emph{数值}元数据。此数据将线性变换到
+            当前颜色映射，如前所述。
+
+            如何为 |\addplot coordinates|、|\addplot table| 和其他输入方法
+            提供元数据，在第~\ref{sec:pgfplots:providing:input} 节中详细
+            描述——但我们在此提供小示例来总结各种可能性：
+            %
+\begin{codeexample}[code only]
+% for 'coordinates':
+% provide color data explicitly using [<data>]
+% behind coordinates:
+\addplot+ [point meta=explicit]
+    coordinates {
+        (0,0) [1.0e10]
+        (1,2) [1.1e10]
+        (2,3) [1.2e10]
+        (3,4) [1.3e10]
+        % ...
+    };
+\end{codeexample}
+
+\begin{codeexample}[code only]
+% for 'table':
+% Assumes a datafile.dat like
+% xcolname  ycolname    colordata
+% 0         0           0.001
+% 1         2           0.3
+% 2         2.1         0.4
+% 3         3           0.5
+% ...
+% the file may have more columns.
+\addplot+ [point meta=explicit]
+    table [x=xcolname,y=ycolname,meta=colordata]
+        {datafile.dat};
+% or, equivalently (perhaps a little bit slower):
+\addplot+ [point meta=\thisrow{colordata}]
+    table [x=xcolname,y=ycolname]
+        {datafile.dat};
+\end{codeexample}
+
+\begin{codeexample}[code only]
+% for 'file':
+% Assumes a datafile.dat like
+% 0         0           0.001
+% 1         2           0.3
+% 2         2.1         0.4
+% 3         3           0.5
+% ...
+% the first three columns will be used here as x,y and meta,
+% resp.
+\addplot+ [point meta=explicit]
+    file {datafile.dat};
+\end{codeexample}
+
+\begin{codeexample}[code only]
+% 'table' using expressions which may depend on all
+% columns:
+% Assumes a datafile.dat like
+% xcolname  ycolname    anything    othercol
+% 0         0           4           15
+% 1         2           5           20
+% 2         2.1         8           30
+% 3         3           42          40
+% ...
+% the file may have more columns.
+\addplot+ [point meta={0.5*(\thisrow{anything} + sqrt(\thisrow{othercol}))}]
+    table [x=xcolname,y=ycolname]
+        {datafile.dat};
+\end{codeexample}
+            %
+            因此，有多种方法提供元数据（颜色数据）。选项 |explicit| 的
+            关键在于显式提供某些数据——尽管 |point meta| 不知道如何提供。
+            数据应为数值类型，并线性映射到范围 $[0,1000]$
+            （可能用于当前颜色映射）。
+        \item[\declaretext{explicit symbolic}] 选项 |explicit symbolic|
+            与 |explicit| 非常相似，它期望坐标输入例程提供额外数据。
+            但是，|explicit symbolic| 不一定期望数值数据：你可以提供
+            任何类型的符号。可以提供一组样式，散点图中每个类一个。
+            这使用 |scatter/classes| 实现，见第
+            ~\pageref{pgfplots:scatterclasses} 页。输入数据的提供方式与
+            上述选项 |explicit| 相同。
+
+            该选项适用于带文本标签的 |nodes near coords|（见第
+            ~\pageref{pgfplots:example:pointmeta:nodesnearcoords} 页）
+            和带显式颜色的 |surf|ace 图（详情见
+            |mesh/color input=explicit|）。
+        \item[\normalfont\declare{\meta{expression}}] 该选项允许使用数学
+            表达式计算元数据。\meta{expression} 可取决于 |x|、|y|、|z|，
+            分别产生当前 $x$、$y$ 或 $z$ 坐标。坐标已完全处理
+            （变换、对数），如上述选项 |x| 所述。此外，\meta{expression}
+            可取决于 |\addplot| 期间有效的命令，如 |\plotnum| 或
+            |\coordindex|（详见第~\ref{sec:pgfplots:misc} 节）。如果使用
+            |\addplot table| 提供坐标，宏 |\thisrow|\marg{colname}
+            特别有用，因为它允许访问``当前''行中提供的
+            \meta{colname} 的值。计算使用 \PGF{} 的浮点单元执行，
+            所有支持的算术运算均可使用。
+
+            本质上，\meta{expression} 可取决于所有 |\addplot| 命令已知的
+            一切：$x$、$y$ 和（如果有）$z$ 坐标。此外，它可取决于
+            |rawx|、|rawy| 或 |rawz|。这三个表达式产生输入流中找到的
+            未处理 $x$、$y$ 或 $z$ 值（无对数、无用户变换）。%
+            \footnote{%
+                在极少数情况下，将数学表达式应用于元数据的另一个源
+                （其他选项之一）可能很有趣。为此，在其他可能选项已求值后，
+                才检查 \meta{expression}。换言之，语句
+                \texttt{point meta=explicit,
+                point meta=meta*meta+3} 将使用设为显式提供数据的
+                |meta| 来求值表达式。%
+            }
+            如果与 |\addplot table| 一起使用，你还可以访问其他表格列
+            （例如使用 |\thisrow|\marg{colname}）。
+        \item[\normalfont\declaretext{TeX code}\texttt{=}\meta{code}] 一个
+            相当底层的选项，允许提供 \TeX{} \meta{code} 来计算数值。
+            \meta{code} 应定义宏 |\pgfplotspointmeta|。它在局部作用域
+            环境中求值（其局部变量之后被释放）。它可取决于与上述
+            \meta{expression} 相同的值，特别是 |\thisrow|\marg{colname}
+            for table input.
+
+            注意，此时数学解析器将配置为使用 |fpu|，因此 |\pgfmathparse|
+            产生浮点数。
+
+            注意，需要额外一对花括号来提供此键，即
+
+            |point meta={TeX code=|\marg{code}|}|.
+
+        \item[\normalfont\declaretext{TeX code
+            symbolic}\texttt{=}\meta{code}] 与 |TeX code| 一样，可提供
+            定义宏 |\pgfplotspointmeta| 的 \meta{code}，但结果不解释为数字。
+            它类似 |explicit symbolic| 选项。
+
+            注意，需要额外一对花括号来提供此键，即
+
+            |point meta={TeX code symbolic=|\marg{code}|}|.
+        \item[\normalfont\declaretext{symbolic}\texttt{=}\meta{symbol}] 一个
+            选项，接受任意 \meta{symbol}，用于每个坐标。与
+            |explicit symbolic| 和 |TeX code symbolic| 一样，此选项产生
+            符号表示，即它保持原样，不映射结果。
+
+            与 |explicit symbolic| 的区别是，\meta{symbol} 是所有点的公共
+            符号，而 |explicit symbolic| 期望输入数据流（如表格）提供
+            单独的符号。
+
+            与 |TeX code symbolic| 的区别很小：|symbolic| 实际上等同于
+
+            |point meta/TeX code symbolic={\def\pgfplotspointmeta|\marg{symbol}|}|.
+
+            |symbolic| 的一个用例是 |mesh/color input=explicit mathparse|，
+            见其中文档。
+
+            注意，需要额外一对花括号来提供此键，即
+
+            |point meta={symbolic=|\marg{symbol}|}|.
+    \end{description}
+
+    如前所述，元数据的主要应用是使用到范围 $[0,1000]$ 的线性映射
+    （可能用于当前颜色映射）来确定（标记/面/边）颜色。此映射工作如下：
+    它是函数
+        \[ \phi\colon [m_{\min},m_{\max}] \to [0,1000] \]
+    其中
+        \[ \phi(m) = \frac{m - m_{\min}}{m_{\max} - m_{\min}} \cdot 1000 \]
+    使 $\phi(m_{\min})=0$ 且 $\phi(m_{\max})=1000$。按惯例，
+    值 $1000$ 是所有颜色映射的上限。现在，如果一个坐标（或边/面）
+    具有元数据 $m$，其颜色将使用 $\phi(m)$ 确定：它是当前颜色映射中
+    $\phi(m)$\textperthousand{} 处的颜色。
+
+    此变换取决于区间 $[m_{\min},m_{\max}]$，而该区间又可使用下文描述的
+    键 |point meta rel|、|point meta min| 和 |point meta max| 修改。
+
+    未变换的元数据可在宏
+    \declareandlabel{\pgfplotspointmeta} 中获取（仅在正确上下文中，
+    例如散点图样式或 |scatter/@pre marker code| 接口）。此宏包含
+    底层浮点数（除非它是非解析字符串数据）。变换后的数据可在宏
+    \declareandlabel{\pgfplotspointmetatransformed} 中获取，为定点表示。
+    预期其在范围 $[0,1000]$ 内。
+
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{set point meta if empty=\marg{point meta source}}
+    设置 |point meta=|\meta{point meta source}，但仅在当前
+    |point meta=none| 时。这用于 |scatter|、|mesh| 和 |surf|，
+    配合 |set point meta if empty=f(x)|。
+\end{pgfplotskey}
+
+
+\subsection{映射元数据与颜色映射}
+
+如 |point meta| 文档中已解释的，元数据的一个应用是使用当前颜色映射
+和从元数据到当前颜色映射的线性映射来确定颜色。本小节显示控制此映射的键。
+
+绘图处理程序 |surf|、|mesh|、|patch|、|scatter|、|contour prepared|
+及一些相关处理程序都使用映射颜色。为此，|point meta| 提供的值按以下
+方式处理：
+%
+\begin{itemize}
+    \item 首先，收集所有遇到的值（在 |\addplot| 期间），并计算最大值和
+        最小值 $m_{\max}$ 和 $m_{\min}$。值存储在 |\pgfplotspointmeta| 中。
+    \item 其次，使用线性映射将每个遇到的值 $m$ 映射到 $[0,1000]$：
+        $m_{\min}\to 0$；$m_{\max}\to 1000$，中间所有值线性映射。
+        此值存储（并可获取）在 \TeX{} 宏 |\pgfplotspointmetatransformed|
+        中（但在 |\end{axis}| 之前不可用）。
+    \item 最后，映射值 |\pgfplotspointmetatransformed| 被映射到当前
+        |colormap|。生成的颜色称为
+        \declareandlabel{mapped color}。
+\end{itemize}
+%
+绘图处理程序进而使用 |mapped color| 来渲染颜色
+（通常与颜色混合组合，如 |mapped color!80!black|）。
+
+\begin{pgfplotskey}{point meta rel=\mchoice{axis wide,per plot} (initially axis wide)}
+    键 |point meta rel| 配置所有元数据坐标的区间 $[m_{\min},m_{\max}]$
+    是作为整个坐标轴中所有绘图的最大值计算（选项
+    \declaretext{axis wide}），还是仅针对单个特定绘图
+    （选项 \declaretext{per plot}）。
+
+\message{Overfull hbox is ok.}%
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title=Axis wide color mapping,
+        colorbar,
+        samples=50,point meta rel=axis wide,
+        point meta=y,
+    ]
+        \addplot [mesh,thick] {sin(deg(x))};
+        \addplot [mesh,thick] {3*tanh(x)};
+    \end{axis}
+\end{tikzpicture}
+~
+\begin{tikzpicture}
+    \begin{axis}[
+        title=Per Plot color mapping,
+        colorbar,
+        samples=50,
+        point meta rel=per plot,
+        point meta=y,
+    ]
+        \addplot [mesh,thick] {sin(deg(x))};
+        \addplot [mesh,thick] {3*tanh(x)};
+   \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，|colorbar| 仍将使用 |axis wide| 元数据限制。如果你希望颜色条使用
+    某个\emph{特定}绘图的颜色数据限制，请考虑 |colorbar source| 键。
+    |point meta rel| 键配置元数据如何映射到 |colormap| 中的颜色。
+\end{pgfplotskey}
+
+\begin{pgfplotskeylist}{point meta min=\marg{number},point meta max=\marg{number}}
+    这些键允许显式定义元数据到范围 $[0,1000]$ 的线性映射所需的范围
+    （例如，用于当前映射）。如果同一映射要用于多个坐标轴，则这是必要的。
+
+
+    \paragraph{特殊情况说明：}
+
+    \begin{itemize}
+        \item 可以部分提供限制；此时仅计算缺失的限制。
+        \item 如果元数据落在这些限制之外，线性变换仍有良好定义，
+            这是可接受的（除非区间长度为零）。但是，颜色数据不能
+            落在这些限制之外，因此颜色条会执行截断。
+        \item 该键既可用于单个绘图，也可用于整个坐标轴（或两者）。
+        \item 如果为单个绘图提供了元数据限制，这些限制也可能贡献到
+            坐标轴范围元数据区间。
+    \end{itemize}
+\end{pgfplotskeylist}
+
+\begin{pgfplotskey}{colormap access=\mchoice{%
+        map,
+        direct,
+        const,\\
+        piecewise constant,
+        piecewise const,
+        piecewise linear%
+    } (initially map)%
+}
+    该键配置元数据如何用于从颜色映射确定颜色。
+
+
+    \subsubsection{使用分段常数插值映射元数据}
+
+    初始配置 \declaretext{map} 执行上面详细解释的线性映射操作。
+
+
+    \subsubsection{将颜色映射用作索引颜色空间（调色板）}
+
+    选项 \declaretext{direct} 不执行任何变换；它将 |point meta| 的值
+    解释为当前颜色映射的整数索引。如果数字不是整数，将通过丢弃小数部分
+    来截断。因此，它与 |index of colormap| 非常相似。\index{index of colormap}
+
+\def\showcolorandname#1{%
+    \showcolor{#1}~\pgfmanualpdfref{#1}{\texttt{#1}}%
+}%
+\def\showcolor#1{%
+    \tikz \draw[black,fill={#1}] (0,0) rectangle (1em,0.6em);%
+}%
+%
+    假设我们有颜色定义
+    %
+    \showcolorandname{RdPu-K},
+    \showcolorandname{RdPu-I},
+    \showcolorandname{RdPu-G},
+    \showcolorandname{RdPu-E}, 和
+    \showcolorandname{RdPu-B}
+    %
+    （实际上取自 |\usetikzlibrary{colorbrewer}|）。
+
+    我们将使用这些颜色定义一个 |colormap|：
+    %
+\begin{codeexample}[]
+% requires \usetikzlibrary{colorbrewer}
+\begin{tikzpicture}
+\begin{axis}[
+    colormap={brewer}{
+        color=(RdPu-B) color=(RdPu-E)
+        color=(RdPu-G) color=(RdPu-I)
+        color=(RdPu-K)
+    },
+    enlargelimits=false,
+    colorbar as palette,
+]
+    \addplot [
+        matrix plot,
+        nodes near coords,mark=*,
+        point meta=explicit,
+        colormap access=direct,
+    ] coordinates {
+        (0,0) [0] (1,0) [1] (2,0) [2] (3,0) [NaN]
+
+        (0,1) [3] (1,1) [4] (2,1) [5] (3,1) [99]
+
+        (0,2) [3.5] (1,2) [-1] (2,2) [2.99] (3,2) [3]
+    };
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    该示例有一个 $3\times 4$ 矩阵，每个都有显式提供的 |point meta| 值。
+    第一个点的 |point meta| 值为~$0$，使用 |colormap| 的第一个颜色
+    （|RdPu-B|，\showcolor{RdPu-B}）。第二个点值为~$1$，使用第二个颜色
+    |RdPu-E| \showcolor{RdPu-E}，依此类推。注意，|NaN| 被解释为矩阵中的
+    ``空洞''，留空（此处你看到背景色）。此外，注意坐标
+    |(1,2) [-1]| 被映射到第一个颜色，因为超出允许范围的值会自动裁剪到
+    下一个正确颜色。点 |[99]| 同理：它被映射到最后一个可用颜色
+    ~\showcolor{RdPu-K}。最后，点 |[2.99]| 被映射到索引 $2$
+    ~(\showcolor{RdPu-G})，因为 |colormap access=direct| 截断到下一个
+    整数索引。
+
+    \begin{pgfplotskey}{colorbar as palette}
+        上面的示例使用了 |colorbar as palette|，这是一种专用样式，
+        适用于此类调色板型应用。
+
+        它定义为
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar as palette/.style={
+        colorbar sampled={
+            surf,
+            colormap access=direct,
+            shader=flat corner,
+            samples=\pgfplotscolormapsizeof
+            {\pgfkeysvalueof{/pgfplots/colormap name}}+1,
+        },
+        colorbar style={
+            point meta min=0,
+            point meta max=\pgfplotscolormapsizeof
+            {\pgfkeysvalueof{/pgfplots/colormap name}},
+        },
+    },
+}
+\end{codeexample}
+        %
+        其思路是仅显示``调色板''的颜色，即不插值 |colormap| 的值。
+        此外，它应该显示所有可用颜色。
+
+        另见密切相关（但更通用）的 |colorbar as legend|。
+\end{pgfplotskey}
+
+    注意，|colormap access=direct| 改变 |point meta| 转换为颜色的方式。
+    但是，它\emph{不影响} |shader|。换言之，使用 |shader=interp| 或
+    |shader=flat mean| 完全合理。但是，这将插值由
+    |colormap access=direct| 产生的颜色！我们上面的示例使用
+    |shader=flat corner|，完全不进行颜色插值。
+
+    选项 |colormap access=direct| 实际上就像带索引颜色空间的图像的颜色
+    调色板：假设我们使用随机选择的图像，将其降采样使其对 \LaTeX{}
+    不致过大，并导出为以下形式的坐标：
+    %
+\begin{codeexample}[code only]
+1 1 194
+1 2 194
+1 3 170
+1 4 193
+1 5 188
+1 6 188
+...
+\end{codeexample}
+    %
+    带索引颜色空间。此外，我们将其颜色调色板导入为 \PGFPlots{}
+    |colormap|。为此，一个小的 Matlab 脚本用作将 |tiff| 图像转换为
+    坐标的工具：\footnote{另见第~\ref{sec:pgfplots:import:matlab} 节，
+    ``从 Matlab 导入网格数据到 PGFPlots''，第
+    ~\pageref{sec:pgfplots:import:matlab} 页}
+    %
+\begin{codeexample}[code only]
+[Z,cm] = imread('legoplane.tiff');
+size(Z)
+[X,Y]=meshgrid(1:size(Z,2), 1:size(Z,1));
+data = [ X(:) Y(:) Z(:) ];
+fid = fopen('legoplane.dat', 'w');
+fprintf(fid, "%d %d %d\n", data');
+fclose(fid);
+fid = fopen('legoplane_cm.tex', 'w');
+fprintf(fid, "\\pgfplotsset{colormap={legoplane palette}{\n");
+fprintf(fid, "rgb=(%f,%f,%f)\n", cm');
+fprintf(fid, "}}\n");
+fclose(fid);
+\end{codeexample}
+    %
+    这允许我们将图形导入 \PGFPlots{} 作为 |matrix plot|：
+    %
+\tikzset{external/figure name/.add={}{legoplane_}}%
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}
+    % load and activate the CM:
+    \input{legoplane_cm.tex}
+\begin{axis}[view={0}{90},axis equal,enlargelimits=false]
+    \addplot3 [
+        matrix plot,
+        colormap access=direct,
+        mesh/rows=128,
+        mesh/ordering=colwise,
+    ] table {legoplane.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    文件 |legoplane_cm.tex|、|legopolane.dat| 和 |legoplane.tiff| 随
+    \PGFPlots{} 发布，可从 CTAN 下载。将表格数据解码为 |mesh| 的键
+    特定于我们脚本的 Matlab 导出格式。
+
+    注意，从坐标渲染图像在效率上远不如 |\includegraphics|，
+    就
+    \begin{itemize}
+        \item computational time required by \PGFPlots{},
+        \item 生成的 |pdf| 文档中的空间消耗，
+        \item 以及在查看器中渲染生成的 |pdf| 的时间。
+    \end{itemize}
+    %
+    根据用例，\verbpdfref{\addplot graphics} 可能有助于减少排版时间。
+
+
+    \paragraph{更多细节：}
+
+    \begin{itemize}
+        \item 如果颜色映射中有 $m$ 种颜色，且颜色数据落在 $[0,m-1]$ 之外，
+            它将被裁剪到第一种或最后一种颜色。
+        \item 如果颜色数据是实数，它将被截断到下一个较小整数。
+        \item 如果 |colormap access=direct| 与 |shader|$\neq$|flat corner|
+            组合，则进行颜色插值。但是，颜色插值不是按标量
+            |point meta| 进行的（如 |colormap access=map| 那样）。
+            而是在其自身颜色空间中的\emph{结果}颜色上进行。
+        \item 注意，在此上下文中不支持 |patch refines| 或
+            |patch to triangles|（在撰写本文时，它将插值颜色索引，
+            导致定义不良的行为）。
+    \end{itemize}
+
+    另见相关键 |color of colormap| 和 |index of colormap|。
+
+    选项 |colormap access=|\declaretext{piecewise linear} 是
+    |colormap access=map| 的别名。它与 |color of colormap| 相关。
+    \index{color of colormap}
+
+
+    \subsubsection{使用分段常数插值映射元数据}
+
+    \paragraph{注意：查看器限制}
+
+    以下段落使用 \textsc{pdf} 功能，某些免费查看器
+    （包括 |pdf.js| 和 |evince|）不支持。如果看到意外结果，
+    请改用合适的查看器。
+
+    选项 |colormap access=|\declaretext{piecewise constant} 与
+    |colormap access=map| 非常相似：它接受相同的 |point meta| 值作为输入，
+    线性映射到 $[0,1000]$，如果 |point meta| 值为 |point meta min| 则使用
+    |colormap| 的第一个颜色，如果 |point meta| 值为 |point meta max|
+    则使用 |colormap| 的最后一个颜色。但是，落在两个 |colormap| 条目
+    \emph{之间} 的 |point meta| 值使用\emph{分段常数}插值，即就像
+    |const plot|：插值颜色类似于区间\emph{第一个}颜色的值。因此，
+    结果包含的颜色最多与 |colormap| 提供的一样多：
+    %
+\begin{codeexample}[]
+% requires \usepgfplotslibrary{colorbrewer}
+\begin{tikzpicture}
+\begin{axis}[
+    colormap access=piecewise constant,
+    colormap/RdPu-6,
+    colorbar horizontal,
+]
+    \addplot3 [
+        surf,
+    ] {x*y};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    选项 |colormap access=piecewise constant| 与所有可用 |shader| 兼容，
+    但使用 |shader=interp| 可获得最佳结果，因为这会避免网格边界处的
+    矩形伪影。
+    %
+\begin{codeexample}[]
+% requires \usepgfplotslibrary{colorbrewer}
+\begin{tikzpicture}
+\begin{axis}[
+    colormap access=piecewise constant,
+    colormap/RdPu-6,
+    colorbar horizontal,
+]
+    \addplot3 [
+        surf,
+        shader=interp,
+    ] {x*y};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    选项 |colormap access=piecewise constant| 需要具有合适颜色数量的
+    |colormap|。这与 |colormap access=map|（或 |piecewise linear|）非常不同，
+    后者中 |colormap| 的实际颜色数量在结果图中不可见。为获得所需效果，
+    可能需要具有不同样本数量的相同 |colormap|。为此，可以使用基于
+    |samples of colormap| 及其变体的特殊 |colormap| 语法：
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colormap access=piecewise constant,
+    colormap={my sampled version of viridis}{
+        samples of colormap=(10 of viridis)
+    },
+    colorbar horizontal,
+]
+    \addplot3 [
+        surf,
+        shader=interp,
+    ] {x*y};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    该示例使用现有 |colormap name=viridis| 并选择其 $10$ 个样本。
+    结果称为 |my sampled version of viridis|，用作``当前颜色映射''。
+    有关此过程的详情，请阅读第
+    ~\ref{sec:pgfplots:colormaps:based:on:others} 节
+    （第~\pageref{sec:pgfplots:colormaps:based:on:others} 页）。
+
+
+    \paragraph{另见}
+
+    绘图处理程序 |contour filled|，它基于此类可视化方案。
+
+    在此上下文中确定颜色的策略也可作为
+    |const color of colormap| 使用。\index{const color of colormap}
+
+    选项 \declareandlabel{piecewise const} 和 \declaretext{const} 是
+    |piecewise constant| 的别名。
+\end{pgfplotskey}

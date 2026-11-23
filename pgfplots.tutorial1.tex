@@ -1,0 +1,559 @@
+\section{解决一个实际用例：函数可视化}
+
+本节假设你想可视化两个函数。第一个函数以数据表的形式给出。第二个函数以
+数学表达式的形式给出。我们希望把两个结果并排放置，并且希望它们
+“恰当地”对齐（不管“恰当”具体指什么）。
+
+根据上面的动机，我们有一张数据表。假设它如下所示。
+%
+\begin{codeexample}[code only]
+x_0	f(x)
+# some comment line
+3.16693000e-05	-4.00001451e+00
+1.00816962e-03	-3.08781504e+00
+1.98466995e-03	-2.88058811e+00
+2.96117027e-03	-2.75205040e+00
+3.93767059e-03	-2.65736805e+00
+4.91417091e-03	-2.58181091e+00
+5.89067124e-03	-2.51862689e+00
+...
+9.89226496e-01	2.29825980e+00
+9.90202997e-01	2.33403276e+00
+9.91179497e-01	2.37306821e+00
+9.92155997e-01	2.41609413e+00
+9.93132498e-01	2.46412019e+00
+9.94108998e-01	2.51860712e+00
+9.95085498e-01	2.58178769e+00
+9.96061999e-01	2.65733975e+00
+9.97038499e-01	2.75201383e+00
+9.98014999e-01	2.88053559e+00
+9.98991500e-01	3.08771757e+00
+9.99968000e-01	3.99755546e+00
+\end{codeexample}
+%
+注意，这里省略了数据文件的部分内容，因为它有点长。该数据文件（以及本手册中
+引用的所有其他文件）都随 \PGFPlots{} 一起发布；你可以在子文件夹
+\texttt{doc/latex/pgfplots/plotdata} 中找到它们。
+
+
+\subsection{把数据读入 \TeX{}}
+\label{sec:tut1:step1}
+
+我们的第一步是把数据表读入 \PGFPlots{}。此外，我们还想为 |x| 和 |y|
+坐标轴添加坐标轴描述，并在图的顶部加一个 |title|。
+
+我们的第一版如下所示：
+%
+\begin{codeexample}[]
+%\documentclass{article}
+%\usepackage{pgfplots}
+%\pgfplotsset{compat=1.5}
+
+%\begin{document}
+
+\begin{tikzpicture}
+\begin{axis}[
+    title=Inv. cum. normal,
+    xlabel={$x$},
+    ylabel={$y$},
+]
+    \addplot [blue] table {invcum.dat};
+\end{axis}
+\end{tikzpicture}
+%\end{document}
+\end{codeexample}
+
+这段代码清单已经展示了几个重要方面：
+%
+\begin{enumerate}
+    \item 与 \LaTeX{} 中通常一样，你使用
+        |\usepackage{pgfplots}| 来引入宏包。
+    \item 不太常见的是 |\pgfplotsset{compat=1.5}|。
+
+        这样的语句应当总是使用，以便 (a)~享受相对较新的功能集，
+        并且 (b)~在你用更高版本的 \PGFPlots{} 重新编译时，
+        避免图片发生变化。
+
+        注意，\PGFPlots{} 会在你的日志文件中生成某个建议取值
+        （自 1.6.1 起）。最低建议版本是
+        |\pgfplotsset{compat=1.3}|，因为它对
+        坐标轴标签的位置有很大影响。
+    \item \PGFPlots{} 依赖 \Tikz{} 和 \pgfname{}。可以说它是
+        建立在 \Tikz{}/\pgfname{} 之上的一个“第三方宏包”。
+
+        因此，我们必须把每一幅 \PGFPlots{} 图画进一个 \Tikz{}
+        picture 中，于是就有了
+        |\begin{tikzpicture} ... |\allowbreak|\end{tikzpicture}| 给出的 picture 环境。
+    \item \PGFPlots{} 中的每一个坐标轴都写在一个独立的环境中。在
+        本例中，我们选择 |\begin{axis} ... |\allowbreak|\end{axis}|，因为这是
+        普通坐标轴所用的环境。
+
+        还有其他坐标轴环境（例如用于对数坐标轴的
+        |\begin{loglogaxis} ... \end{loglogaxis}| 环境）。
+
+        尽管 \PGFPlots{} 用默认选项即可运行，但它接受各种选项
+        键。非常多的选项键。通常，你只需在“某处”用方括号
+        （|[...]|）提供你“想要”的所有键，而忽略其他所有键。
+
+        当然，主要的难点在于纵览可用的键，并弄清楚如何使用它们。
+        本参考手册，尤其是它的 Chapter~\ref{cha:pgfplots:reference}，
+        就是为在线浏览而设计的：它包含数百个相互交叉引用的示例。
+        在 PDF 查看器中打开本手册并按关键词搜索，希望能跳到一个
+        合适的匹配处，再从那里跳转到\emph{相应的}参考章节
+        （例如关于刻度标签、刻度位置、绘图处理器等）。关于所有可用
+        选项键的详细信息，它是（也将永远是）最可靠的来源。
+
+        说到参考手册：注意，大多数 PDF 查看器还具有
+        “跳回点击超链接之前那一页”的功能
+        （在 Acrobat Reader 中，打开菜单 View / Toolbars / More
+        Tools，并启用位于“Page Navigation Toolbar”下的
+        “Previous View”和“Next View”按钮）。
+
+        注意，这段代码清单包含两组选项键：第一组在
+        |\begin{axis}| 之后（即键 |title|、|xlabel| 和 |ylabel|），
+        第二组紧跟在 |\addplot| 之后（即单个键 |blue|）。另外请注意，
+        axis 之后的选项列表做了缩进：每个选项单独占一行，且每行
+        第一个字符是一个制表位。当指定的键多于一个时，这种代码
+        排版方式被认为是良好实践，因为它比把多个选项键挤在同一行
+        更易读。它也便于把个别选项注释掉。
+
+        另一个良好实践是在最后一个选项之后加一个逗号（在本例中，
+        即在 |ylabel| 的取值之后）。这个尾随逗号实际上会被
+        忽略——它不是语法错误，也不改变选项列表的语义。
+        不过，它的存在让以后可以轻松地追加更多选项键——
+        你不会忘记那个逗号。
+
+        第二组键（|\addplot| 之后）缺少尾随逗号，这表明
+        并不严格需要按上面推荐的方式排版选项列表。事实上，当只有
+        一个选项键时，通常就像所示那样把它写在一行里。在本例中，
+        我们只是写了 |\addplot[blue]|，表示这幅图用蓝色绘制，
+        不带任何绘图 |mark|。不过，如果要再加一个选项，
+        最好还是改为缩进并加尾随逗号：
+        %
+\begin{codeexample}[code only]
+\addplot[
+    blue,
+    mark=*,
+]
+table {invcum.dat};
+\end{codeexample}
+        %
+    \item 在坐标轴内部，\PGFPlots{} 接受一条 |\addplot ... ;|
+        语句（注意末尾的分号）。
+
+        在本例中，我们使用 |\addplot table|：它从文件加载一张表，
+        并绘制前两列。
+
+        不过，还有更多的输入方式。最重要的可用输入方式是
+        |\addplot expression|（从某个数学表达式采样）和
+        |\addplot table|（从表加载数据），以及两者的结合——
+        |\addplot table| 也支持（从表加载数据并应用数学表达式）。
+        除了这些只依赖内置方法的工具之外，还有一种用外部
+        工具计算数据的选择：|\addplot gnuplot|，它把 gnuplot 当作
+        “桌面计算器”来调用并导入数值数据；|\addplot shell|
+        （可以从任意系统调用加载表数据）；以及特殊的
+        |\addplot graphics| 工具，它连同元数据一起加载一张\emph{图像}，
+        并只绘制相应的坐标轴。
+
+        在我们的坐标轴中，可以看到若干记号：第一个是
+        必需的 |\addplot| 记号。它“开启”一幅新的图。第二个是
+        该图的选项列表，用方括号界定（另见上面关于良好实践的
+        说明）。“选项列表”这个名称表明该列表可以为空。它也可以
+        完全省略，此时 \PGFPlots{} 会从当前的
+        |cycle list| 中选择一个选项列表（另一次讲座会详细讨论）。
+        下一个记号是关键字“|table|”。它告诉 \PGFPlots{} 接下来是
+        表数据。关键字“|table|”也接受一个选项列表
+        （例如用于选择列、定义不同的 |col sep| 或 |row sep|，
+        或提供一个应用于每一行的数学表达式）。这方面将在另一次
+        讲座中讨论。下一个记号是 |{invcum.dat}|：一个花括号
+        参数，提供表数据。这个参数由“plot table”解释。其他输入
+        类型会期待不同类型的参数。在本例中，花括号内是一个
+        文件名。Plot table 要么期待像本例这样的文件名，要么期待
+        所谓的“内联表”。内联表意味着你直接把文件内容
+        插入花括号内。本例中的表太长，无法插入参数中，所以我们
+        把它放在一个单独的文件里。最后，最后一个（必需的！）
+        记号是分号。它结束这条 |\addplot| 语句。
+    \item 坐标轴描述可以像示例清单中那样，使用键
+        |title, xlabel, ylabel| 来添加。
+
+        \PGFPlots{} 接受非常多的键——有时，找到你要找的那一个键
+        本身就是一门艺术。希望通过浏览参考手册的目录，和/或在
+        整本参考手册中按关键词搜索，能命中目标。
+\end{enumerate}
+
+
+\subsection{对第一幅图做微调}
+\label{sec:tut1:step2}
+
+看着 Section~\ref{sec:tut1:step1} 的结果，我们决定要改点东西。
+首先，我们觉得左右两端敞开的端部有点碍眼（也许我们品味古怪——
+又也许我们事先知道底层函数并不局限于任何区间）。
+无论如何，我们只想在 |y| 从 $-3$ 到 $+3$ 的区间内显示它。
+
+我们可以这样做：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    title=Inv. cum. normal,
+    xlabel={$x$},
+    ylabel={$y$},
+    ymin=-3, ymax=3,
+    minor y tick num=1,
+]
+    \addplot [blue] table {invcum.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+我们在坐标轴的选项列表中又加了三个选项。第一对是
+|ymin=-3| 和 |ymax=3|。注意，虽然我们说过每个选项应单独占一行，
+但这里把它们放在了同一行。换行其实完全是可选的；
+在本例中，这两个选项看起来属于一组。它们定义了
+\emph{显示}上下限。显示上下限定义了坐标轴的“窗口”。注意，
+任何 |\addplot| 语句可能拥有更多数据（如本例所示）。它们
+仍会为其完整的数据点集生成图形！键
+|ymin,ymax,xmin,xmax| 只控制\emph{可见}部分，即坐标轴
+范围。其余内容（默认）会被裁剪掉。第三个新选项是
+|minor y tick num=1|，它用于自定义次刻度。注意，只有当主刻度
+间距与本例相同时，才会显示次刻度。
+
+注意，我们也可以修改图的 |width| 和/或 |height|
+（这两个键就叫这些名字）。我们也可以使用某个预定义样式，
+例如 |tiny| 或 |small|，这样不仅修改图形，还会对描述文字
+使用不同的字体。我们也可以选择调整那些未指定的上下限：
+要么像上面对 y 那样显式固定，要么修改 |enlargelimits| 键
+（例如使用 |enlargelimits=false|）。
+
+现在我们对第一幅图满意了，想加上第二幅。
+
+
+\subsection{加上第二幅图，绘制不同的图}
+\label{sec:tut1:step3}
+
+根据前面的动机，我们的目标是把两个独立的坐标轴并排放置。
+第二个坐标轴应展示一个以数学表达式给出的函数。更确切地说，
+我们想在这里展示正态分布的密度函数（也就是一个特殊的
+数学表达式）。
+
+我们只需新开一个 |tikzpicture|，再插入一个新的 |axis| 环境
+（也许是复制--粘贴我们已有的那个）。不过，|\addplot| 命令
+有所不同：
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+]
+    % density of Normal distribution:
+    \addplot [
+        red,
+        domain=-3e-3:3e-3,
+        samples=201,
+    ]
+        {exp(-x^2 / (2e-3^2)) / (1e-3 * sqrt(2*pi))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+我们看到它有一个选项列表为空的坐标轴环境。这完全
+可以接受：毕竟，我们以后迟早会加选项。即使不加：也没有
+坏处。接着，我们看到预期的 |\addplot| 语句。如前所述，
+|\addplot| 语句开启一幅新图。其后跟一个（可选的）选项列表，
+然后是某个标识输入坐标提供方式的关键字，再后是参数，
+最后是分号。本例中，我们看到一个选项列表，它使这幅图呈
+红色。键 |domain| 和 |samples| 控制如何求值我们的数学表达式：
+|domain| 以 |a:b| 的形式定义采样区间，而
+|samples=N| 期望给出插入该采样区间的采样点数。
+
+注意，|domain| 只控制采哪些样本；它与所显示的坐标轴范围
+无关（两者可能相差很大）。如果缺少标识坐标提供方式的关键字，
+\PGFPlots{} 就会假定下一个参数是一个数学表达式。于是，
+选项列表之后的第一个记号就是花括号中的数学表达式。我们在这里
+输入了正态分布的密度函数（参见
+\href{http://en.wikipedia.org/wiki/Normal_distribution}{Wikipedia}）。
+
+注意，这个坐标轴带了一个坐标轴倍数：$x$ 刻度标签被取为
+$-2$、$0$ 和 $2$，并附带一个形如 `$\cdot
+10^{-3}$' 的额外 $x$ 刻度比例标签。这些刻度比例标签非常方便，
+是从输入数据自动推断出来的。本教程末尾我们会看到一个使用
+|scaled x ticks=false| 的示例及其效果。
+
+在数学表达式内部，你可以使用很多数学函数，例如 exp、
+sin、cos、sqrt，可以用 |a^b| 语法表示指数，而且采样
+变量默认是 |x|。不过请注意，\emph{三角函数默认以角度为单位}！
+如果你要对正弦函数采样，可以使用 |\addplot[domain=0:360] {sin(x)};|。
+这相当少见。你也可以使用 |\addplot[domain=0:2*pi] {sin(deg(x)};|。
+它按弧度采样（这更常见）。但由于数学解析器期待角度，
+我们必须先用 |deg()| 函数把 |x| 转换成角度。另见
+|trig format plots=rad|。数学解析器是用 \TeX{} 编写的
+（它不需要任何第三方工具）。它支持双精度数的完整范围，
+尽管精度大约只有单精度。这通常已远远足以精确采样
+任何函数。如果你真的遇到精度问题，仍然可以求助于
+|\addplot gnuplot|，以调用外部工具 gnuplot 作为“坐标
+计算器”。
+
+有经验的读者可能会对常量
+|domain=-3e-3:3e-3|、|2e-3^2| 和 |1e-3| 感到奇怪，而不是用
+像 `|mu|' 或 `|sigma|' 这样的变量名。这其实是
+口味问题：两种方式都支持，我们会在下一段代码清单中改用变量名。
+
+我们这一步的主要工作还没做：我们想把两幅
+图并排放置。可以这样做：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title=Inv. cum. normal,
+        xlabel={$x$},
+        ylabel={$y$},
+        ymin=-3, ymax=3,
+        minor y tick num=1,
+    ]
+        \addplot [blue] table {invcum.dat};
+    \end{axis}
+\end{tikzpicture}% -- avoid white space
+%
+\hskip 10pt % insert a non-breaking space of specified width.
+%
+\begin{tikzpicture}
+    \begin{axis}[
+    ]
+        % density of Normal distribution:
+        \newcommand\MU{0}
+        \newcommand\SIGMA{1e-3}
+        \addplot[
+           red,
+           domain=-3*\SIGMA:3*\SIGMA,
+           samples=201,
+        ]
+           {exp(-(x-\MU)^2 / 2 / \SIGMA^2) / (\SIGMA * sqrt(2*pi))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+上面的清单展示了两个独立的 picture 环境：第一个
+直接照抄上一步，第二个是新的。注意，两者
+只是彼此相邻放置：我们只插入了注释符号来
+分隔它们。这种并排放置图形的做法在
+\TeX{} 中很常见：它对 |\includegraphics| 同样
+适用。例如，你可以写
+%
+\begin{codeexample}[code only]
+\includegraphics{image1}%
+%
+\hskip 10pt % insert a non-breaking space of specified width.
+%
+\includegraphics{image2}
+\end{codeexample}
+%
+来把两幅图形并排放置。这里的做法完全相同（只是
+我们的图形在 |.tex| 文件中占据更多代码）。
+
+注意，|\end{tikzpicture}| 后面也有一个注释符号。这不是
+单纯的良好实践：它对于抑制多余空格是\emph{必要}的！在 \TeX{} 中，
+每个换行符都会自动转换为一个空格（当然，空行除外）。
+在本例中，我们不想要空格。
+
+在第二幅图中，我们看到了如前所述把数学表达式改为
+常量定义所带来的效果。有趣的部分从两个
+常量开始，它们通过两个 |\newcommand| 定义：我们把 |\MU| 定义为
+0，把 |\SIGMA| 定义为 |1e-3|。这是定义常量的一种方式
+（注意，当数字为负时，这种常量定义大概应当加上圆括号，
+即类似 |\newcommand\negative{(-4)}| 这样的形式）。
+
+
+\subsection{修正垂直对齐并调整刻度标签位置}
+\label{sec:tut1:step4}
+
+注意，虽然我们单独看每幅图都相当不错，但两者的组合
+并未正确对齐。有经验的读者立刻能看出
+弱点：两幅图的包围盒不同，而且它们
+是按基线对齐的（基线即图片的底边）。特别地，
+左图的 |xlabel=$x$| 和右图自动插入的
+比例标签 |\cdot 10^{-3}| 造成了不想要的垂直
+偏移。下一步我们要修正它。
+
+除了糟糕的对齐之外，我们还觉得第二幅图的坐标轴
+描述夹在两幅图之间，有点误导。我们想把它们
+移到右边。
+
+先看结果：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}[baseline]
+    \begin{axis}[
+        title=Inv. cum. normal,
+        xlabel={$x$},
+        ylabel={$y$},
+        ymin=-3, ymax=3,
+        minor y tick num=1,
+    ]
+\addplot [blue] table {invcum.dat};
+    \end{axis}
+\end{tikzpicture}%
+%
+\hskip 10pt % insert a non-breaking space of specified width.
+%
+\begin{tikzpicture}[baseline]
+    \begin{axis}[
+        yticklabel pos=upper,
+    ]
+        % density of Normal distribution:
+            \newcommand\MU{0}
+            \newcommand\SIGMA{1e-3}
+        \addplot [red,domain=-3*\SIGMA:3*\SIGMA,samples=201]
+            {exp(-(x-\MU)^2 / 2 / \SIGMA^2) / (\SIGMA * sqrt(2*pi))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+这段清单有几处修改。最重要的是，我们给
+|tikzpicture| 环境加了一个选项列表：|baseline| 选项。
+这个选项把图片上下移动，使画布坐标 $y=0$
+对齐到周围文字的基线。在 \PGFPlots{} 中，$y=0$
+线就是盒子的下边。这个简单的功能让两个坐标轴能够
+垂直对齐：现在对齐的是它们的盒子，而不是
+包围盒的下边。凡是需要这种偏移的图片都要提供
+baseline 选项——在本例中，即所有要放在同一行的
+图片。请记住，它是 |\begin{tikzpicture}| 的一个选项。
+
+第二处修改相当简单：我们只是给第二个坐标轴
+加了 |yticklabel pos=upper| 选项。它把所有刻度标签移到
+右边，其余一概不变。
+
+注意，关于对齐和包围盒控制，可讲的还有很多。
+毕竟，我们并没有真正改变包围盒——我们只是把
+图片上下移动而已。还存在这样一种用例：我们想要
+水平对齐：例如两幅图应当水平居中，或者
+应当分别与左右页边对齐。相关的键
+|\begin{tikzpicture}[trim axis left, trim axis right]| 和
+|\centering| 超出了本教程的范围，细节请参见
+Section~\ref{sec:pgfplots:sec:align}。
+
+
+\subsection{满足不同的口味}
+\label{sec:tut1:step5}
+
+现在，图本身已经达到不错的状态。
+
+不过，知识的增长自然会带来
+更多问题。其中一些问题会在其他 how-to 讲座中讨论。但
+最常被问到的问题在这里回答（如果你认为我还应该加入某个
+热点，欢迎发邮件告诉我）：
+%
+\begin{enumerate}
+    \item 怎样才能去掉那个 $10^{-3}$ 标签？
+    \item 怎样修改数字的打印方式？
+    \item 怎样让每个坐标轴只有一条线，而不是一个盒子？
+\end{enumerate}
+
+这里给出简短提示，告诉你在本参考手册的哪里可以找到更多
+细节。我们按照上面的问题修改第二幅图的
+外观：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines=left,
+    scaled ticks=false,
+    xticklabel style={
+        rotate=90,
+        anchor=east,
+        /pgf/number format/precision=3,
+        /pgf/number format/fixed,
+        /pgf/number format/fixed zerofill,
+    },
+]
+    % density of Normal distribution:
+        \newcommand\MU{0}
+        \newcommand\SIGMA{1e-3}
+  \addplot [red,domain=-3*\SIGMA:3*\SIGMA,samples=201]
+        {exp(-(x-\MU)^2 / 2 / \SIGMA^2)
+            / (\SIGMA * sqrt(2*pi))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+坐标轴本身的外观可以通过 |axis lines| 键控制。它接受取值
+|left, right, box, center, none|（以及作为别名的
+|top, bottom, middle|）。|xticklabel style| 键
+修改一个预定义样式（注意这里缩进的用法！）。样式是
+一组键的集合，在特定上下文中统一应用。样式非常
+有用，并被 \PGFPlots{} 广泛使用。在本例中，我们调整了几个
+选项，例如旋转、对齐（|anchor| 选项）和数字打印
+选项。这些个别选项的确切细节超出了
+本教程的范围。这些键其实属于 \Tikz{}——这些键的参考
+是 \Tikz{} 手册（尽管 \PGFPlots{} 也覆盖了大部分
+主题）。完整的数字打印选项集既见于
+\Tikz{} 手册~\cite{tikz}，也见于随 \PGFPlots{}
+发布的 \PGFPlotstable{} 手册。简短的摘录可在
+Section~\ref{sec:number:printing} 中找到。
+
+
+\subsection{收尾工作：自动生成独立的 Pdf 图形}
+\label{sec:tut1:step6}
+
+作为本次讲座的最后一步，我想谈一个技术话题。
+通常，一个 \TeX{} 文档起步时相当简单：一点点文字，也许
+一两幅图。但它们往往会增长。最终，你会遇到
+\PGFPlots{} 的弱点之一：图形很复杂，\TeX{}
+生成它们要耗费大量时间。尤其是它还会在图形
+根本没变的情况下反复重新生成。而我们又需要
+不断重新运行 pdflatex 处理器，这让事情雪上加霜。
+
+幸运的是，有解决方案。一个简单的方案是：我们为什么不能把
+每一幅独立图形写成单独的 |.pdf| 文件，再用
+|\includegraphics| 把它引入呢！？答案是：可以。而且
+做起来简单得令人惊讶。
+
+为了在\emph{不}改动 \TeX{} 文件中任何一行代码的情况下，
+自动把每个 |tikzpicture| 环境转成外部图形，
+我们只需在文档导言区写下如下两行：
+%
+\begin{codeexample}[code only]
+\usepgfplotslibrary{external}
+\tikzexternalize
+
+...
+\begin{document}
+...
+\end{document}
+\end{codeexample}
+%
+但现在，我们\emph{必须给 pdflatex 提供一个命令行开关}：
+%
+\begin{codeexample}[code only]
+pdflatex -shell-escape myfile.tex
+\end{codeexample}
+
+它与 |pdflatex| 开箱即用。如果你使用 |latex/dvips|、
+|lualatex|、|dvipdfm| 或其他任何 \TeX{} 衍生物，则需要修改
+选项 |\tikzexternalize[system call=...]|（遗憾的是，
+它是依赖系统的，尤其是对于 postscript 各变体）。
+
+如何定义个别文件名，或如何
+修改文件名生成策略，讨论起来可能内容太多。还有
+|\tikzexternalize[mode=list|\allowbreak| and make]| 功能，它生成一个 GNU Make 文件，
+从而允许对外部图形内部的东西使用 |\label/\ref|，并且
+支持并行生成所有图片（如果你有多核
+PC）。
+
+|external| 库的细节可参见
+Section~\ref{sec:pgfplots:export}（但只是简短概述），以及最完整地
+参见 \Tikz{} 参考手册~\cite{tikz}。
+
+
+\subsection{小结}
+
+我们学习了如何创建一个标准坐标轴，以及如何指定基本的
+坐标轴描述。我们还看到了如何从数据表绘图（本例中
+是一个制表符分隔的文件，但也支持 CSV 文件那样的其他分隔符）
+以及如何从数学表达式绘图。我们看到 \PGFPlots{} 在自动
+创建功能完整的坐标轴方面做得相当不错（例如正确缩放单位、
+选择刻度位置和标签）。我们还学习了如何改善
+垂直对齐，以及如何自定义坐标轴的外观。
+
+下一步可能包括：如何把多幅图画进同一个坐标轴，如何
+使用 \PGFPlots{} 的散点图，如何生成对数坐标轴，或如何
+绘制二元函数。其中一些方面将在
+后续的 how-to 讲座中讨论。

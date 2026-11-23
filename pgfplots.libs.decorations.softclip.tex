@@ -1,0 +1,50 @@
+
+\section{装饰：软裁剪}
+
+\begingroup
+\def\pgfplotsmanualcurlibrary{decorations.softclip}
+
+\begin{pgfplotslibrary}{decorations.softclip}
+    启用 |decoration=softclip|。
+
+    “软裁剪”是输入路径的一部分，即位于“裁剪路径”内部的那一部分。这与通常所说的
+    裁剪类似：你设置 |\clip |\meta{path}|;|，其后所有路径都会按 \meta{path} 进行裁剪。
+    软裁剪与之类似，但它并不安装底层裁剪路径，而是修改输入路径，使其仅保留
+    \meta{path} 内部的部分。当需要施加装饰时，二者会产生差别；对于
+    |fill between/soft clip| 也同样如此。
+
+    注意，本库由 |fillbetween| 库隐式加载，以便支持其 |fill between/soft clip| 键。
+
+    \textsc{注意}：本库被视为实验性特性。它适用于与绘图相似的路径，即自不相交、
+    方向明确的路径。一般而言，本库可能失效。
+
+    一种应用场景是将同一路径绘制两次，但第二次仅影响路径的一部分：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \draw [
+        postaction={decorate,draw,ultra thick},
+        decoration={
+            soft clip,soft clip path={
+                (1.5,-1) rectangle (4,2)
+            },
+        },
+    ]
+        (0,0) -- (1,1) -- (2,1) -- (3,0);
+\end{tikzpicture}
+\end{codeexample}
+
+    |soft clip| 特性是为配合 |fill between| 使用而设计的。关于软裁剪的更多示例与
+    说明，请参考 |fill between/soft clip| 的文档。
+\end{pgfplotslibrary}
+
+\begin{key}{/pgf/decoration/soft clip path=\meta{corner1} rectangle \meta{corner2}}
+    设置用于 |soft clip| 装饰的路径。该参数为施加 |soft clip| 装饰时所必需。
+
+    细节请参考 |fill between/soft clip| 的文档；二者语法相同，设计动机也相似。
+\end{key}
+
+\begin{stylekey}{/pgf/decoration/every soft clipped path}
+    该样式在生成裁剪后路径之前立即应用。
+\end{stylekey}
+\endgroup

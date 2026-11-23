@@ -1,0 +1,629 @@
+
+\section{史密斯圆图}
+\label{sec:smithcharts}
+
+\begingroup
+\def\pgfplotsmanualcurlibrary{smithchart}
+
+\begin{pgfplotslibrary}{smithchart}
+    本库用于绘制史密斯圆图。
+
+    史密斯圆图将实部为正的复半平面映射到单位圆。|smithchart| 库使 \PGFPlots{}
+    能够可视化史密斯圆图：它以映射
+    %
+        \[
+            r\colon [0,\infty] \times [-\infty,\infty] \to
+                \{ a+j b \;\vert\;  a^2 + b^2 = 1 \},
+                    \quad r(z) = \frac{z-1}{z+1}
+        \]
+    %
+    通过复数除法，可视化形如 $z = x+ j y \in \C$（$j$ 为虚数单位，$j^2=-1$）且
+    $x \ge 0$ 的二维输入坐标 $z \in \C$。结果始终位于单位圆内。
+
+    史密斯圆图的主要应用领域是专攻射频的电气与电子工程师：用于展示归一化阻抗
+    $z$ 对应的反射系数 $r(z)$。深入射频技术超出本手册范围；对我们而言，
+    只需注意 |smithchart| 库支持
+    %
+    \begin{itemize}
+        \item 上文所示的数据映射 $r(z)$；
+        \item 一种坐标轴类，将 $x$ 解释为实部、$y$ 解释为虚部；
+        \item 将网格线可视化为圆弧；
+        \item 可以让网格线在指定位置停止，从而在史密斯圆图中获得均匀间距；
+        \item 大量 \PGFPlots{} 坐标轴微调参数；
+        \item 输入已经映射好的坐标 $r(z)$（即单位圆内的笛卡尔坐标）；
+        \item 许多 \PGFPlots{} 绘图处理器。
+    \end{itemize}
+\end{pgfplotslibrary}
+
+
+\subsection{史密斯圆图坐标轴}
+
+\begin{environment}{{smithchart}\oarg{options}}
+    |\begin{smithchart}| 环境用于绘制史密斯圆图。它接受与 |\begin{axis}| 相同的
+    \meta{options}。实际上，它等价于
+    |\begin{axis}[|\meta{options}|,axis type=smithchart]|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{smithchart}[
+    title=Impedance Smith Chart,
+]
+    \addplot coordinates {
+        (0.5,0.2) (1,0.8) (2,2)
+    };
+\end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    上面的例子使用史密斯圆图的初始配置可视化三个数据点；这些数据点被解释为
+    复数 $z = x + j y$，并通过 $r(z)$ 映射。
+
+    这里，$x$ 坐标对应水平线所描述的圆周，而 $y$ 坐标对应外侧刻度标签所描述的
+    圆周。
+
+    \begin{pgfplotskey}{smithchart mirrored=\mchoice{true,false} (initially false)}
+        \paragraph{注意：}
+
+        该键已弃用。它的输出\emph{不}对应导纳史密斯圆图，因为作者未能完全理解
+        如何完整绘制它们。
+
+        \PGFPlots{} 目前不支持导纳史密斯圆图。欢迎贡献者提交补丁来修正此行为。
+
+        依赖 |smithchart mirrored| 的现有代码仍会产生与之前相同的结果，但会生成
+        警告。
+\iffalse
+        \PGFPlots{} also supports Admittance Smith charts. Here, the origin is
+        on the right side of the circle:
+        %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{smithchart}[
+    smithchart mirrored,
+    title=Admittance Smith Chart,
+]
+    \addplot coordinates {
+        (0.5,0.2) (1,0.8) (2,2)
+    };
+\end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+\fi
+    \end{pgfplotskey}
+
+    由于 \PGFPlots{} 可以将两个坐标轴叠在一起绘制，因此也可以组合阻抗/导纳
+    史密斯圆图。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}[]
+    % First, the Admittance chart:
+    \begin{smithchart}[
+        title=Impedance and Admittance Smith Chart,
+        smithchart mirrored,
+        xticklabel shift=-19pt,
+        grid style={blue},
+        ticklabel style={blue},
+        yticklabel around circle,
+    ]
+    \end{smithchart}
+
+    % Second, overlay the impedance chart:
+    \begin{smithchart}[
+        show origin,
+        grid style={red},
+        ticklabel style={red},
+        yticklabel around circle*,
+    ]
+        \addplot+ [black,mark=o,only marks,point meta=explicit symbolic,nodes near coords]
+            coordinates {
+                (0.2,0.2) [(2)]
+                (1,0.2) [(1)]
+        };
+
+        \addplot+ [black,no markers,domain=0.2:1] {0.2};
+
+        \addplot+ [black,mark=o,only marks,point meta=explicit symbolic,nodes near coords]
+            coordinates{
+                (0.2,0.5) [(3)]
+        };
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    由于这样的图很容易变得拥挤，应通过“合适的”外观选项手动调整（如果你觉得存在
+    一种“合适的默认值”，请告诉我）。
+
+    |show origin|、|yticklabel around circle| 与 |yticklabel around circle*|
+    的细节见本节后文。
+\end{environment}
+
+
+\subsection{尺寸控制}
+
+史密斯圆图可以通过向坐标轴提供 |width| 或 |height| 参数来调整大小。若同时提供
+二者，圆图将绘制为椭圆。
+
+|smithchart| 坐标轴的刻度与网格位置通过三套手动调整的网格线集合实现：一套用于
+小尺寸图，一套用于中等尺寸图，一套用于大图。|width| 或 |height| 的实际参数用于
+从下列集合中选择一套：
+
+\begin{stylekey}{/pgfplots/few smithchart ticks}%
+    它产生上面例子中的输出——它是宽度小于 |14cm| 的史密斯圆图的初始配置。
+
+    |few smithchart ticks| 样式定义如下：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    few smithchart ticks/.style={
+        default smithchart xtick/.style={
+            xtick={0.2,0.5,1,2,5},
+        },
+        default smithchart ytick/.style={
+            ytick={%
+                0,%
+                 0.2, 0.5, 1, 2, 5,%
+                -0.2,-0.5,-1,-2,-5},
+        },
+        default smithchart xytick/.style={
+            xgrid each nth passes y={2},
+            ygrid each nth passes x={2},
+        },
+    },
+}
+\end{codeexample}
+    %
+    \noindent 注意，|few smithchart ticks| 包含语法上的额外开销，用于区分“默认刻度”
+    与最终刻度位置：它并不直接赋值 |xtick| 与 |ytick|，而是将它们作为单独的
+    |default xtick style| 参数提供。这种区分的目的是将它们标记为“默认”参数——
+    仅当未给出 |xtick| 值时，底层样式 |smithchart/every default xtick| 才会被使用。
+
+    若希望覆盖此默认值，可以
+    %
+    \begin{itemize}
+        \item 复制上面的定义并加以调整，或
+        \item 略去所有 |default smithchart xtick/.style| 相关内容，直接写
+            |xtick=|\marg{your list}。
+    \end{itemize}
+    %
+    如前所述，|default smithchart xtick/.style| 这层开销的唯一目的是区分
+    |\begin{smithchart}[xtick=|\allowbreak\marg{user defined}|]| 与默认参数（关于这一技术细节
+    的更多内容，见 |default smithchart xtick/.style| 的文档）。
+
+    缩放决策的微调，见 |smith chart ticks by size| 键。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/many smithchart ticks}
+    对于宽度超过 |14cm| 但小于 |20cm| 的每个史密斯圆图，使用 |many smithchart ticks| 样式：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{smithchart}[
+        title=Medium-Sized Smith Chart,
+        width=14cm,
+    ]
+        \addplot coordinates {(0.5,0.2) (1,0.8) (2,2)};
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+
+    我们看到，|many smithchart ticks| 与 |few smithchart ticks| 具有不同的位置与
+    对齐选项：它在单位圆内部为 $y$ 描述（虚轴）使用倾斜的刻度标签。
+
+    初始配置通过\emph{两个}独立样式实现：一个仅定义刻度位置（
+    \declareandlabel{many smithchart ticks*} 样式），另一个还修改位置与对齐选项。
+    初始配置可单独修改（示例见本节末尾）。初始配置为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    many smithchart ticks*/.style={
+        default smithchart xtick/.style={
+            xtick={
+                0.1,0.2,0.3,0.4,0.5,1,1.5,2,3,4,5,10,20%
+            },
+            minor xtick={0.6,0.7,0.8,0.9,1.1,1.2,1.3,1.4,1.6,1.7,1.8,1.9,
+              2.2,2.4,2.6,2.8,3.2,3.4,3.6,3.8,4.5,6,7,8,9,50},
+        },
+        default smithchart ytick/.style={
+            ytick={%
+                0,%
+                0.1,0.2,...,1,1.5,2,3,4,5,10,20,%
+                -0.1,-0.2,...,-1,-1.5,-2,-3,-4,-5,-10,-20%
+            },
+            minor ytick={%
+                1.1,1.2,1.3,1.4,1.6,1.7,1.8,1.9,2.2,2.4,2.6,2.8,3.2,3.4,3.6,3.8,
+                  4.5,6,7,8,9,50,%
+                -1.1,-1.2,-1.3,-1.4,-1.6,-1.7,-1.8,-1.9,-2.2,-2.4,-2.6,-2.8,
+                  -3.2,-3.4,-3.6,-3.8,-4.5,-6,-7,-8,-9,-50%
+            },
+        },
+        default smithchart xytick/.style={
+            xgrid each nth passes y={1,2,4,5,10,20},
+            ygrid each nth passes x={1,2,3,5,10:3,20:3},
+        },
+    },
+    /pgfplots/many smithchart ticks/.style={
+        many smithchart ticks*,
+        yticklabel in circle,
+        show origin=true,
+    },
+}
+\end{codeexample}
+    %
+    \noindent 关于 |default smithchart xtick/.style| 这层开销的解释，见
+    |few smithchart ticks| 的文档。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/dense smithchart ticks}
+    |dense smithchart ticks| 样式为宽度至少为 |20cm| 的每个史密斯圆图分配
+    刻度位置集合：
+    %
+\tikzset{external/figure name/.add={}{smithhuge_}}%
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}[scale=0.75]
+    \begin{smithchart}[
+        title=Huge Smith Chart (rescaled),
+        width=20cm,
+    ]
+        \addplot coordinates {(0.5,0.2) (1,0.8) (2,2)};
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+
+    \textbf{注意：}该样式在未来版本中可能会改变！
+
+    与 |many smithchart ticks|（见上）类似，初始配置通过\emph{两个}独立样式实现：
+    一个仅定义刻度位置（\declareandlabel{many smithchart ticks*} 样式），另一个
+    还修改位置与对齐选项：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    dense smithchart ticks*/.style={
+        default smithchart xtick/.style={
+            xtick={
+                0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.2,1.4,1.6,1.8,2,3,4,5,10,20%
+            },
+            minor xtick={%
+                0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.11,0.12,0.13,0.14,0.15,0.16,0.17,
+                0.18,0.19,0.22,0.24,0.26,0.28,0.32,0.34,0.36,0.38,0.42,0.44,0.46,0.48,%
+                0.52,% This is sub-optimal and will (hopefully) be improved in the future.
+                0.55,0.65,0.75,0.85,0.95,%
+                %0.6,0.7,0.8,0.9,%
+                1.1,1.3,1.5,1.7,1.9,%
+                2.2,2.4,2.6,2.8,3.2,3.4,3.6,3.8,4.5,6,7,8,9,50},
+        },
+        default smithchart ytick/.style={
+            ytick={%
+                0,%
+                0.1,0.2,...,1,1.2,1.4,1.6,1.8,2,3,4,5,10,20,%
+                -0.1,-0.2,...,-1,-1.2,-1.4,-1.6,-1.8,-2,-3,-4,-5,-10,-20%
+            },
+            minor ytick={%
+                0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.11,0.12,0.13,0.14,0.15,0.16,0.17,
+                0.18,0.19,0.22,0.24,0.26,0.28,0.32,0.34,0.36,0.38,0.42,0.44,0.46,0.48,%
+                0.55,0.65,0.75,0.85,0.95,%
+                1.1,1.3,1.5,1.7,1.9,2.2,2.4,2.6,2.8,3.2,3.4,3.6,3.8,4.5,6,7,8,9,50,%
+                -0.01,-0.02,-0.03,-0.04,-0.05,-0.06,-0.07,-0.08,-0.09,-0.11,-0.12,-0.13,-0.14,
+                -0.15,-0.16,-0.17,-0.18,-0.19,-0.22,-0.24,-0.26,-0.28,-0.32,-0.34,-0.36,-0.38,
+                -0.42,-0.44,-0.46,-0.48,-0.55,-0.65,-0.75,-0.85,-0.95,%
+                -1.1,-1.3,-1.5,-1.7,-1.9,-2.2,-2.4,-2.6,-2.8,-3.2,-3.4,-3.6,-3.8,-4.5,-6,-7,-8,
+                -9,-50%
+            },
+        },
+        default smithchart xytick/.style={
+            xgrid each nth passes y={0.2 if < 0.2001,0.5 if < 0.50001,1 if < 1.001,2,4,5,10,20},
+            ygrid each nth passes x={0.2 if < 0.2001,0.52 if < 0.52001,1 if < 1.001,2,3,5,10:3,20:3},
+        },
+    },
+    dense smithchart ticks/.style={
+        yticklabel in circle,
+        dense smithchart ticks*,
+        show origin=true,
+        every major grid/.style={black!60},
+    },
+}
+\end{codeexample}
+    %
+    \noindent 关于 |default smithchart xtick/.style| 这层开销的解释，见
+    |few smithchart ticks| 的文档。
+\end{stylekey}
+
+\begin{pgfplotskeylist}{%
+    default smithchart xtick,
+    default smithchart ytick,
+    default smithchart xytick%
+}
+    当且仅当你未手动提供 |xtick| 时，才会安装 |default smithchart xtick| 样式。
+
+    类似地，当且仅当你未手动提供 |ytick| 时，才会安装 |default smithchart ytick|
+    样式。
+
+    最后，当且仅当你既未提供 |xtick| 也未提供 |ytick| 时，才会安装
+    |default smithchart xytick| 样式。
+
+    这些样式通常在 |few smithchart ticks| 及其变体中定义，见上。
+\end{pgfplotskeylist}
+
+
+\subsection{使用已预处理数据}
+
+\begin{pgfplotskey}{is smithchart cs=\mchoice{true,false} (initially false)}
+    有时，你可能已经有变换到单位圆笛卡尔坐标 $r(z) = (x,y)$ 的输入数据。
+
+    可以通过 |is smithchart cs| 键将它们提供给 \PGFPlots{}：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{smithchart}
+    % smithchart_data.dat contains
+    % 0.78395 -0.40845
+    % 0.78165 -0.41147
+    % 0.77934 -0.41466
+    % 0.77774 -0.41869
+    % ...
+    \addplot [
+        blue,
+        is smithchart cs,
+    ] file {plotdata/smithchart_data.dat};
+\end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    使用 |is smithchart cs| 即告知 \PGFPlots{} 跳过变换 $r(z)$。
+\end{pgfplotskey}
+
+
+\subsection{外观控制与样式}
+
+\begin{pgfplotskey}{show origin=\mchoice{true,false} (initially false)}
+    允许在点 $(0,0)$ 处放置额外描述，以标记原点。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{smithchart}[
+        show origin,
+    ]
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+
+    \begin{pgfplotscodekey}{show origin code}
+        允许重定义绘制原点标记的代码。初始配置为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    show origin code/.code={%
+        \path[draw=black,fill=white] (0pt,0pt) circle (2.5pt);
+        \path[fill=black] (0pt,0pt) circle (0.5pt);
+    },
+}
+\end{codeexample}
+    \end{pgfplotscodekey}
+\end{pgfplotskey}
+
+\begin{stylekey}{/pgfplots/yticklabel in circle}
+    该样式将史密斯圆图中虚部分量（|ytick| 参数）的刻度标签绘制在圆内部。
+
+    它安装变换以旋转并移动刻度标签。示例见 |many smithchart ticks| 样式。
+
+    该样式的初始配置为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    yticklabel in circle/.style={
+        ytick align=inside,
+        yticklabel style={
+            rotate=90,
+            sloped like y axis={
+                execute for upside down={\tikzset{anchor=north east}},
+                %allow upside down,
+                reset nontranslations=false},
+            anchor=south west,
+            %font=\tiny,
+        },
+    },
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/yticklabel around circle}
+    该样式将史密斯圆图中虚部分量（|ytick| 参数）的刻度标签绘制在圆外部，
+    并旋转以贴合圆周的斜率。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{smithchart}[
+        yticklabel around circle,
+    ]
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+
+    该样式的初始配置为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    yticklabel around circle/.style={
+        ytick align=center,
+        yticklabel style={
+            rotate=90,
+            sloped like y axis={
+                execute for upside down={\tikzset{anchor=south west}},
+                %allow upside down,
+                reset nontranslations=false},
+            anchor=south east,
+        },
+    },
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/yticklabel around circle*}
+    |yticklabel around circle| 的一个变体，交换了锚点：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{smithchart}[
+        yticklabel around circle*,
+    ]
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    若同一幅图中有两个史密斯圆图，可以将它们叠加：第一个使用
+    |yticklabel around circle|，第二个使用 |yticklabel around circle*|
+    （示例见本节开头）。
+
+    该样式的初始配置为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    yticklabel around circle*/.style={
+        ytick align=center,
+        yticklabel style={
+            rotate=90,
+            sloped like y axis={
+                execute for upside down={\tikzset{anchor=north west}},
+                %allow upside down,
+                reset nontranslations=false},
+            anchor=north east,
+        },
+    },
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every smithchart axis}
+    该样式为每个史密斯圆图安装。其定义为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every smithchart axis/.style={
+        grid=both,
+        xmin=0,
+        scaled ticks=false, % never draw the \cdot 10^4 labels
+        major tick style={draw=black},
+        xtick align=center,
+        ytick align=center,
+    },
+}
+\end{codeexample}
+\end{stylekey}
+
+
+\subsection{控制圆弧及其停止点}
+
+本节允许对史密斯圆图的圆弧（网格线）进行高级控制。|xgrid each nth passes y|
+与 |xgrid stop at y|（以及它们在 $y$ 方向上的对应项）这两个特性允许只绘制部分
+圆弧，从而获得更均匀的外观。
+
+\begin{pgfplotskey}{xgrid each nth passes y=\marg{list of stop entries} (initially empty)}
+    该键构成了“只绘制部分圆弧”的核心思想：你提供若干 $y$ 刻度坐标作为“边界”。
+    然后，只允许（例如）每隔一条的 $x$ 网格线穿过这些边界：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{smithchart}[
+    xtick={0.2,0.5,1,2,5},
+    ytick={
+        0,
+         0.2, 0.5, 1, 2, 5,
+        -0.2,-0.5,-1,-2,-5
+    },
+    xgrid each nth passes y={1,2},
+]
+\end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    该例子覆盖了 |default smithchart tick|，以定义新的布局：现在，每条 |ytick|
+    使用完整圆弧，但 |xtick| 的某些网格线在 $y=1$ 处停止，而若它们继续延伸，
+    则可能在 $y=2$ 处停止。
+
+    参数 \meta{list of stop entries} 是以逗号分隔的条目列表。在最简单的情况下，
+    每个条目是一个 $y$ 坐标（它应当是出现在 |ytick| 列表中的坐标）。这种最简单的
+    情况表示“只允许每隔一条 $x$ 网格线穿过该 $y$ 的网格线”。第二种语法允许提供
+    一个自然数，形式为 \meta{y coord}|:|\meta{number}。这表示只允许每隔第
+    \meta{number} 条 $x$ 网格线穿过指定的 $y$ 网格线。第三种语法还允许写
+    |if < |\meta{x value}。它表示该条目仅适用于小于 \meta{x value} 的 $x$ 网格线。
+    总结起来，条目有三种可能形式：
+    %
+    \begin{enumerate}
+        \item 单个 $y$ 坐标，例如 |xgrid each nth passes y={1,2}|；或
+        \item 与上面相同，后接一个整数，例如
+            |xgrid each nth passes y={1:3,2:2}|；或
+        \item 附加限制子句，如 |xgrid each nth passes y={0.2 if <0.3}|。
+
+            在这种情况下，所有满足 $x \le 0.3$ 的 $x$ 网格线都会被检查是否允许
+            穿过 $y=0.2$。所有 $x > 0.3$ 的 $x$ 网格线不受此约束影响。应用示例见
+            |dense smithchart ticks| 样式。
+    \end{enumerate}
+
+    注意，|xgrid each nth passes y| 总是利用对称性；你无需同时提供 $y$ 与 $-y$
+    （若希望如此，可以使用 |xgrid stop at y| 键来推翻“每隔第 n 条”策略）。
+
+    为了判断给定的 |xtick| 参数是否为“第 n 条”网格线，\PGFPlots{} 将所有
+    |xtick| 与 |minor xtick| 参数收集到\emph{一个}大数组中并排序。然后，它使用所得
+    序列分配索引。因此，你可以自由混用主刻度与次刻度；仍然有效。影响计数的唯一
+    方式是 |xgrid each nth passes y start| 键，见下文。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{ygrid each nth passes x=\marg{list of stop entries} (initially empty)}
+    你可能已经猜到，这是 |xgrid each nth passes y| 在 $y$ 方向上的对应项。
+    它通过提供的 $x$ 刻度来限制 $y$ 网格线的圆弧：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{smithchart}[
+    xtick={0.2,0.5,1,2,5},
+    ytick={
+        0,
+         0.2, 0.5, 1, 2, 5,
+        -0.2,-0.5,-1,-2,-5
+    },
+    ygrid each nth passes x={0.2,1:2},
+]
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    语法与 |xgrid each nth passes y| 中解释的完全相同。唯一差别在于：|if <|
+    语法使用绝对值 $|y|$（以保持对称）。
+\end{pgfplotskey}
+
+现在，我们已经知道如何\emph{分别}使用 |xgrid each nth passes y| 与对应的
+|ygrid each nth passes x|。能否同时使用这两个键？可以——但线条可能终止于空白处！
+\PGFPlots{} 会应用一些逻辑，将圆弧延伸到下一个可行停止点，以避免圆弧终止于
+空白处。因此，混合使用这两个键的结果会被自动修正。
+
+\begin{pgfplotskeylist}{%
+    xgrid each nth passes y start=\marg{integer} (initially 0),
+    ygrid each nth passes x start=\marg{integer} (initially 0)%
+}
+    允许修改“每隔第 n 条”计数的起始位置。该参数可视为一个偏移量。我认为该键
+    多少带有实验性质——希望它有用。请尝试一下。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    xgrid stop at y=\marg{list} (initially empty),
+    ygrid stop at x=\marg{list} (initially empty)%
+}
+    这些键允许为显式选择的刻度位置提供\emph{单独的}停止点。这些显式停止点的
+    优先级高于上文所述的“每隔第 n 条”特性。
+
+    |ygrid stop at x| 键接受以逗号分隔的条目列表 \meta{y coord}|:|\meta{x stop point}：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{smithchart}[
+    ygrid stop at x={0.5:0.5,-0.2:0.2}
+]
+    \end{smithchart}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 在本例中，$y=0.5$ 的圆弧在 $x=0.5$ 的圆弧处停止，而 $y=-0.2$ 的
+    圆弧在 $x=0.2$ 处停止。
+
+    |ygrid stop at x| 键允许非对称布局（$y$ 与 $-y$ 使用不同的停止点）。
+\end{pgfplotskeylist}
+\endgroup

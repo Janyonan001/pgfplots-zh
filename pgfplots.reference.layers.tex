@@ -1,0 +1,247 @@
+
+\section{图层}
+
+{
+\tikzset{external/figure name/.add={}{layers_}}
+
+重要的是，坐标轴的几个部分绘制在其他部分“之上”。通常，\PGFPlots{} 通过以适当的顺序绘制它们来确保这一点（通常是背景，然后是网格线，然后是刻度线和刻度标签，然后是图，最后是坐标轴描述）。虽然这在大多数情况下效果合理，但在某些情况下需要更多控制。一个常见用例是如果多个坐标轴应绘制到同一图片中：这里，上面的顺序应同时应用于所有涉及的坐标轴。
+
+
+\subsection{概要}
+
+本节是在 \PGFPlots{} 中使用和自定义分层图形的技术参考。因此，它读起来比较难。
+
+对于大多数用途，以下内容对你来说\emph{完全}足够：如果你想启用分层图形，将以下语句放入应具有分层图形的 |tikzpicture| 中：
+
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+        \pgfplotsset{set layers}
+    \begin{axis}
+        ...
+    \end{axis}
+
+    % perhaps a second axis which should use the same layers?
+    \begin{axis}
+        ...
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+\noindent 这会为该特定 |tikzpicture| 启用分层图形。
+
+如果你在同一图片中有多个坐标轴，或者对你的图有特定需求，你可能需要分层图形。
+
+如果你想将坐标轴的特定元素移动到不同图层，请考虑阅读 |on layer|。
+
+
+\subsection{使用预定义图层}
+
+用 \PGFPlots{} 控制分层图形的主要键是 |set layers|：
+
+\pgfkeys{
+    /pgfmanual/gray key prefixes/.add={/pgfplots/layers/,}{},
+}
+
+\begin{pgfplotskey}{set layers=\mchoice{none,\normalfont\meta{layer configuration name}} (initially none)}
+   此键为当前坐标轴或所有后续坐标轴启用分层图形。
+
+   启用分层图形的效果是，图形元素给出的顺序与它们绘制的顺序无关。主要好处是如果你在同一图中有多个坐标轴：这些坐标轴可以共享相同的图层。
+
+   调用 |set layers=none| 禁用分层图形。
+
+   调用 |set layers|（没有等号也没有参数）与你写 |set layers=||default| 相同。
+
+   在所有其他情况下，|set layers| 期望一个 \meta{layer configuration name}。有两个预定义配置可用（前缀 |/pgfplots/layers/| 是可选的）：
+
+   \begin{pgfplotskey}{layers/standard}
+       一个图层配置，它定义图层 \texttt{axis background}、\texttt{axis grid}、\texttt{axis ticks}、\texttt{axis lines}、\texttt{axis tick labels}、\texttt{main}、\texttt{axis descriptions}、\texttt{axis foreground}。它们按出现顺序绘制。
+   \end{pgfplotskey}
+
+   \begin{pgfplotskey}{layers/axis on top}
+       一个图层配置，它使用与 |layers/standard| 相同的图层名称，但具有不同的顺序：\texttt{axis background}、\texttt{main}、\texttt{axis grid}、\texttt{axis ticks}、\texttt{axis lines}、\texttt{axis tick labels}、\texttt{axis descriptions}、\texttt{axis foreground}。
+
+        如果键 |axis on top| 与 |set layers=|\meta{any layer configuration name} 一起使用，则自动使用此图层。
+   \end{pgfplotskey}
+
+    一旦遇到键 |set layers=|\meta{layer configuration name}，\PGFPlots{} 就启动 \pgfname{} 命令 |\pgfsetlayers|\marg{layer names}，使用相应配置的图层名称。通常，这会\emph{替换}嵌入 |tikzpicture| 的当前图层配置。此外，|set layers| 存储 \meta{layer configuration name} 的名称，以便每个后续 |axis| 知道如何将图形元素映射到图层名称。
+
+    与调整 \PGFPlots{} 的任何其他键相比，有一个巨大区别：图层配置是完整 |tikzpicture| 的属性，而任何其他选项仅影响坐标轴对象及其内容。然而，图层影响嵌入图片的每个图形元素。由于此属性，图层配置需要在几个支持的位置之一给出：
+    %
+    \begin{enumerate}
+        \item\label{en:layers_directly} 直接在图片内：
+            %
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+        \pgfplotsset{set layers=default}
+    \begin{axis}
+        ...
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+            \noindent 此选项明确告诉你源代码的读者，你的图片的重要部分已被更改：完整图片具有并使用 \meta{layer configuration name}（在此情况下为 |default|）。
+        \item 作为直接在图片内的一个或多个坐标轴的选项：
+            %
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+    \begin{axis}[set layers]
+        ...
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+            这里，\PGFPlots{} 隐式地将其图层配置传达给包围的 |tikzpicture|。因此，|set layers| 的效果\emph{不是坐标轴局部的}；它持续到 |\end{tikzpicture}|。任何其他选项仅持续到 |\end{axis}|。
+
+            在这种情况下，只有\emph{最后一个}激活的图层配置将应用于图片。
+
+            \paragraph{限制：不允许环境或局部 \TeX{} 组。}
+
+            如本手册示例中的标准用法始终有效。但由于图层名称配置本质上是 \PGF{} 图片的一部分（在底层），不能任意设置它们；如果它们在某些嵌套 \TeX{} 组或 \LaTeX{} 环境中被更改，\PGF{} 会抱怨。通常，你永远不需要担心这个。
+
+            简而言之，以下示例\emph{被禁止}，因为坐标轴在局部嵌套组内。
+            %
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+    {% FORBIDDEN! Consider using case (1) above!
+        \begin{axis}[set layers]
+            ...
+        \end{axis}
+    }
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+    \begin{scope} % FORBIDDEN! Consider using case (1) above!
+        \begin{axis}[set layers]
+            ...
+        \end{axis}
+    \end{scope}
+\end{tikzpicture}
+\end{codeexample}
+            %
+            \noindent 这些示例被禁止，因为图层配置将被第一个禁止示例的 `|}|' 和第二个示例的 `|\end{scope}|' 清除。一个解决方案是使用不同的放置选项之一（即选项 \ref{en:layers_directly} 或 \ref{en:layers_outside}）。
+        \item\label{en:layers_outside} 在任何图片之外：
+            %
+\begin{codeexample}[code only]
+\pgfplotsset{set layers=default}
+\begin{tikzpicture}
+    \begin{axis}
+        ...
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+            \noindent 此选项为\emph{每个}后续 |tikzpicture| 配置图层配置。
+    \end{enumerate}
+
+
+    \paragraph{限制：坐标轴对齐限于内部锚点。}
+
+    这仅在你更改了 |anchor| 的默认值（即 |anchor=south west|）时适用。任何使用分层图形的坐标轴应使用以下 |anchor| 值之一：|north|、|north west|、|west|、|south west|、|south|、|south east|、|east|、|north east|、|north|、|center|、|origin|、|above origin|、|left of origin|、|right of origin|、|below origin|。如果你确实需要另一个锚点，\PGFPlots{} 要求使用 |cell picture=true|，使图层对该特定坐标轴是局部的。
+
+    此限制的技术背景是一个先有鸡还是先有蛋的问题：外部锚点（如 |outer south west|）仅在完整坐标轴生成\emph{之后}可用——而图层只能在每条绘图指令发出之后绘制。进一步阅读的技术键是 |cell picture=false| 或 |cell picture=if necessary|（其中一个对分层图形处于活动状态）。
+\end{pgfplotskey}
+
+\begin{command}{\pgfplotssetlayers}
+    |\pgfplotsset{set layers}| 的别名。它激活 |layers/default| 图层配置。
+\end{command}
+
+\begin{command}{\pgfplotssetlayers\allowbreak\marg{layer configuration name}}
+    |\pgfplotsset{set layers=|\marg{layer configuration name}|}| 的别名。
+\end{command}
+
+\begin{handler}{{.define layer set}=\marg{ordered layer names}\marg{style definitions}}
+    允许定义一个名为 \meta{key} 的新图层集配置。之后，\meta{key} 可以作为 |set layers| 的参数如下指定：
+    %
+    \begin{itemize}
+        \item 如果 \meta{key} 具有类型 |/pgfplots/layers/|\meta{name}，你可以写 |set layers=|\meta{name}。
+
+            示例：|/pgfplots/layers/my layers/|\allowbreak|.define layer set=|$\cdots$\linebreak
+            可以通过简写记法 |set layers=my layers| 激活。
+        \item 如果 \meta{key} 是任意键路径，|set layers| 期望完全限定的 \meta{key} 名称。
+
+            示例：|/user/my layers/.define layer set=|$\cdots$
+            可以通过完整值 |set layers=/user/my layers| 激活。
+    \end{itemize}
+
+    第一个参数 \meta{ordered layer names} 是逗号分隔的图层名称列表。名称是任意的，并且会为每个遇到的参数调用 |\pgfdeclarelayer|。\footnote{更准确地说：\texttt{set layers} 在使用 \meta{ordered layer names} 时调用 \texttt{\textbackslash pgfdeclarelayer}。}只有一个“神奇”名称：图层 |main| 应是每个 \meta{ordered layer names} 的一部分，因为它将包含不与特定图层关联的每个图形元素。
+
+    第二个参数 \meta{style definitions} 包含选项——就像你写了 \meta{key}|/.style=|\marg{style definitions} 一样。\meta{style definitions} 应包含 \PGFPlots{} 样式重定义，这些重定义利用 \meta{ordered layer names} 的每个遇到的元素。这最好通过示例解释：|layers/standard| 图层配置由以下定义
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    layers/standard/.define layer set={
+        axis background,axis grid,axis ticks,axis lines,axis tick labels,
+        pre main,main,axis descriptions,axis foreground
+    }{
+        grid style=         {/pgfplots/on layer=axis grid},
+        tick style=         {/pgfplots/on layer=axis ticks},
+        axis line style=    {/pgfplots/on layer=axis lines},
+        label style=        {/pgfplots/on layer=axis descriptions},
+        legend style=       {/pgfplots/on layer=axis descriptions},
+        title style=        {/pgfplots/on layer=axis descriptions},
+        colorbar style=     {/pgfplots/on layer=axis descriptions},
+        ticklabel style=    {/pgfplots/on layer=axis tick labels},
+        axis background@ style={/pgfplots/on layer=axis background},
+        3d box foreground style={/pgfplots/on layer=axis foreground},
+    },
+}
+\end{codeexample}
+    %
+    \noindent 此声明声明了几个图层，并通过添加 |on layer| 命令调整 \PGFPlots{} 样式。|on layer| 的参数是 \meta{ordered layer names} 的元素。
+
+    请注意，如果你在 \meta{ordered layer names} 中有一个元素在 \meta{style definitions} 内部从未被引用，此图层将始终为空。换句话说：对 \meta{ordered layer names} 中名称的\emph{唯一}引用是 \meta{style definitions}，\PGFPlots{} 没有硬编码的神奇图层名称（如上面解释的 |main| 除外）。
+
+    由于第二个参数 \meta{style definitions} 将 \meta{key} 定义为普通样式键，可以简单地使用 \meta{key} 来设置 \meta{style definitions}。这允许继承它们。例如，|layers/axis on top| 图层配置通过以下方式定义
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/layers/axis on top/.define layer set={
+        axis background,pre main,main,axis grid,axis ticks,axis lines,
+        axis tick labels,axis descriptions,axis foreground
+    }{/pgfplots/layers/standard},
+}
+\end{codeexample}
+    %
+    \noindent 即它仅重定义图层的\emph{顺序}并重用 |layers/standard| 的样式定义。
+
+    可以定义任意数量的图层配置。
+\end{handler}
+
+
+\subsection{更改图形元素的图层}
+
+有几个键可更改图形元素的图层。
+
+\begin{pgfplotskey}{on layer=\marg{layer name}}
+    在 \PGFPlots{} 样式中的某处或 \PGFPlots{} 坐标轴内部提供此键，将更改该样式适用的所有图形元素的图层。
+
+    例如，
+    %
+\begin{codeexample}[code only]
+...
+\begin{axis}[set layers,grid style={/pgfplots/on layer=axis foreground}]
+...
+\end{codeexample}
+    %
+    \noindent 将把任何网格线的图层更改为 |axis foreground|。
+
+    参数 \meta{layer name} 应为当前图层配置的一部分，即 |set layers| 的参数应包含它。
+
+    请注意，如果你有两个具有不同 |on layer| 值的\emph{图}，你可能还需要启用 |clip mode=individual| 或使用 |clip=false| 完全停用裁剪。裁剪选项需要作为坐标轴的选项提供，而不是图的选项。技术背景是，裁剪路径需要为绘图应发生的图层复制——否则它们将应用于错误的图层。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{mark layer=\mchoice{auto,like plot,\meta{layer name}} (initially auto)}
+    一个高级键，用于定义绘图 |mark| 的图层。通常最好将其保留在 |auto|。
+
+    如果你写 |\addplot[on layer=|\meta{layer name}|]|，该图层将用于完整图。绘图标记被特殊处理，因此你可以为绘图标记定义自己的图层。
+
+    初始选项 \declaretext{auto} 将自动定义一个“合适的”选项，将责任留给 \PGFPlots{}。这里，“合适的”意味着以某种方式遵守 |clip mode| 和 |clip marker paths|，使得绘图标记不会被裁剪，即使你的图的默认图层会被裁剪。
+
+    选项 \declaretext{like plot} 将标记打包到与其所属图相同的图层上。这可能导致标记被裁剪，即如果标记靠近坐标轴边界，它们仅被部分显示。
+
+    最后，可以提供任何 \meta{layer name}，就像 |on layer| 一样——但该图层可以与用于图的图层不同。
+\end{pgfplotskey}
+
+}

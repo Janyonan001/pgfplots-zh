@@ -1,0 +1,6 @@
+xelatex -shell-escape pgfplots.tex
+makeindex pgfplots
+xelatex -shell-escape pgfplots.tex
+bibtex pgfplots
+xelatex -shell-escape pgfplots.tex
+xelatex -shell-escape pgfplots.tex

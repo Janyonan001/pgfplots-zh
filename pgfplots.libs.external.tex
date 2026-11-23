@@ -1,0 +1,21 @@
+
+\section{图像外部化导出}
+
+\begingroup
+\def\pgfplotsmanualcurlibrary{external}
+
+\begin{pgfplotslibrary}{external}
+    |external| 库提供了一种便捷方式，可将每个单独的 |tikzpicture| 导出为独立的
+    ~|.pdf|（或~|.eps|）文件。后续 \LaTeX{} 编译时将直接引入这些图像，从而大幅
+    缩短排版时间。
+
+    本库的更多细节见第~\ref{sec:pgfplots:export} 节“导出为 {\pdf/\eps}”。
+
+    |external| 库由 Christian Feuersänger（\PGFPlots 作者）编写。它已作为通用库
+    贡献给 \Tikz{}，因此完整的参考文档及全部可调参数可在
+    ~\cite[第 ``Externalization Library'' 节]{tikz} 中找到。命令
+    |\usepgfplotslibrary{external}| 实际上只是一个包装，它会加载
+    |\usetikzlibrary{external}|；若安装的 \pgfname{} 版本至多为 2.00 而该库尚不存在，
+    则会加载 \PGFPlots{} 自带的副本。
+\end{pgfplotslibrary}
+\endgroup

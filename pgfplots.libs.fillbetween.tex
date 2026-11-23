@@ -1,0 +1,1346 @@
+
+\section{区间填充}
+\label{sec:fillbetween}
+
+\begin{pgfplotslibrary}{fillbetween}
+    |fillbetween| 库允许填充两条任意具名图之间的区域。它还能识别交点处的分段，
+    并单独填充各段。
+\end{pgfplotslibrary}
+
+\begingroup
+\def\pgfplotsmanualcurlibrary{fillbetween}
+\pgfkeys{
+    /pgfmanual/gray key prefixes/.add={/tikz/fill between/,}{},
+    /pdflinks/search key prefixes in/.add={/tikz/fill between/,}{},
+}
+
+
+\subsection{填充一个区域}
+
+\begin{addplotoperation}[]{fill between}{%
+    [\marg{options defined with prefix \normalfont\texttt{/tikz/fill between}}]
+}
+    一种特殊绘图操作，接受两条具名路径作为输入，并生成一条或多条路径，呈现输入
+    路径之间的填充区域。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,domain=0:1,samples=2] {x};
+
+    \addplot+ [name path=B] table {
+        x   y
+        0   2
+        0.5 -1
+        1   3
+    };
+
+    \addplot fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    操作 |fill between| 在
+    \meta{options defined with prefix \normalfont\texttt{/tikz/fill between}}
+    内至少需要一个输入键：以 |of=|\meta{first}| and |\meta{second} 形式给出的两条
+    相关路径。这里，\meta{first} 与 \meta{second} 都需要用 |name path|（或
+    |name path global|）定义。参数可以交换，\footnote{注意，某些选项显式引用第一
+    条或第二条输入路径。这些选项已相应文档化。}
+    即 |of=B and A| 会得到相同效果。
+
+    参数 \meta{options defined with prefix
+    \normalfont\texttt{/tikz/fill between}} 可包含任意数量带 |/tikz/fill between|
+    前缀的选项。注意，此前前缀是为参考手册而设，你无需键入此前缀。这排除了
+    |fill=orange| 等绘图选项；这些选项应作为 \meta{options} 给出（或放在
+    |every segment| 等样式内）。允许的选项包括 |of|、|split|、|soft clip|，以及
+    |every segment| 及其相关项的样式定义，即那些定义要获取哪些路径以及在可视化
+    前如何处理它们的选项。
+
+    |fill between| 操作接受两条输入路径，分析其方向（即其坐标是否沿 $x$ 方向
+    递增给出？），连接它们，并生成一条 |fill| 路径。
+
+    如上所述，输入路径需要预先定义（不支持前向引用）。若你手动生成填充路径，
+    你会在其他路径\emph{之前}绘制它，使其不重叠。这由 \PGFPlots{} 隐式完成：
+    一旦 \PGFPlots{} 遇到 |fill between| 图，它就会激活分层图形。填充路径将放在
+    层 \declareandlabel{pre main} 上，它位于主层与背景层之间。
+
+    |fill between| 操作就像普通图一样：它使用 |cycle list|，即它获得默认绘图
+    样式。我们上面的第一个例子使用默认 |cycle list|，它有棕色。我们可以像其他
+    任何图一样，通过在方括号中添加选项轻松重定义外观：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [blue,name path=A,domain=0:1] {sqrt(x)};
+
+    \addplot [red, name path=B,domain=0:1] {sqrt(x/2)};
+
+    \addplot [gray] fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，数据点数不限制 |fill between|。特别地，你可以轻松组合不同参数。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [blue,name path=A,domain=0:1]
+        {sin(360*x)};
+
+    \addplot [red, name path=B,domain=0:1,samples=2]
+        {0.5};
+
+    \addplot [orange] fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    若一个或两个图使用 |smooth| 插值，也可以组合输入图：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+  \addplot+ [name path=A,samples=7,smooth,domain=0:1]
+        {sin(360*x)};
+
+  \addplot+ [name path=B,samples=15,domain=0:1]
+        {cos(360*x)};
+
+  \addplot [orange] fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    实际上，|fill between| 路径直接操作底层输入路径段。因此，它更接近 \Tikz{}
+    装饰，而非图；仅其用例（图例、样式、分层）按图使用定制。但是，输入路径可以
+    是路径和/或图。下面的例子组合了一个 |\addplot| 和一个 |\path|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[ymin=-0.2,enlargelimits]
+    \addplot+ [name path=A,smooth]
+        coordinates {(0,0) (1,1) (2,0)};
+
+    \path [name path=B]
+        (0.5,-0.2) -- (1.8,-0.2);
+
+    \addplot [orange] fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    如上所述，|fill between| 直接接受两条输入路径，并将它们组合成一个填充段。
+    为此，它连接两条路径的端点。这在上面的例子中可见：名为 `|B|' 的路径与
+    `|A|' 有不同的 $x$ 坐标，并导致梯形输出。
+
+    下面是另一个例子，其中图与普通路径通过 |fill between| 组合。注意，|\draw|
+    路径使用路径 `|A|' 的节点生成。在这种情形下，我们可能想只填充第二段，
+    这也是可行的，见下文 |split|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,samples=15,domain=0:1]
+        {cos(360*x)}
+            coordinate [pos=0.25] (nodeA0) {}
+            coordinate [pos=0.75] (nodeA1) {};
+
+    \draw [name path=B]
+        (nodeA0) -- (nodeA1);
+
+    \addplot [orange] fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    |fill between| 图在以下方面与其他绘图操作不同：
+    %
+    \begin{enumerate}
+        \item 它没有自己的标记，也没有 |nodes near coords|。但是，其输入路径
+            可以两者都有。
+        \item 它不支持 |pos| 节点。但是，其输入路径可以像往常一样带任意标注。
+        \item 它不支持误差棒。同样，其输入路径支持 \PGFPlots{} 为图提供的
+            功能。
+        \item 它不能堆叠（其输入图当然可以）。
+    \end{enumerate}
+
+    注意，更多例子还可见于
+    第~\ref{sec:fillbetween:in:area:plots} 节（第~\pageref{sec:fillbetween:in:area:plots} 页），
+    该节覆盖区域图，并包含大量 |fill between| 示例。
+\end{addplotoperation}
+
+
+\subsection{填充区域的不同段}
+
+\begin{tikzkey}{fill between/split=\mchoice{true,false} (initially false)}
+    激活生成多于一个输出段。
+
+    初始选择 |split=false| 相当快速且稳健，它简单地拼接输入路径，并恰好生成
+    \emph{一}个输出段。
+
+    选择 |split=true| 会计算两条曲线的每个交点（借助 |tikz| 库 |intersections|）。
+    然后，每个结果段产生一条独立的绘图指令。
+
+    选择 |split=false| 是默认值，上面已用各种例子说明。
+
+    选择 |split=true| 与各种样式配合时非常有用。例如，我们可以使用
+    |every odd segment| 为每个奇数段选择不同颜色：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,samples=7,smooth,domain=0:1]
+        {sin(360*x)};
+
+    \addplot+ [name path=B,samples=15,domain=0:1]
+        {cos(360*x)};
+
+    \addplot [orange] fill between [of=A and B,
+        split,
+        every odd segment/.style={yellow},
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    类似地，我们可以使用 |every segment no| 分别为各区域设置样式：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,samples=15,
+        smooth,domain=0:1] {sin(720*x)};
+
+    \path [name path=B]
+            (\pgfkeysvalueof{/pgfplots/xmin},0)
+        --  (\pgfkeysvalueof{/pgfplots/xmax},0)
+    ;
+
+    \addplot fill between [of=A and B,
+        split,
+        every segment no 0/.style=
+          {orange},
+        every segment no 1/.style=
+          {pattern=north east lines},
+        every segment no 2/.style=
+          {pattern=north west lines},
+        every segment no 3/.style=
+          {top color=orange, bottom color=blue},
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    |split| 选项让我们可以回看之前的例子，其中我们只想绘制其中一段：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,samples=15,domain=0:1]
+        {cos(360*x)}
+            coordinate[pos=0.25] (nodeA0)
+            coordinate[pos=0.75] (nodeA1)
+    ;
+
+    \draw [name path=B] (nodeA0) -- (nodeA1);
+
+    \addplot [fill=none] % default: fill none
+        fill between [of=A and B,
+            split,
+            % draw only selected ones:
+            % every segment no 0/.style: invisible
+            every segment no 1/.style={fill,orange},
+            % every segment no 2/.style: invisible
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    每个段产生一条独立的 |\fill| 指令，即每个段都是自己独立的路径。这允许使用
+    所有可能的 \Tikz{} 路径操作，包括 |pattern|、|shade| 或 |decorate|。
+    %
+\begin{codeexample}[]
+% requires
+% \usetikzlibrary{decorations.markings,shapes.arrows}
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,domain=0:1,samples=2] {x};
+
+    \addplot+ [name path=B] table {
+        x y
+        0 2
+        0.5 -1
+        1 3
+    };
+
+    \addplot fill between [of=A and B,
+        split,
+        every even segment/.style={
+            postaction={decorate},
+            decoration={
+                markings,
+                mark=between positions 0 and 1
+                  step 1cm with {
+                    \node [single arrow,fill=orange,
+                        single arrow head extend=3pt,
+                        transform shape]
+                    {};
+                },
+            },
+        },
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{tikzkey}
+
+
+\subsection{仅填充图下部分（裁剪）}
+
+\begin{tikzkeylist}{%
+    fill between/soft clip=\meta{argument},
+    fill between/soft clip first=\meta{argument},
+    fill between/soft clip second=\meta{argument}%
+}
+    在两条或仅一条相关路径上安装“软裁剪”。软裁剪意味着修改输入路径，使其遵守
+    裁剪区域。
+
+    在默认配置下，|fill between| 连接两条相关路径的起点/终点。
+
+    这通常是你想要的，但也有使用情形只应填充输入路径之间的\emph{部分}：假设
+    我们有 $f(x)=x^2$，且想填充区间 $[3,5]$ 下方。情形“填充下方”意味着在我们的
+    函数与 $x$ 轴之间填充：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,domain=0:5] {x^2};
+
+    \path [name path=B]
+        (\pgfkeysvalueof{/pgfplots/xmin},0) --
+        (\pgfkeysvalueof{/pgfplots/xmax},0);
+
+    \addplot [orange] fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 显然，我们填充得太多了。一种解决方案可能是缩短路径 |B| —— 但那样
+    仍会用缩短的线连接 $f(x)$ 的左右端点。
+
+    这正是 |soft clip| 的用武之地：我们可以通过安装软裁剪路径来选择感兴趣区域：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,domain=0:5] {x^2};
+
+    \path [name path=B]
+        (\pgfkeysvalueof{/pgfplots/xmin},0) --
+        (\pgfkeysvalueof{/pgfplots/xmax},0);
+
+    \addplot [orange] fill between [
+        of=A and B,
+        soft clip={domain=3:5},
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    软裁剪与裁剪类似。事实上，我们本可以安装一条裁剪路径达到相同效果。\footnote{
+    安装裁剪路径可能需要调整图层：\texttt{fill between} 位于层 \texttt{pre main}，
+    而裁剪路径需要在同一层上。}
+    但是，软裁剪会产生一条新路径，它知道边界。因此，装饰会正确，而不会因裁剪
+    丢失图像部分：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,domain=0:5] {x^2};
+
+    \path [name path=B]
+        (\pgfkeysvalueof{/pgfplots/xmin},0) --
+        (\pgfkeysvalueof{/pgfplots/xmax},0);
+
+    \addplot[
+        orange,
+        decorate,decoration={
+            footprints,
+            foot of=bird,
+            stride length=15pt,
+            foot sep=2pt,
+            foot length=6pt,
+        },
+    ]
+    fill between [
+        of=A and B,
+        soft clip={domain=3:5},
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    特性 |soft clip| 是 |fill between| 的一部分，因为它决定填充路径。
+
+    \meta{argument} 可以是下列项之一：
+    %
+    \begin{itemize}
+        \item 它可以形如 \declaretext{domain}|=|\meta{xmin}|:|\meta{xmax}。
+            此选择等价于
+
+            |(|\meta{xmin}|,\pgfkeysvalueof{/pgfplots/ymin}) rectangle |
+
+            |(|\meta{xmax}|,\pgfkeysvalueof{/pgfplots/ymax})|。
+        \item 它可以形如 \declaretext{domain
+            y}|=|\meta{ymin}|:|\meta{ymax}。此选择等价于
+
+            |(\pgfkeysvalueof{/pgfplots/xmin},|\meta{ymin}|) rectangle |
+
+            |(\pgfkeysvalueof{/pgfplots/xmax},|\meta{ymax}|)|。
+        \item 它可以是
+            |(|\meta{x}|,|\meta{y}|) rectangle (|\meta{X}|,|\meta{Y}|)|。
+            此时，它是由给定点定义的矩形。
+        \item 它可以是具名路径的名字，即若存在 |name path=A| 的路径，
+            则 |soft clip=A|。
+
+            此时，该具名路径必须“相当简单”。特别地，它应是凸的，比如矩形、
+            圆或某种云形。它也应是闭合的。
+    \end{itemize}
+    %
+    无论哪种情况，软裁剪路径应\emph{大于}它所作用的路径。请避免无穷多交点。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \draw [help lines,name path=clippath]
+        (0,-5) -- (-5,0) --
+        (2,4) -- (4,-4) --cycle;
+
+    \addplot+ [name path=A] {x};
+
+    \draw [red,name path=B]
+        (0,\pgfkeysvalueof{/pgfplots/ymin}) --
+        (0,\pgfkeysvalueof{/pgfplots/ymax});
+
+    \addplot[gray!50] fill between [
+        of=A and B,
+        soft clip={clippath}
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 上面的例子定义了三条具名路径：路径 |A| 是 $f(x) = x$。具名路径
+    |clippath| 用作裁剪路径，它是某种旋转的矩形形式。最后，名为 |B| 的路径是
+    一条直线 —— 我们用给定的 |clippath| 在 |A| 与 |B| 之间填充。
+
+    选择 \declareandlabel{soft clip first} 仅将裁剪路径应用于第一条输入路径
+    （我们例子中的“|A|”）。
+
+    选择 \declareandlabel{soft clip second} 仅将裁剪路径应用于第二条输入路径
+    （我们例子中的“|B|”）。
+
+    最后，\declareandlabel{soft clip} 将裁剪路径应用于两条输入路径。
+    %
+\begin{codeexample}[]
+% requires \usepgfplotslibrary{fillbetween}
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [name path=A,domain=0:5] {x^2};
+
+    \path [name path=B]
+        (\pgfkeysvalueof{/pgfplots/xmin},0) --
+        (\pgfkeysvalueof{/pgfplots/xmax},0);
+
+    \addplot [gray] fill between [
+        of=A and B,
+        soft clip={
+            (3,-1) rectangle (4,100)
+        },
+    ];
+    \addplot [gray!30] fill between [
+        of=A and B,
+        soft clip={
+            (2,-1) rectangle (3,100)
+        },
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，还有一个独立模块可对单条路径施加软裁剪。为此，可使用
+    |decoration=soft clip|。一个用例可能是高亮输入路径的部分：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [name path=A,domain=0:5,
+        postaction={decorate,red,thick},
+        decoration={
+            soft clip,
+            soft clip path={domain=3:5},
+        },
+    ] {x^2};
+
+    \path [name path=B]
+        (\pgfkeysvalueof{/pgfplots/xmin},0) --
+        (\pgfkeysvalueof{/pgfplots/xmax},0);
+
+    \addplot [orange] fill between [
+        of=A and B,
+        soft clip={
+            (3,-1) rectangle (5,100)
+        },
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，更多例子还可见于
+    第~\ref{sec:fillbetween:in:area:plots} 节（第~\pageref{sec:fillbetween:in:area:plots} 页），
+    该节覆盖区域图，并包含大量 |fill between| 示例。
+\end{tikzkeylist}
+
+
+\subsection{fill between 相关样式}
+
+\begin{stylekey}{/tikz/fill between/every segment}
+    为 |fill between| 生成的每个段安装的样式。
+
+    被安装样式的顺序为
+
+    |every segment|、|\addplot[|\meta{options}|] fill between| 之后提供的任意
+    \meta{options}、然后是相应的 |every segment no| \meta{index}、然后是
+    |every odd segment| 或 |every even segment| 之一，最后是
+    |every last segment|。
+\end{stylekey}
+
+\begin{stylekey}{/tikz/fill between/every odd segment}
+    为 |fill between| 生成的每个奇数段安装的样式。
+
+    \emph{注意：} 此样式仅在 |split| 激活时才有意义。
+
+    样式调用顺序见 |every segment|。
+\end{stylekey}
+
+\begin{stylekey}{/tikz/fill between/every even segment}
+    为 |fill between| 生成的每个偶数段安装的样式。
+
+    \emph{注意：} 此样式仅在 |split| 激活时才有意义。
+
+    样式调用顺序见 |every segment|。
+\end{stylekey}
+
+\begin{stylekey}{/tikz/fill between/every segment no \meta{index}}
+\pgfmanualpdflabel{/tikz/fill between/every segment no}{}%
+\pgfmanualpdflabel{/tikz/fill between/every segment no 0}{}%
+\pgfmanualpdflabel{/tikz/fill between/every segment no 1}{}%
+\pgfmanualpdflabel{/tikz/fill between/every segment no 2}{}%
+\pgfmanualpdflabel{/tikz/fill between/every segment no 3}{}%
+\pgfmanualpdflabel{/tikz/fill between/every segment no 4}{}%
+    为 |fill between| 生成的、具有指定索引 \meta{index} 的每个段安装的样式。
+
+    索引是从 $0$ 开始的数字（$0$ 用于第一段）。
+
+    \emph{注意：} 此样式仅在 |split| 激活时才有意义。
+
+    样式调用顺序见 |every segment|。
+\end{stylekey}
+
+\begin{stylekey}{/tikz/fill between/every last segment}
+    为 |fill between| 生成的每个\emph{最后}段安装的样式。
+\end{stylekey}
+
+\begin{command}{\tikzsegmentindex}
+    在生成 |\addplot fill between| 路径期间有效的命令。
+
+    它展开为段 \meta{index}，即与 |every segment no| \meta{index} 使用的相同值。
+
+    索引是从 $0$ 开始的数字（$0$ 用于第一段）。
+\end{command}
+
+\begin{stylekey}{/pgfplots/every fill between plot}
+    为每个 |\addplot fill between| 安装的样式。其默认值为
+    %
+\begin{codeexample}[code only]
+\pgfkeys{
+    /pgfplots/every fill between plot/.style={
+        /pgfplots/area legend,/tikz/fill},
+}
+\end{codeexample}
+\end{stylekey}
+
+
+\subsection{键参考}
+
+\begin{tikzkey}{fill between/of=\meta{first} and \meta{second}}
+    此键为必选。它定义应组合哪些路径。
+
+    参数是预先使用 |name path| 分配给路径或图的名字。具此两个名字的路径应位于
+    同一 |tikzpicture| 中。
+
+    |fillbetween| 库支持多种输入路径，即
+    %
+    \begin{itemize}
+        \item 函数图，即每个 $x$ 坐标至多有一个 $y$ 坐标，
+        \item 带中断的图，
+        \item 满足相同限制并以 |name path| 标记的 \Tikz{} 路径，
+        \item |smooth| 曲线或 |curveto| 路径，
+        \item 平滑与不平滑部分的混合。
+    \end{itemize}
+    %
+    但是，它对以下路径至多只有有限支持（或完全不支持）：
+    %
+    \begin{itemize}
+        \item 有自交点（即参数图可能成问题），
+        \item 坐标以奇怪的输入序列给出，
+        \item 由大量独立分离的子路径组成（如 |mesh| 或 |surf| 图）。
+    \end{itemize}
+
+    注意，输入路径不一定要以相同序列给出，见 |fill between/reverse|。
+\end{tikzkey}
+
+\begin{key}{/tikz/name path=\marg{name}}
+    \Tikz{} 指令，为路径或图分配名字。\footnote{注意，\tikzname{} 还知道
+    \texttt{name path global}。此键具有相同效果，并且是 \PGFPlots{} 环境内
+    \texttt{name path} 的别名。\index{name path global}}
+
+    这是为 |fill between/of| 定义输入参数所必需的。
+\end{key}
+
+\begin{tikzkey}{fill between/reverse=\mchoice{auto,true,false} (initially auto)}
+    配置 |of| 指定的输入路径是否需要反转，以得到合适的路径拼接。
+
+    初始选择 \declaretext{auto} 会自动处理。为此，它应用以下启发式：它比较每个
+    图的前两个坐标：若两图的 $x$ 坐标均按升序，则其中之一将被反转（若两者均按
+    降序也同样）。若一个升序、一个降序，则它们都不反转。若前两点的 $x$ 坐标相等，
+    则比较 $y$ 坐标。
+
+    选择 \declaretext{true} 总是反转其中一条相关路径。这适合两条路径方向相同的
+    情形（例如，两者都按 $x$ 递增顺序给出）。
+
+    选择 \declaretext{false} 不反转相关路径。这适合一条路径按 $x$ 递增顺序有
+    坐标而另一条按 $x$ 递减顺序有坐标的情形。
+
+    若 \PGFPlots{} 选错，则需要手动反转。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [blue,-stealth,name path=A] {x};
+
+    \draw [-stealth,name path=B]
+        (0,-5) -- (0,5);
+
+    \addplot [gray!50]
+        fill between [of=A and B,reverse=true];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    在此情形下，我们选择了 |reverse=true|。这本质上等价于指令
+    %
+    \begin{itemize}
+        \item 使用路径 |A|
+        \item 追加反转后的路径 |B|
+        \item 填充结果。
+    \end{itemize}
+    %
+    换言之，它等价于基于 |intersection segments| 的下列路径构造：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[set layers]
+    \addplot [blue,-stealth,name path=A] {x};
+
+    \draw [-stealth,name path=B]
+        (0,-5) -- (0,5);
+
+    \pgfonlayer{pre main}
+        \fill [
+            gray!50,
+            intersection segments={
+                of=A and B,
+                sequence={A* -- B*[reverse]},
+            },
+        ];
+    \endpgfonlayer
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    这里，我们填充 |A| 与 |B| 的 |intersection segments|，取 |A| 的全部段
+    （以 |*| 指示）与 |B| 的全部段（反转顺序）。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [blue,-stealth,name path=A] {x};
+
+    \draw [-stealth,name path=B]
+        (0,-5) -- (0,5);
+
+    \addplot [gray!50] fill between [
+        of=A and B,
+        reverse=false,
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    在此情形下，我们选择了 |reverse=false|。这又可表达为
+    %
+    \begin{itemize}
+        \item 使用路径 |A|，
+        \item 与路径 |B| 连接，
+        \item 填充结果。
+    \end{itemize}
+    %
+    换言之，它类似下列 |intersection segments| 构造：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[set layers]
+    \addplot [blue,-stealth,name path=A] {x};
+
+    \draw [-stealth,name path=B]
+        (0,-5) -- (0,5);
+
+    \pgfonlayer{pre main}
+        \fill [
+            gray!50,
+            intersection segments={
+                of=A and B,
+                sequence={A* -- B*},
+            },
+        ];
+    \endpgfonlayer
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{tikzkey}
+
+\begin{tikzkey}{fill between/on layer=\marg{layer name} (initially pre main)}
+    定义 |\addplot fill between| 将绘制在哪一层上。\PGFPlots{} 定义层 |pre main|
+    紧接 |main| 层之前，并且 |pre main| 也是任何 |fill between| 路径的初始配置。
+
+    一旦你键入 |\addplot fill between|，\PGFPlots{} 会使用 |set layers| 激活
+    分层图形，使其自动工作。\PGFPlots{} 第一次遇到此层时还会安装裁剪路径。
+
+    将 \meta{layer name} 设为空字符串以停用 |fill between| 的特殊层支持。
+
+    注意，|set layers| 的自动激活与 |clip| 路径的安装是针对 |\addplot fill between| 完成的，而非针对 |\tikzfillbetween| 或 |intersection segments|
+    等更底层绘图指令。若你需要它们，必须手动使用 |set layers|（若在坐标轴内）
+    或 |\pgfsetlayers| 安装层列表。坐标轴的裁剪路径可手动使用下列代码安装
+    %
+\begin{codeexample}[code only]
+\pgfplotsextra{
+    \pgfonlayer{pre main}
+    \pgfplotspathaxisoutline
+    \pgfusepath{clip}
+    \endpgfonlayer
+}
+\end{codeexample}
+    %
+    （万一真有必要）。
+\end{tikzkey}
+
+\begin{tikzkey}{fill between/inner moveto=\mchoice{connect,keep} (initially connect)}
+    有时输入路径包含开头的 moveto 操作\emph{以及}一些内部 moveto。此键配置如何
+    处理它们。
+
+    初始选择 \declaretext{connect} 用 lineto 操作替换它们（并连接它们）。\footnote{
+    注意，\texttt{inner moveto=connect} 的实际实现更复杂：它还会去重多个相邻
+    moveto，并消除路径末尾的“空”moveto 操作（即后面不跟任何路径操作的 moveto）。}
+
+    选择 \declaretext{keep} 保留它们。
+
+    通常，fill between 需要初始选择 |connect|，因为它能处理中断的路径：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+
+    \addplot [blue,ultra thick,name path=A,
+        jump mark left] {x};
+
+    \path [name path=B]
+        (-5,0) -- (5,0);
+
+    \addplot [top color=red, bottom color=white]
+        fill between [of=A and B];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{tikzkey}
+
+
+\subsection{交点段重组}
+
+{%
+\pgfkeys{
+    /pgfmanual/gray key prefixes/.add={/tikz/segments/,}{},
+    /pdflinks/search key prefixes in/.add={/tikz/segments/,}{},
+}
+
+|fill between| 的实现在内部依赖路径重组：所有 |intersection segments| 都被计算，
+并按合适顺序拼接（可能反转）。
+
+此方法也可应用于普通 \tikzname{} 路径以获得有趣效果：
+%
+\begin{codeexample}[width=7cm,vbox]
+\begin{tikzpicture}
+
+        \def\verticalbar{2}
+    \begin{axis}[domain=-5:8,samples=25,smooth,width=12cm,height=7cm]
+        % Draw curves
+        \addplot [name path=g0,thin] {exp(-x^2/4)};
+            \addlegendentry{$\mathcal{N}(0)$}
+        \addplot [name path=g2.5,thin] {exp(-(x-2.5)^2/4)};
+            \addlegendentry{$\mathcal{N}(\frac52)$}
+
+        % Draw vertical bar:
+        \draw [name path=red,red,thick]
+            (\verticalbar,-1) -- (\verticalbar,2);
+
+        \path [name path=axis] (-10,0) -- (16,0);
+
+        \addplot [black!10] fill between [
+            of=g0 and g2.5,
+            soft clip={domain=-6:\verticalbar},
+            split,
+            every segment no 0/.style={left color=blue,right color=white},
+            every segment no 1/.style={pattern=grid,pattern color=gray},
+        ];
+            \addlegendentry{fill}
+
+        % compute + label the lower segment (but do not draw it):
+        \path [name path=lower,
+            %draw=red,ultra thick,
+            intersection segments={of=g0 and g2.5,sequence=R1 -- L2}
+        ];
+
+        \addplot [pattern=north west lines, pattern color=orange]
+            fill between [
+                of=axis and lower,
+                soft clip={domain=-6:\verticalbar},
+        ];
+            \addlegendentry{lower}
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+这个例子有两个图，一个在 $x=0$ 处有高斯峰，另一个在 $x=\frac52$ 处有高斯峰。
+两者都有标准图例条目。然后我们有一条红线，绘制于 $x=\;$|\verticalbar|，
+它定义为 $x=2$。第三个图是 |fill between|，带 |split| 段，左段有渐变、右段有
+图案 —— 两者都被裁剪到 |\verticalbar| 左侧部分。紧跟 |\addplot| 之后的选项列表，
+即 |[black!10]|，将被记住用于此图的图例条目。下一条 |\path...| 指令没有可见
+效果（也不增加文档大小）。\footnote{好吧，也许作用域占 8 字节。}
+但是，它包含键 |intersection segments|，该键计算由两条函数交点段组成的路径。
+在我们的例子中，我们连接名为 |g2.5| 的路径的第一（$1$st）段（在 |sequence|
+上下文中称为 |R|）与名为 |g0| 的路径的第二（$2$nd）段（在 |sequence| 上下文中
+称为 |L|）。结果接收 |name path=lower|。最后一条 |\addplot| 是 |fill between|，
+它填充坐标轴与此下段之间的一切，再次裁剪到 |\verticalbar| 左侧部分。注意，
+|axis| 不是魔法名字；它在我们的例子中也被定义。以下段落将更详细解释这一点。
+
+\begin{key}{/tikz/intersection segments=\marg{options with prefix \normalfont\texttt{/tikz/segments}}}
+    求值 \meta{options}，并将交点段追加到当前路径。
+
+    此键实际上更像一条命令：它获取必选键 |of| 参数中的两条输入路径，并解析
+    |sequence| 参数中的 \meta{series specification}。然后，它计算交点段，并按
+    \meta{series specification} 拼接。每个结果段原样追加到当前路径。
+
+    键 |intersection segments| 在当前路径中可出现多次。由于此键生成路径元素，
+    只需在选项处理完后立即终止路径（即就在选项列表后加 `|;|'）。
+
+    注意，此方法操作于变换后的路径，自身不施加坐标变换。它更像装饰而非标准
+    路径命令，尽管它没有输入路径。
+
+    \tikzname{} 的 |intersections| 库中还有一个相关键 |name intersections|，
+    它为所有交点分配名字，详见 \tikzname{} 手册。
+\end{key}
+
+\begin{key}{/tikz/segments/of=\marg{name1} and \marg{name2}}
+    定义两条输入路径。
+\end{key}
+
+\begin{key}{/tikz/segments/sequence=\marg{series specification} (initially L1 -- R2)}
+    选择 |intersection segments| 及其顺序。
+
+    \meta{series specification} 由一系列形如 |L|\meta{index} |-- R|\meta{index}
+    |-- L|\meta{index} 的条目组成。在深入细节前先展示可能最好：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[domain=0:10]
+    \addplot [name path=first,blue]
+        {sin(deg(x)) + 2/5*x};
+
+    \addplot [name path=second,red,samples=16,smooth]
+        {cos(deg(1.2*x)) + 2/5*x};
+
+    \draw [
+        black,-stealth,
+        decorate,decoration={
+            saw,
+            post=lineto,
+            post length=10pt,
+        },
+        intersection segments={
+            of=first and second,
+            sequence={
+                L1 -- R2 -- R3 -- R4 -- L4[reverse]
+            },
+        },
+    ];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    上一个例子定义了两个不同采样密度的输入图，一个是 |sharp plot|，一个是
+    |smooth|。然后，它用 |saw| 装饰绘制第三条路径 —— 该路径拼接交点段。
+
+    条目 |L1| 表示取第一条输入路径的第一个交点段。在此上下文中，第一条输入路径
+    总是称为 `|L|'，无论其实际名字为何。注意，|L1| 指整\emph{段}（而非仅一个点）。
+
+    第二项是 |--|，表示将上一段与下一段连接。若无此项，它会移动到下一段，留下
+    间隙。注意，|--| 通常是两点间的连接。在此上下文中，它是两段间的连接。
+
+    第三项是 |R2|，表示使用第二条输入路径的第二个交点段。同样，第二条输入路径
+    总是称为 `|R|'，无论其实际名字为何。其他项很直接，直到遇到 |L4[reverse]|：
+    可以以这种方式追加\emph{反转}路径段。
+
+    一般语法是添加一个（任意）序列 \verb.[--] [L|R].
+    \marg{index}\oarg{options}，其中 \meta{options} 可选。有一种特殊情形：若
+    \meta{index} 为 |*|，则使用\emph{整}条路径。若所有遇到的索引都是 |*|，则
+    完全不计算交点（此时 |intersection segments| 退化为“路径拼接”）。因此，
+    下面的例子是一种退化情形，其中我们做的是“路径拼接”而非交点拼接：
+    %
+\begin{codeexample}[]
+\pgfdeclarelayer{pre main}
+\begin{tikzpicture}
+        \pgfsetlayers{pre main,main}
+    \draw [-stealth,thick,name path=A,red]
+        (0,0) -- (1,1);
+    \draw [-stealth,thick,name path=B,blue]
+        (0,-1) -- (1,0);
+
+    \pgfonlayer{pre main}
+        \fill [
+            orange,
+            intersection segments={
+                of=A and B,
+                sequence={L* -- R*[reverse]},
+            },
+        ];
+    \endpgfonlayer
+\end{tikzpicture}
+\end{codeexample}
+
+    注意，段索引从 $1$ 开始。它们由 \pgfname{} 的数学解析器处理，并可能依赖
+    |\pgfintersectionsolutions|（即交点数）。
+
+    注意，实际上还有另一种语法：你可以对第一条输入路径使用
+    \texttt{A}\meta{0-based-index}，对第二条输入路径使用
+    \texttt{B}\meta{0-based-index}。这些标识符在 \PGFPlots{} 1.10 中引入，但已
+    被弃用，改用基于 1 的索引。带基于 0 索引的旧语法仍将可用。建议使用 |L| 与
+    |R| 代替 |A| 与 |B|。
+
+    注意，若 \marg{index} 只有一位数，可省略大括号：|L1|、|L2| 或 |L-2| 都合法。
+
+    也可使用负索引从最后倒数：
+    %
+\begin{codeexample}[]
+\pgfdeclarelayer{pre main}
+\begin{tikzpicture}
+        \pgfsetlayers{pre main,main}
+    \draw [-stealth,thick,name path=A,red]
+        (0,0) -- (1,1);
+    \draw [-stealth,thick,name path=B,blue]
+        (0,1) -- (1,0);
+
+    \pgfonlayer{pre main}
+    \draw [
+        green,
+        line width=2pt,
+        intersection segments={
+            of=A and B,
+            sequence={L-1},
+        },
+    ];
+    \endpgfonlayer
+\end{tikzpicture}
+\end{codeexample}
+    %
+    在此情形下，$-1$ 表示逆序的第一段。
+
+    注意，\declareandlabel{\pgfintersectionsegments} 在此上下文中是段的数量。
+\end{key}
+
+\begin{key}{/tikz/segments/reverse=\mchoice{true,false} (false)}
+    允许反转受影响的路径段。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[xmin=0,xmax=5,ymin=0,ymax=5]
+    \addplot [name path=f,domain=0:5,samples=100]
+        {(x - 2)^2/(7*x) + 1};
+
+    \addplot [name path=border,
+            color=blue, ultra thick, dashed]
+        coordinates {(2,0) (2,5) } ;
+
+    \fill [
+        intersection segments={
+            of=f and border,
+            sequence={L1 -- R2}},
+        pattern=north east lines,
+    ]
+    -- cycle;
+
+    \fill [
+        intersection segments={
+            of=f and border,
+            sequence={R2[reverse] -- L2}},
+        pattern=north west lines,
+    ]
+    -- (rel axis cs:1,1) -- cycle;
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    上一个例子定义了两个输入图：名为 |f| 的曲线与蓝色 |border| 线。
+
+    然后，它基于两个 |intersection segments| 计算填充路径：一个表示曲线上方、
+    位于边界\emph{左侧}的部分，一个表示位于边界\emph{右侧}的部分。
+
+    它通过以合适的 |sequence| 拼接 |intersection segments| 工作（添加更多
+    |\draw| 语句可可视化各个段）。注意，|R2| 被使用两次：一次正向，一次
+    |reverse|d。|intersection segments| 仅构成路径的起点；它们分别被
+    |--cycle| 与 |-- (rel axis cs:1,1) -- cycle| 延伸。请记住，|rel axis cs|
+    是相对坐标系，其中 |1| 表示相应坐标轴的 $100\%$ —— 在此例中，我们有
+    右上角，即 $x$ 的 $100\%$ 与 $y$ 的 $100\%$。
+\end{key}
+
+}
+
+
+\subsection{底层参考}
+
+有若干底层函数允许在更低抽象层级控制 |fillbetween|。本包作者在此列出它们，
+仅供（高度）有经验的高级用户。研究源代码可能适合了解这些方法的细节以及它们
+如何、在哪里被使用。
+
+\begin{command}{\tikzfillbetween\oarg{options}\marg{draw style}}
+    这是 |fill between| 的底层接口；它生成一条或多条路径。
+
+    此命令可在普通 \tikzname{} 图内使用，它在很大程度上独立于 \PGFPlots{}：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \draw [name path=first] (0,0) -- (1,1) -- (2,0);
+
+    \draw [name path=second] (0,0.5) -- (2,0.5);
+
+    \tikzfillbetween [of=first and second,
+        split,
+        every even segment/.style={orange}
+    ] {red}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    第一个参数 \meta{options} 描述如何计算填充区域，如 |of| 或 |split|。它对应
+    |\addplot fill between|\oarg{options} 中的那些项。
+
+    第二个参数 \meta{draw style} 是为每个生成路径段安装的默认绘图样式。
+
+    注意，|\tikzfillbetween| \emph{不是}典型的 |\path| 语句：它生成一条或多条
+    \tikzname{} |\path| 语句（每条都有自己独立的\emph{绘图样式}）。
+
+    在 |\tikzfillbetween| 内，宏 |\tikzsegmentindex| 将展开为当前段索引。它可在
+    样式内使用。
+
+    键 |on layer| 在此受尊重：若 |on layer| 有有效层名（默认 |pre main|），生成的
+    路径将位于该层。但是，与 |\addplot fill between| 不同，此命令不\emph{确保}
+    分层图形已激活。一旦你写下比如 |\pgfsetlayers{pre main,main}|，它就会自动
+    使用这些层。若否则，你会在 |.log| 文件中看到警告信息。
+\end{command}
+
+\begin{command}{\pgfcomputeintersectionsegments\allowbreak\marg{1 or 2}}
+    假设某些交点已被计算（并在当前作用域内），此命令为其中一条输入参数计算
+    交点段。
+
+    输出时，|\pgfretval| 包含计算出的段数。段本身可通过
+    |\pgfgetintersectionsegmentpath| 访问。
+
+    若要计算 |\pgfintersectionofpaths| 的\emph{第一}参数的交点段，参数
+    \meta{1 or 2} 应为 |1|；若\emph{第二}参数应用作输入，则为 |2|。
+
+    此宏是 |fillbetween| 的一部分。
+
+    让我们在下面的例子上说明其中一些方法的效果。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \draw [red] (0,0) -- (1,1) -- (2,0);
+    \draw [blue] (0,0.5) -- (2,0.5);
+\end{tikzpicture}
+\end{codeexample}
+    %
+    我们有两条线，都从左侧开始。我们的目标是得到一条新路径，由图下半部分的
+    交点段组成，即我们希望看到
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    % this is our goal -- but computed automatically.
+    \draw [black] (0,0) -- (0.5,0.5) --
+      (1.5,0.5) -- (2,0);
+\end{tikzpicture}
+\end{codeexample}
+
+    为了让 |fillbetween| 计算目标路径，我们为输入路径命名，计算交点 —— 并使用
+    |\pgfcomputeintersectionsegments| 重组它们。
+
+
+    \paragraph{注意：}
+
+    在你想复制此例子之前，可能想先了解 |intersection segments|，它是得到相同
+    效果的更简单方法！
+    %
+\begin{codeexample}[vbox]
+\begin{tikzpicture}[line join=round,x=3cm,y=3cm]
+    \draw [name path=first,red]   (0,0) -- (1,1) -- (2,0);
+    \draw [name path=second,blue] (0,0.5) -- (2,0.5);
+
+    % from 'name path' to softpaths...
+    \tikzgetnamedpath{first}
+    \let\A=\pgfretval
+    \tikzgetnamedpath{second}
+    \let\B=\pgfretval
+
+    % compute intersections using the PGF intersection lib...
+    \pgfintersectionofpaths{\pgfsetpath\A}{\pgfsetpath\B}%
+
+    % ... and compute the intersection *segments* for both input
+    % paths...
+    \pgfcomputeintersectionsegments1
+    \pgfcomputeintersectionsegments2
+
+    % ... recombine the intersection segment paths!
+    \pgfgetintersectionsegmentpath{1}{0}% path 1, segment 0
+    \pgfsetpathandBB\pgfretval% this starts a new path
+    \pgfgetintersectionsegmentpath{2}{1}% path 2, segment 1
+    % connect, not move. Try to eliminate this line to see the effect
+    \pgfpathreplacefirstmoveto\pgfretval%
+    \pgfaddpathandBB\pgfretval% append
+    \pgfgetintersectionsegmentpath{1}{2}%
+    \pgfpathreplacefirstmoveto\pgfretval
+    \pgfaddpathandBB\pgfretval
+    \pgfsetlinewidth{3}
+    \pgfsetcolor{black}
+    \pgfusepath{stroke}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    注意，这操作于相对底层。但是，你可以轻松将这些语句插入 |\pgfextra|，以将其
+    嵌入 \tikzname。这允许访问任何 \tikzname{} 选项，包括 |decorate|：
+    %
+\begin{codeexample}[vbox]
+\begin{tikzpicture}[line join=round,x=3cm,y=3cm]
+    \draw [name path=first,red]   (0,0) -- (1,1) -- (2,0);
+    \draw [name path=second,blue] (0,0.5) -- (2,0.5);
+
+    \draw [
+        orange,
+        decorate,decoration={
+            footprints,
+            foot of=bird,
+            stride length=15pt,
+            foot sep=2pt,
+            foot length=6pt},
+    ]
+    \pgfextra
+        % from 'name path' to softpaths...
+        \tikzgetnamedpath{first}
+        \let\A=\pgfretval
+        \tikzgetnamedpath{second}
+        \let\B=\pgfretval
+        %
+        % compute intersections using the PGF intersection lib...
+        \pgfintersectionofpaths{\pgfsetpath\A}{\pgfsetpath\B}%
+        %
+        % ... and compute the intersection *segments* for both input
+        % paths...
+        \pgfcomputeintersectionsegments1
+        \pgfcomputeintersectionsegments2
+        %
+        % ... recombine the intersection segment paths!
+        \pgfgetintersectionsegmentpath{1}{0}% path 1, segment 0
+        \pgfsetpathandBB\pgfretval% this starts a new path
+        \pgfgetintersectionsegmentpath{2}{1}% path 2, segment 1
+        \pgfpathreplacefirstmoveto\pgfretval% connect, not move
+        \pgfaddpathandBB\pgfretval% append
+        \pgfgetintersectionsegmentpath{1}{2}%
+        \pgfpathreplacefirstmoveto\pgfretval
+        \pgfaddpathandBB\pgfretval
+    \endpgfextra
+    ;
+\end{tikzpicture}
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    在你想复制此例子之前，可能想先了解 |intersection segments|，它是得到相同
+    效果的更简单方法！
+\end{command}
+
+\begin{command}{\pgfgetintersectionsegmentpath\marg{1 or 2}\marg{index}}
+    定义 |\pgfretval| 以 softpath 形式包含所需路径段。
+
+    结果具有与 |\pgfgetpath| 返回路径相同的性质，可通过 |\pgfsetpath|、
+    |\pgfsetpathandBB| 或 |\pgfaddpathandBB| 使用。
+
+    值 \meta{1 or 2} 类似前一次调用 |\pgfcomputeintersectionsegments| 的参数：
+    它标识两条已计算交点的路径中应选哪一条。
+
+    第二个参数 \meta{index} 是数字 $0 \le i < N$，其中 $N$ 是计算出的段总数。
+    段总数由 |\pgfcomputeintersectionsegments| 返回。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\tikzgetnamedpath\marg{string name}}
+    定义 |\pgfretval| 包含与 \meta{string name} 关联的 softpath。
+    \meta{string name} 应为 |name path| 或 |name path| global 的值。
+
+    结果值是 softpath，即它具有与 |\pgfgetpath| 返回者相同的性质。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\tikznamecurrentpath\marg{string name}}
+    取当前 softpath（由先前 moveto、lineto 或其他操作组装而成），并将名字
+    \meta{string name} 赋给它。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\pgfcomputereversepath\marg{\textbackslash softpathmacro}}
+    取 softpath \meta{\textbackslash softpathmacro} 并计算其反转路径。
+
+    它将结果 softpath 存入 |\pgfretval|。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\pgfgetpath\marg{\textbackslash softpathmacro}}
+    将当前 softpath 存入宏 \meta{\textbackslash softpathmacro}。
+
+    另见 |\tikzgetnamedpath|。
+
+    此宏是 \pgfname{} 的一部分。
+\end{command}
+
+\begin{command}{\pgfsetpath\marg{\textbackslash softpathmacro}}
+    用宏 \meta{\textbackslash softpathmacro} 中的内容替换当前 softpath。
+
+    这不更新任何边界框。注意，它原样取 softpath，不施加任何变换。修改路径及其
+    坐标的唯一方式是装饰或画布变换。
+
+    此宏是 \pgfname{} 的一部分。
+\end{command}
+\begin{command}{\pgfaddpath\marg{\textbackslash softpathmacro}}
+    将宏 \meta{\textbackslash softpathmacro} 中的 softpath 追加到当前 softpath。
+
+    这不更新任何边界框。注意，它原样取 softpath，不施加任何变换。修改路径及其
+    坐标的唯一方式是装饰或画布变换。
+
+    此宏是 \pgfname{} 的一部分。
+\end{command}
+
+\begin{command}{\pgfsetpathandBB\marg{\textbackslash softpathmacro}}
+    用宏 \meta{\textbackslash softpathmacro} 中的内容替换当前 softpath。
+
+    它根据 \meta{\textbackslash softpathmacro} 中的坐标更新图片边界框。除此之外，
+    与 |\pgfsetpath| 相同的限制在此也适用。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\pgfaddpathandBB\marg{\textbackslash softpathmacro}}
+    将宏 \meta{\textbackslash softpathmacro} 的 softpath 追加到当前 softpath。
+
+    它根据 \meta{\textbackslash softpathmacro} 中的坐标更新图片边界框。除此之外，
+    与 |\pgfsetpath| 相同的限制在此也适用。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\pgfpathreplacefirstmoveto\marg{\textbackslash softpathmacro}}
+    接受一个含 softpath 的宏作为输入，将其第一个 moveto 操作替换为 lineto 操作，
+    并作为 |\pgfretval| 返回。
+
+    参数 \meta{\textbackslash softpathmacro} 是可由 |\pgfgetpath| 获取的那种。
+
+    此宏是 |fillbetween| 的一部分。
+\end{command}
+
+\begin{command}{\pgfintersectionofpaths\marg{first}\marg{second}}
+    \pgfname{} 基础层命令，用于计算两条 softpath 的交点。与 \tikzname 提供的
+    |name path| 方法不同，此命令接受\emph{不同}参数：\meta{first} 与
+    \meta{second} 应设置路径，即它们应包含类似 |\pgfsetpath{\somesoftpath}|
+    的内容。
+
+    结果存入当前作用域的变量。
+
+    此宏是 \pgfname{} 的一部分。
+\end{command}
+
+\begin{command}{\tikzpathintersectionsegments\oarg{options with prefix \normalfont\texttt{/tikz/segments}}}
+    |\tikzset{intersection segments=|\marg{options}|}| 的别名。
+\end{command}
+
+\begin{command}{\pgfpathcomputesoftclippath\marg{\textbackslash inputsoftpath}\marg{\textbackslash softclippath}}
+    为 |soft clip| 完成工作：当 \meta{\textbackslash inputsoftpath} 被
+    \meta{\textbackslash softclippath} 裁剪时，计算其软裁剪路径。
+
+    此算法已为矩形软裁剪路径测试和编写。它会接受复杂裁剪路径，并可能对其中
+    一些成功。尽管如此，矩形软裁剪路径是官方支持的那种。
+
+    详见 |soft clip|。
+\end{command}
+
+
+\subsection{陷阱与限制}
+
+|fillbetween| 后端相当强大，开箱即用地成功计算许多围绕“填充任意图的路径段”
+的用例。
+
+但是，它有若干限制，未来版本可能克服也可能不克服：
+%
+\begin{enumerate}
+    \item 第一个限制是可扩展性。底层算法相对低效，当样本数大时扩展性差。
+        请将其应用于“合理样本大小”和“合理交点数”的图。即：若耗时过长，
+        可能需要降低采样密度。
+    \item 第二个限制是精度。|fillbetween| 功能依赖 \pgfname{} 的
+        |intersections| 库，后者可能找不到所有交点（尽管作为 |fillbetween|
+        工作的一部分，其精度与可靠性已大幅提高，感谢 \pgfname{} 团队的
+        Mark Wibrow 的协助）。
+
+        此限制的变通方案可能是降低采样密度 —— 并提交 bug 报告。
+    \item 另一个限制是通用性。|fillbetween| 库允许组合 |smooth| 与
+        |sharp plot|，甚至带跳变的 |const plot|，且全部开箱即用。只要你有
+        “类图”结构，它就会成功。但以下情形可能失败：
+        %
+        \begin{itemize}
+            \item 图与自身相交，且你尝试使用 |split| 或
+                |intersection segments| 计算单独段，
+            \item 图含有圆，
+            \item 两条相关图有无限多交点（即彼此重叠）。
+        \end{itemize}
+\end{enumerate}
+%
+这些限制在 \pgfname{} 中也大多存在，尤其是在 |decorate| 路径或使用
+|name intersections| 时。
+\endgroup

@@ -1,0 +1,760 @@
+
+\chapter{工具与基础层命令}
+\label{cha:pgfplots:lowlevel}
+
+本章记录的命令提供了对 \PGFPlots{} 更基础元素的访问。其中大多数与 \pgfname{} 的基础层密切相关，尤其是各种与坐标轴相关的点命令。还有一些是通用工具，例如循环。
+
+不过，本节中的大多数元素只对高级用户有意义——而且可能只在特殊情况下才用得到。
+
+
+\section{工具命令}
+
+\begin{command}{\foreach \meta{variables} |in| \meta{list} \marg{commands}}
+    \Tikz{} 提供的一个功能强大的循环命令，参见~\cite[Section
+    ``Utilities'']{tikz}。
+    %
+\begin{codeexample}[]
+\foreach \x in {1,2,...,4} {Iterating \x. }%
+\end{codeexample}
+
+    一个与 \PGFPlots{} 相关的例子可以是
+    %
+\begin{codeexample}[code only]
+\foreach \i in {1,2,...,10} {\addplot table {datafile\i}; }%
+\end{codeexample}
+\end{command}
+
+\begin{command}{\pgfplotsforeachungrouped \meta{variable} |in| \meta{list} \marg{command}}
+    |\foreach| 的一个特殊变体，它有两点不同：在执行 \meta{command} 时不引入额外的分组；并且允许对（简单的！）
+    \meta{$x_0$}|,|\meta{$x_1$}|,...,|\meta{$x_n$} 表达式调用数学解析器。
+    %
+\begin{codeexample}[]
+\def\allcollected{}
+\pgfplotsforeachungrouped \x in {1,2,...,4} {Iterating \x. \edef\allcollected{\allcollected, \x}}%
+All collected = \allcollected.
+\end{codeexample}
+
+    一个更有用的例子是与数据表配合使用。下面的例子取自 \PGFPlotstable{}：
+    %
+\begin{codeexample}[code only]
+\pgfplotsforeachungrouped \i in {1,2,...,10} {%
+    \pgfplotstablevertcat{\output}{datafile\i} % appends `datafile\i' -> `\output'
+}%
+% since it was ungrouped, \output is still defined (would not work
+% with \foreach)
+\end{codeexample}
+
+    \paragraph{备注：}
+
+    特殊语法
+    \meta{list}=\meta{$x_0$}|,|\meta{$x_1$}|,...,|\meta{$x_n$}，即以两个元素开头、中间为省略号、末尾为一个元素，会为循环调用数学解析器。因此，当 |/pgf/fpu| 处于活动状态时，它支持的数值范围比其他任何语法都更大。在其他情况下，
+    |\pgfplotsforeachungrouped| 会调用 |\foreach|，并在不使用 \TeX{} 分组的情况下提供结果。
+
+    请记住：在坐标轴环境内，所有循环构造（包括自定义循环、|\foreach| 和 |\pgfplotsforeachungrouped|）都需要小心处理：循环变量只能在被立即求值的地方使用；但 \PGFPlots{} 会推迟许多宏的求值。例如，要遍历某些内容并生成形如 |\node at (axis cs:\i,0.5)...| 的坐标轴描述，循环宏 |\i| 会在 |\end{axis}| 处才被求值——但那时循环已经结束，它的值已经丢失。正确的做法是\emph{显式展开}循环变量。例如：
+    %
+\begin{codeexample}[code only]
+\pgfplotsforeachungrouped \i/\j in {
+    1 / a,
+    2 / b,
+    3 / c
+}{
+    \edef\temp{\noexpand\node at (axis cs: \i,0.5) {\j};}
+    % \show\temp % lets TeX show you what \temp contains
+    \temp
+}
+\end{codeexample}
+    %
+    该示例生成三次循环迭代：|\i=1|、|\j=a|；然后 |\i=2|、|j=b|；然后 |\i=3|、|\j=c|。在循环体内部，它把它们展开，并用「展开定义」|\edef| 把结果赋给一个宏。结果中不再包含 |\i| 或 |\j|（因为它们已经被展开）。然后，调用得到的宏。关于 \TeX{} 命令 |\edef| 以及展开控制的详细信息，请参见随 \PGFPlots{} 一起提供的文档
+    \href{file:TeX-programming-notes.pdf}{TeX-programming-notes.pdf}。
+\end{command}
+
+\begin{command}{\pgfplotsinvokeforeach\marg{list} \marg{command}}
+    |\pgfplotsforeachungrouped| 的一个变体（因而也是 |\foreach| 的变体），它会对 \meta{list} 中的每一个元素，把 \meta{command} 内出现的 |#1| 各替换一次。因此，它实际上假设 \marg{command} 像一个 |\newcommand| 的命令体。
+
+    换句话说，对 \meta{list} 的每一个元素都会调用一次 \meta{command}。\meta{list} 的当前元素以 |#1| 的形式可用。
+
+    与 |\pgfplotsforeachungrouped| 一样，本命令\emph{不}引入额外的作用域（即它也是不分组的）。
+
+    它与 |\foreach \x in |\meta{list}\marg{command} 的区别很细微：|\x| \emph{不会}被展开，而 |#1| 会。
+    %
+\begin{codeexample}[]
+\pgfkeys{
+    otherstyle a/.code={[a]},
+    otherstyle b/.code={[b]},
+    otherstyle c/.code={[c]},
+    otherstyle d/.code={[d]}}
+\pgfplotsinvokeforeach{a,b,c,d}
+    {\pgfkeys{key #1/.style={otherstyle #1}}}
+Invoke them:
+\pgfkeys{key a} \pgfkeys{key b}
+\pgfkeys{key c} \pgfkeys{key d}
+\end{codeexample}
+相反的例子则使用一个宏（这里是 |\x|）作为循环参数：
+\begin{codeexample}[]
+\pgfkeys{
+    otherstyle a/.code={[a]},
+    otherstyle b/.code={[b]},
+    otherstyle c/.code={[c]},
+    otherstyle d/.code={[d]}}
+\pgfplotsforeachungrouped \x in {a,b,c,d}
+    {\pgfkeys{key \x/.style={otherstyle \x}}}
+Invoke them:
+\pgfkeys{key a} \pgfkeys{key b}
+\pgfkeys{key c} \pgfkeys{key d}
+\end{codeexample}
+
+    \paragraph{限制：}
+
+    目前还不能嵌套使用此命令（因为它不通过作用域提供保护）。
+\end{command}
+
+\begin{command}{\pgfmathparse\marg{expression}}
+    对 \meta{expression} 调用 \pgfname{} 的数学解析器，并把
+    \declareandlabel{\pgfmathresult} 定义为结果。
+    %
+\begin{codeexample}[]
+\pgfmathparse{1+41}
+
+The result is `\pgfmathresult'.
+\end{codeexample}
+    %
+    \noindent \pgfname{} 中的数学引擎通常使用 \TeX{} 内部的算术。也就是说：它适合处理范围在
+    $[-16384,16384]$ 内的数字，精度为 $5$ 位。
+
+    对于绘图应用而言，这个数值范围通常太小。\PGFPlots{} 通过
+    |\pgfkeys{/pgf/fpu}\pgfmathparse{1+41}| 启用「浮点单元」（fpu），从而扩展数值范围，并让之后所有运算都以浮点数进行。
+
+    在 \PGFPlots{} 中，键 |/pgfplots/use fpu| 默认是打开的，这意味着所有坐标运算都用 |fpu| 进行。然而，所有与 \pgfname{} 相关的绘图操作仍然使用标准数学引擎。
+
+    如果你曾经需要处理扩展精度的数字，可以使用
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/fpu}%
+\pgfmathparse{1000*1000}
+
+The result is `\pgfmathprintnumber{\pgfmathresult}'.
+\end{codeexample}
+    %
+    请注意，|fpu| 的结果通常不是人类可读格式，因此 |\pgfmathprintnumber| 是排版这类数字的首选方式。
+
+    更多细节请参见 \cite{tikz}。
+\end{command}
+
+\begin{pgfplotskey}{use fpu=\mchoice{true,false} (initially true)}
+    \PGFPlots{} 提供了多种计算数学表达式的方式，其中 |use fpu| 是最强大的。它的数学运算要么在 |lua backend| 中实现，要么在纯 \TeX{} 实现中完成，数值范围大、精度也足够。
+
+    然而，存储在 |\pgfmathresult| 中的值是晦涩难懂的，需要通过专门的宏来处理。|use fpu| 这一开关只在该数值格式导致问题时才有用——也就是说，它是一个调试开关，在正常操作中不应使用。
+\end{pgfplotskey}
+
+\begin{key}{/pgf/declare function=\meta{function definitions}}
+    允许定义一个或多个函数。
+
+    参数 \meta {function definitions} 可以包含一个或多个定义，每一个\emph{必须}以分号结尾：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    declare function={
+        C=4;
+        square(\t)=(\t)^2 + C;
+    },
+]
+    \addplot+ [samples=2] {C*x};
+
+    \addplot {square(x)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    这些定义本身的形式为 \meta{function}\meta{argument list} =
+    \meta{definition}，其中 \meta{argument list} 是用逗号分隔的参数列表，例如 |\t| 或 |\t,\a,\b|。\meta{definition} 是一个数学表达式，它使用这些参数。
+
+    更多细节请参见 \cite{tikz}。
+\end{key}
+
+\begin{command}{\pgfplotstableread\marg{file}}
+    请参见 \PGFPlotstable{} 的手册 |pgfplotstable.pdf|，它是 \PGFPlots{} 套件的一部分。
+\end{command}
+
+\begin{command}{\pgfplotstabletypeset\marg{\textbackslash macro}}
+    请参见 \PGFPlotstable{} 的手册 |pgfplotstable.pdf|，它是 \PGFPlots{} 套件的一部分。
+\end{command}
+
+\begin{command}{\pgfplotsiffileexists\marg{filename}\marg{true code}\marg{false code}}
+    如果 \meta{filename} 存在则调用 \meta{true code}，否则调用 \meta{false code}。例如，可以在循环宏中使用它，依次绘制每一个数据文件，直到没有更多文件为止。
+\end{command}
+
+\begin{command}{\pgfplotsutilifstringequal\marg{first}\marg{second}\marg{true code}\marg{false code}}
+    一个简单的「字符串比较」工具：当 \meta{first}
+    $=$\meta{second} 时调用 \meta{true code}，否则调用 \meta{false code}。它不展开宏。
+\end{command}
+
+\begin{commandlist}{\pgfkeys,\pgfeov,\pgfkeysvalueof,\pgfkeysgetvalue}
+    这些命令是 \Tikz{} 指定选项方式的一部分，属于其子宏包 |pgfkeys|。命令 |\pgfplotsset| 实际上只是对 |\pgfkeys| 的一层包装。
+
+    关于 |\pgfkeys| 的简短介绍可参见~\cite{keyvalintro}，完整的参考当然是 \Tikz{} 手册~\cite{tikz}。
+
+    键 |\pgfkeysvalueof|\marg{key name} 展开为某个键的值；
+    |\pgfkeysgetvalue|\marg{key name}\marg{\textbackslash macro} 把 \meta{key name} 的值存入 \meta{\textbackslash macro}。宏 |\pgfeov| 用于在 |\pgfkeys| 中为代码键分隔参数，请参见上面提到的参考。
+\end{commandlist}
+
+
+\section[PGFPlots 坐标轴内部的命令]
+        {{\normalfont\PGFPlots{}} 坐标轴内部的命令}
+
+\begin{command}{\autoplotspeclist}
+    此命令不应再使用，但会作为技术实现细节保留下来。请使用 `|cycle list|' 选项，见第~\ref{sec:cycle:list} 节。
+\end{command}
+
+\begin{command}{\logten}
+    展开为常数 $\log(10)$。对于对数图很有用，因为 $\log(10^i)
+    = i\log(10)$。此命令仅在 \Tikz{} 图内部可用。
+\end{command}
+
+\begin{command}{\pgfmathprintnumber\marg{number}}
+    为 \meta{number} 生成排版精美的输出\footnote{此方法以前叫
+    \texttt{\textbackslash prettyprintnumber}。它的功能已并入 \PGF{}，旧命令现已弃用。}。每个刻度标签都使用此方法。
+
+    数字按当前数字打印选项输出；关于不同的数字样式、舍入精度与舍入方法，请参见随本宏包提供的 \PGFPlotstable{} 手册。
+\end{command}
+
+\begin{command}{\numplots}
+    在任一坐标轴环境、相关样式、选项或命令内部，|\numplots| 展开为图的总数。
+\end{command}
+
+\begin{command}{\numplotsofactualtype}
+    与 |\numplots| 类似，但此宏返回具有相同绘图处理器的图的总数。因此，如果启用了 |sharp plot|，它返回所有 |sharp plots| 的数量；如果启用了 |ybar|，它返回 |ybar| 图的数量，依此类推。
+\end{command}
+
+\begin{command}{\plotnum}
+    在 |\addplot| 或任何相关样式、选项或命令内部，|\plotnum| 展开为当前图的编号，从~$0$ 开始。
+\end{command}
+
+\begin{command}{\plotnumofactualtype}
+    与 |\plotnum| 类似，但它返回在所有同类型图中的编号。所有此类图的总数可用 |\numplotsofactualtype| 获取。
+\end{command}
+
+\begin{command}{\coordindex}
+    在 |\addplot| 命令内部，此宏展开为当前坐标的编号（从~$0$ 开始）。
+
+    它与 |x filter| 或 |y filter| 配合使用，用于（反）选坐标。
+\end{command}
+
+
+\section{路径操作}
+
+\begin{commandlist}{\path,\draw,\fill,\node,\matrix}
+    这些都是 \Tikz{} 绘图命令，全部记录在~\cite{tikz} 中。它们用于绘制或填充路径、生成文本节点或对齐的文本矩阵。它们分别等价于
+    \pgfmanualpdflabel{/tikz/draw}{}|\path[draw]|、
+    \pgfmanualpdflabel{/tikz/fill}{}|\path[fill]|、
+    \pgfmanualpdflabel{/tikz/node}{}|\path[node]|、
+    \pgfmanualpdflabel{/tikz/matrix}{}|\path[matrix]|。
+\end{commandlist}
+
+\begin{pathoperation}{--}{\meta{coordinate}}
+    一个 \Tikz{} 路径操作，用直线连接当前点（即 |--| 之前的最后一个点）与 \meta{coordinate}。
+\end{pathoperation}
+
+{\catcode`\|=12
+\begin{pathoperation}[noindex]{|-}{\meta{coordinate}}
+\pgfmanualpdflabel[\catcode`\|=12 ]{|-}{}%
+    一个 \Tikz{} 路径操作，用\emph{两}段直线连接当前点与
+    \meta{coordinate}：先竖直，后水平。
+\end{pathoperation}
+
+\begin{pathoperation}[noindex]{-|}{\meta{coordinate}}
+\pgfmanualpdflabel[\catcode`\|=12 ]{-|}{}%
+    一个 \Tikz{} 路径操作，用\emph{两}段直线连接当前点与
+    \meta{coordinate}：先水平，后竖直。
+\end{pathoperation}
+}
+
+\begin{keylist}{/tikz/xshift=\marg{dimension},/tikz/yshift=\marg{dimension}}
+    这些 \Tikz{} 键允许把某个对象沿 \meta{dimension} 平移，\meta{dimension} 可以是任何 \TeX{} 长度（或表达式）。
+\end{keylist}
+
+\begin{command}{\pgfplotsextra\marg{low-level path commands}}
+    在 \PGFPlots{} 坐标轴中执行 \meta{low-level path commands} 的命令。由于坐标轴内部的任何绘图命令都必须推迟到坐标轴完成、缩放初始化之后才能执行，所以不能简单地直接绘制路径。取而代之，必须在坐标轴完成时再绘制它们。对每一个 \Tikz{} 路径这会自动完成——如果你写 |\pgfplotsextra|\marg{commands}，也是手动触发这一过程。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[xmin=0,xmax=3,ymin=0,ymax=5]
+    \pgfplotsextra{
+        \pgfpathmoveto{\pgfplotspointaxisxy{1}{2}}
+        \pgfpathlineto{\pgfplotspointaxisxy{2}{4}}
+        \pgfusepath{stroke}
+    }
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    上面的例子初始化了一个坐标轴，并在坐标轴就绪后执行基础层路径命令。多个 |\path|、|\addplot| 和 |\pgfplotsextra| 命令的执行顺序与它们在环境中出现的顺序相同。\footnote{堆叠图例外，其顺序可能相反，参见键 \texttt{reverse stack plots}。}
+\end{command}
+
+\begin{command}{\pgfplotspathaxisoutline}
+    生成一条与当前坐标轴外轮廓相似的路径。该路径用于裁剪路径和背景路径（如果存在）。
+\end{command}
+
+
+\section{指定基础坐标}
+\label{sec:basic:coordinates}
+
+\begin{commandlist}{%
+    \pgfplotspointaxisxy\marg{x coordinate}\marg{y coordinate},
+    \pgfplotspointaxisxyz\marg{x coordinate}\marg{y coordinate}\marg{z coordinate}%
+}
+    类似 |\pgfpointxy| 的点命令，接受逻辑的绝对坐标，返回一个底层点。所有从用户变换到对数的变换都会被应用。
+
+    由于变换是在坐标轴完成后才初始化的，因此此命令需要被推迟（参见 |\pgfplotsextra|）。
+
+    此命令是基础层版本的 |axis cs:|\meta{x
+    coordinate}|,|\meta{y coordinate}|,|\meta{z coordinate}。
+
+    请注意，这也是可视化阶段的默认坐标系；换句话说：如果你写 |\draw (1,2) -- (1,4)|，\PGFPlots{} 会自动使用 |(axis cs:1,2) -- (axis cs:1,4)|。
+\end{commandlist}
+
+\begin{commandlist}{%
+    \pgfplotspointaxisdirectionxy\marg{x coordinate}\marg{y coordinate},
+    \pgfplotspointaxisdirectionxyz\marg{x coordinate}\marg{y coordinate}\marg{z coordinate}%
+}
+    类似 |\pgfpointxy| 的点命令，接受逻辑\emph{相对}坐标，返回一个底层点。所有从用户变换到对数的变换都会被应用。与
+    |\pgfplotspointaxisxy| 的区别在于：这里会跳过线性变换的平移部分（对比 |disabledatascaling|）。
+
+    此命令是基础层版本的 |axis direction cs:|\meta{x
+    coordinate}|,|\meta{y coordinate}|,|\meta{z coordinate}。更多细节请参见 |axis direction cs| 的文档。
+
+    当需要提供具有\emph{相对}性质的量（如方向或长度）时，使用此命令。一个用例是绘制椭圆：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    xmin=-3,   xmax=3,
+    ymin=-3,   ymax=3,
+    extra x ticks={-1,1},
+    extra y ticks={-2,2},
+    extra tick style={grid=major},
+]
+    \draw [red] \pgfextra{
+        \pgfpathellipse{\pgfplotspointaxisxy{0}{0}}
+            {\pgfplotspointaxisdirectionxy{1}{0}}
+            {\pgfplotspointaxisdirectionxy{0}{2}}
+    % see also the documentation of
+    % 'axis direction cs' which
+    % allows a simpler way to draw this ellipse
+    };
+    \draw [blue] \pgfextra{
+        \pgfpathellipse{\pgfplotspointaxisxy{0}{0}}
+            {\pgfplotspointaxisdirectionxy{1}{1}}
+            {\pgfplotspointaxisdirectionxy{0}{2}}
+    };
+    \addplot [only marks,mark=*] coordinates
+        { (0,0) };
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    由于变换是在坐标轴完成后才初始化的，因此此命令需要放在 \tikzname{} |\path| 命令内部（如上面例子中的 |\draw|），或者放在 |\pgfplotsextra| 内部。
+\end{commandlist}
+
+\begin{commandlist}{%
+    \pgfplotspointrelaxisxy\marg{rel x coordinate}\marg{rel y coordinate},
+    \pgfplotspointrelaxisxyz\marg{rel x coordinate}\marg{rel y coordinate}\marg{rel z coordinate}%
+}
+    接受\emph{相对}坐标的点命令：$x=0$ 对应坐标轴的\emph{下}限，$x=1$ 对应\emph{上}限。
+
+    这些命令用于 |rel axis cs|。
+
+    请注意，变换只有在坐标轴完成后才会初始化！这意味着你需要使用 |\pgfplotsextra|。
+\end{commandlist}
+
+\begin{commandlist}{%
+    \pgfplotspointdescriptionxy\marg{$x$ fraction}\marg{$y$ fraction},
+    \pgfplotsqpointdescriptionxy\marg{$x$ fraction}\marg{$y$ fraction}%
+}
+    点命令：|{0}{0}| 是坐标轴包围盒的左下角，|{1}{1}| 是右上角；其余值位于二者之间。`|q|' 版本更快，因为它不对参数调用数学解析器。
+
+    它们用于 |axis description cs|，见
+    Section~\ref{pgfplots:sec:axis:description:cs}。
+\end{commandlist}
+
+\begin{commandlist}{\pgfplotspointaxisorigin}
+    原点处的点坐标，即 $(0,0,0)$。如果原点不在坐标轴范围内，则返回边界上最近的点。
+
+    这与 |origin| 锚点返回的坐标相同。
+\end{commandlist}
+
+\begin{commandlist}{%
+    \pgfplotstransformcoordinatex\marg{x coordinate of an axis},
+    \pgfplotstransformcoordinatey\marg{y coordinate of an axis},
+    \pgfplotstransformcoordinatez\marg{z coordinate of an axis}%
+}
+    把 |\pgfmathresult| 定义为与输入参数对应的 \PGF{} 底层坐标。
+
+    该命令会应用任何 |[xyz] coord trafo| 键、数据缩放和/或对数，以及 \PGFPlots{} 用于把输入坐标映射为内部坐标的任何其他处理。
+
+    结果可以在 |\pgfpointxy| 语句内部使用（也就是说，它仍然需要与相应的 \PGF{} 单位向量相乘缩放）。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\pgfplotsset{compat/pgfpoint substitution=1.3}
+\begin{axis}[xmin=0,xmax=2,ymin=0,ymax=5]
+    \pgfplotsextra{
+        \pgfplotstransformcoordinatex{1}
+        \let\xcoord=\pgfmathresult
+        \pgfplotstransformcoordinatey{1}
+        \let\ycoord=\pgfmathresult
+        \pgfpathcircle
+            {\pgfqpointxy{\xcoord}{\ycoord}}
+            {5pt}
+        \pgfusepath{fill}
+    }
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    请注意，\PGFPlots{} 默认会把 |\pgfqpointxy| 替换为 |\pgfplotspointaxisxyz|——而此命令本身已经隐式完成了坐标变换。为了看出区别，前面的例子先通过
+    |compat/pgfpoint substitution=1.3| 关闭了这种坐标系的自动替换。
+    %
+    此命令的结果也可以作为数学方法
+    |transformcoordinatex| 使用（参见 |axis cs| 的文档）。
+
+    请注意，变换只有在坐标轴完成后才会初始化。这意味着你需要像上面例子那样使用 |\pgfplotsextra|。
+\end{commandlist}
+
+\begin{commandlist}{%
+    \pgfplotstransformdirectionx\marg{x direction of an axis},
+    \pgfplotstransformdirectiony\marg{y direction of an axis},
+    \pgfplotstransformdirectionz\marg{z direction of an axis}%
+}
+    把 |\pgfmathresult| 定义为 \PGF{} 底层\emph{方向向量分量}。
+
+    方向向量需要与某个坐标\emph{相加}才能得到一个坐标，参见
+    |\pgfplotspointaxisdirectionxy| 和 |axis direction cs| 的文档。
+
+    参数 \meta{x direction of an axis} 的处理方式（几乎）与处理绝对位置的宏
+    |\pgfplotstransformcoordinatex| 相同。唯一区别是：\emph{方向}不需要平移变换。
+
+    此命令的结果也可以作为数学方法
+    |transformdirectionx| 使用（参见 |axis direction cs| 的文档）。
+
+    关于此命令的细节与示例，请参见 |axis direction cs|。
+\end{commandlist}
+
+% this command is for internal use only:
+%--------------------------------------------------
+% \begin{command}{\pgfplotsconvertunittocoordinate\marg{x, y or z}\marg{dimension}}
+%     Converts a dimension (with unit!) to a corresponding $x$-, $y$- or $z$-coordinate. The result will be written to |\pgfmathresult| (without units).
+%
+%     It is possible to use the result as arguments for the |\pgfpointxyz| commands.
+%
+%     The effect is to multiply \meta{dimension} with the inverse length of the unit vector for the specified axis. These lengths are precomputed in \PGFPlots{} so the operation is fast.
+% \begin{codeexample}[code only]
+% \pgfplotsconvertunittocoordinate{x}{5pt}
+% % now, the command uses exactly 5pt in x direction:
+% \pgfqpointxyz{\pgfmathresult}{4}{3}
+% \end{codeexample}
+% \end{command}
+%--------------------------------------------------
+
+\begin{commandlist}{%
+    \pgfplotspointunitx,
+    \pgfplotspointunity,
+    \pgfplotspointunitz%
+}
+    返回画布 $x$、$y$ 或 $z$ 单位向量的底层点命令。
+
+    |\pgfplotspointunitx| 是 $x$ 方向上的 \pgfname{} 单位向量。
+
+    这些向量本质上分别等同于\linebreak
+    |\pgfqpointxyz{1}{0}{0}|、|\pgfqpointxyz{0}{1}{0}|\linebreak
+    和 |\pgfqpointxyz{0}{0}{1}|。
+
+    单位 $z$ 向量只在三维坐标轴中才有定义。
+\end{commandlist}
+
+\begin{commandlist}{%
+    \pgfplotsunitxlength,
+    \pgfplotsunitylength,
+    \pgfplotsunitzlength,
+    \pgfplotsunitxinvlength,
+    \pgfplotsunityinvlength,
+    \pgfplotsunitzinvlength%
+}
+    展开为相应单位向量 $x_i$ 的长度 $\lVert x_i \rVert$，或其倒数 $1/\lVert x_i \rVert$ 的宏。这些宏可以在 |\pgfmathparse| 内部使用。
+
+    $x_i$ 即 |\pgfplotspointunitx| 系列。
+\end{commandlist}
+
+\begin{command}{\pgfplotsqpointoutsideofaxis%
+        \marg{three-char-string}\marg{coordinate}\marg{normal distance}%
+}
+    对于二维图，返回四条可用坐标轴之一上的一个点坐标；对于三维图，则返回十二条可用坐标轴之一上的点坐标。
+
+    所指定的坐标轴由一个三字符字符串唯一标识，作为命令的第一个参数传入。三个字符中的第一个为 `|0|'，表示该坐标轴的 $x$ 坐标经过坐标轴的下限；为 `|1|'，表示经过上限；为 `|2|'，表示经过原点。第二个字符同样是 |0|、|1| 或 |2|，表示 $y$ 轴上的位置。第三个字符对应第三维，即 $z$ 轴；二维图应保留为 `|0|'。但是，三个字符中\emph{必须}有一个为 `|v|'，表示该坐标轴\underline{是变化的}。例如，|v01| 表示 $\{ (x,y_{\min},z_{\max}) \vert x \in \R \}$。
+
+    第二个参数 \meta{coordinate} 是该坐标轴上的逻辑坐标。由于该坐标轴的两个坐标是固定的，\meta{coordinate} 指的是坐标轴中\underline{变化}的那一分量。它必须是一个不带单位的数字；此处不支持数学表达式。
+
+    第三个参数 \meta{normal distance} 是一个长度，例如 |10pt|。它把坐标沿外法向量方向从指定坐标轴向外平移。外法向量总是指向远离坐标轴的方向。它由 |\pgfplotspointouternormalvectorofaxis| 计算。
+
+    此命令有若干变体，都记录在源代码中。其中一个特别有用：
+\end{command}
+
+\begin{command}{\pgfplotsqpointoutsideofaxisrel%
+        \allowbreak\marg{three-char-string}\allowbreak\marg{axis fraction}\allowbreak\marg{normal distance}%
+}
+    此点坐标是 |\pgfplotsqpointoutsideofaxis| 的一个变体，它允许传入 \meta{axis fraction} 而不是绝对坐标。该分数是 $0$（坐标轴下限）到 $1$（坐标轴上限）之间的一个数，即以坐标轴总长的百分比表示。允许使用负值或大于 $1$ 的值。
+
+    |\pgfplotsqpointoutsideofaxisrel| 命令在思路上类似于
+    |rel axis cs|。
+
+    与反向坐标轴配合使用时有一点特殊：如果坐标轴已通过 |x dir=reverse| 反向，且 |allow reversal of rel axis cs| 为 true，那么 $0$ 表示\emph{上}限，$1$ 表示\emph{下}限。这样，仅因坐标轴反向，坐标值不会发生改变。
+        \index{allow reversal of rel axis cs}%
+\end{command}
+
+\begin{command}{\pgfplotspointouternormalvectorofaxis\marg{three-char-string}}
+    一个点命令，返回相应坐标轴的外法向量。该法向量长度为 $1$（用
+    |\pgfpointnormalised| 计算）。它与 |\pgfplotsqpointoutsideofaxis| 及其变体中使用的是同一个法向量。
+
+    此命令的输出会被缓存，并在坐标轴的整个生命周期内复用。
+\end{command}
+
+\begin{command}{\pgfplotsticklabelaxisspec\marg{x, y or z}}
+    展开为指定坐标轴（\meta{x}、\meta{y} 或 \meta{z}）所在的、用于承载刻度标签的坐标轴的三字符标识。
+\end{command}
+
+\begin{command}{\pgfplotsvalueoflargesttickdimen\marg{x, y or z}}
+    展开为刻度位置到其刻度标签包围盒沿外单位法向量方向的最大距离。它还包括 |ticklabel shift| 键的值。
+
+    此值用于 |ticklabel cs|。
+\end{command}
+
+\begin{commandlist}{
+    \pgfplotsmathfloatviewdepthxyz\marg{x}\marg{y}\marg{z},
+    \pgfplotsmathviewdepthxyz\marg{x}\marg{y}\marg{z}%
+}
+    这两个宏都把 |\pgfmathresult| 定义为三维点 $\bar x = (x,y,z)$ 的「深度」。深度定义为 $\bar x$ 与当前坐标轴视图方向 $\vec d$ 的内积。
+
+    对于 |\pgfplotsmathfloatviewdepthxyz|，参数按浮点数解析，结果也以浮点数编码。可以用
+    |\pgfmathfloattofixed{\pgfmathresult}| 生成定点表示。
+
+    对于 |\pgfplotsmathviewdepthxyz|，内积使用 \TeX{} 算术完成，结果以定点数赋值。它略快，但数值范围小得多。
+
+    这两个命令都只能在三维 \PGFPlots{} 坐标轴\emph{内部}使用（坐标轴初始化之后，参见
+    |\pgfplotsextra|）。
+\end{commandlist}
+
+\begin{texif}{pgfplotsthreedim}
+    一个 \TeX{} |\if|：如果坐标轴是三维的，求 \meta{true code}；否则求 \meta{else code}。
+\end{texif}
+
+
+\section{访问坐标轴范围}
+
+也可以在可视化阶段，即在 |\end{axis}| 期间，访问坐标轴范围。请参见
+第~\pageref{page:access:limits} 页上 |xmin| 的参考文档。
+
+
+\section{访问点坐标的值}
+
+在可视化阶段，\PGFPlots{} 提供了对当前正在处理的坐标及其值的访问。
+
+这种访问需要调用特定的宏。这些宏把坐标值写入一些公开的键值对中。然后，就可以访问当前点的 $x$、$y$、$z$ 和颜色数据。
+
+\begin{commandlist}{\pgfplotspointgetcoordinates,\pgfplotspointgetcoordinates\marg{point}}
+
+    调用此宏之后，会设置以下键：
+
+    \declaretext{/data point/x} 将包含当前点的 $x$ 坐标。
+
+    \declaretext{/data point/y} 将包含当前点的 $y$ 坐标。
+
+    \declaretext{/data point/z} 将包含当前点的 $z$ 坐标（如果适用）。
+
+    \declaretext{/data point/meta} 将包含当前点的
+    |point meta| 值（如果适用）。
+
+    \declaretext{/data point/index} 将包含当前点在坐标流中的索引。它实际上与 |\coordindex| 相同。
+
+    此命令实际上支持两种工作模式：
+    %
+    \begin{enumerate}
+        \item 不带参数。此时，它返回当前绘图处理器即将处理的点的值。
+        \item 带花括号参数。此时，它接受一个坐标并相应地为各键赋值。请注意，此命令仅支持二维坐标轴，并且只赋值
+            |/data point/x| 和 |/data point/y|。
+    \end{enumerate}
+
+    返回的值与你在坐标轴上读到的相同，也与你写进 |axis cs| 的相同。
+
+    这意味着任何 |x coord inv trafo| 都已经作用在该值上。也就是说，即使内部坐标是以对数形式存储的，这里也已经调用了指数函数。
+
+    对于任何 |scatter| 图（包括 |nodes near coords|），此函数都会被隐式调用。这样就可以一次性访问\emph{所有}坐标值：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [
+        domain=0:360,
+        samples=9,
+        only marks,
+        nodes near coords={%
+            \footnotesize
+            $(\pgfmathprintnumber
+                {\pgfkeysvalueof{/data point/x}},
+               \pgfmathprintnumber
+                {\pgfkeysvalueof{/data point/y}})$%
+        },
+    ] {sin(x)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    这个例子之所以能工作，是因为 |\pgfplotspointgetcoordinates| 是 |nodes near coords| 标准实现的一部分；得到的值可以直接使用。请注意，如果只打印一个值，前面的例子还可以更简单：|nodes near coords| 会退回到使用 |point meta|。而 |point meta| 默认情况下本来就包含 $y$ 坐标。
+
+    一个更高级的例子是：在 |ybar| 图中，希望把节点放在坐标轴下端，并从节点到相应柱条画一些虚线：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    nodes near coords,
+    %
+    % we want to provide absolute 'at' values
+    % for the nodes:
+    scatter/position=absolute,
+    every node near coord/.style={
+        at={(\pgfkeysvalueof{/data point/x},-1)},
+        % pretty printing:
+        anchor=north,
+        /pgf/number format/fixed,
+        /pgf/number format/precision=1,
+        % assign a name which can be referenced below:
+        name=NNC\pgfkeysvalueof{/data point/index},
+    },
+    % ... draw a dotted line between
+    % the marker and the bar:
+    /pgfplots/scatter/@post marker code/.add code={}{
+        \draw [dotted,help lines]
+            (NNC\pgfkeysvalueof{/data point/index})
+            -- (\pgfkeysvalueof{/data point/x},
+            {min(0,\pgfkeysvalueof{/data point/y})});
+    },
+    % assign suitable tick labels:
+    xtick=data,
+]
+    % some dummy data:
+    \addplot+ [
+        domain=0:360,
+        bar width=360/9,
+        samples=9,
+    ] {sin(x)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    同样，该命令是作为 |nodes near coords| 的一部分隐式使用的，因此在例子本身中并未出现。
+
+    \paragraph{另请参见} 在线相关示例：
+    \url{https://tex.stackexchange.com/a/141006}。它演示了如何根据数值（放在柱条内部或柱条上方）放置由 |nodes near coords| 生成的节点。
+
+    下面的例子使用一个花括号参数，我们希望获取该参数的坐标值：
+    %
+\begin{codeexample}[]
+% requires \usetikzlibrary{intersections}
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [name path=A] {x^3};
+
+    \draw [red,name path=HelperLine]
+        (axis cs:-6,-100) -- (axis cs:6,130);
+
+    \draw [
+        font=\footnotesize,
+        name intersections={of=A and HelperLine},
+    ]
+    node [pin={right:
+      \pgfplotspointgetcoordinates{(intersection-1)}
+        $(\pgfmathprintnumber[fixed]{
+            \pgfkeysvalueof{/data point/x}},
+          \pgfmathprintnumber[fixed]{
+            \pgfkeysvalueof{/data point/y}})$
+      }
+    ] at (intersection-1) {}
+    node [pin={
+      \pgfplotspointgetcoordinates{(intersection-2)}
+        $(\pgfmathprintnumber[fixed]{
+            \pgfkeysvalueof{/data point/x}},
+          \pgfmathprintnumber[fixed]{
+            \pgfkeysvalueof{/data point/y}})$
+      }
+    ] at (intersection-2) {};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    该例子计算并命名了 |A| 与 |HelperLine| 的交点。下面的代码在交点处生成 pin。为此，它使用
+    |\pgfplotspointgetcoordinates|\marg{point}，该宏会定义 |/data point/x|
+    和 |/data point/y|。然后，用 |\pgfmathprintnumber| 把这些值格式化输出。
+
+    在第二种模式下，|\pgfplotspointgetcoordinates|\marg{point} 期望 \meta{point} 为以下二者之一：
+    %
+    \begin{enumerate}
+        \item 一个基础层 \PGF{} 点，例如 |\pgfpointanchor{A}{center}|；或
+        \item 一个 \Tikz{} 点，例如 |(A.base)| 或 |(3,5)|。
+    \end{enumerate}
+\end{commandlist}
+
+\begin{command}{\pgfplotspointgetnormalizedcoordinates}
+    与 |\pgfplotspointgetcoordinates| 非常相似的一个宏。同样，它也应在可视化阶段调用。
+
+    它赋值的输出宏完全相同，但值不同。更准确地说，它定义的宏为：
+
+    \declaretext{/data point/x} 将包含当前点的\emph{归一化} $x$ 坐标。
+
+    \declaretext{/data point/y} 将包含当前点的\emph{归一化} $y$ 坐标。
+
+    \declaretext{/data point/z} 将包含当前点的\emph{归一化} $z$ 坐标（如果适用）。
+
+    \declaretext{/data point/meta} 将包含当前点的
+    |point meta| 值（如果适用）。
+
+    \declaretext{/data point/index} 将包含当前点在坐标流中的索引。它实际上与 |\coordindex| 相同。
+
+    关键字 \declaretext{normalized} 表示这些值采用适合坐标轴使用的数值形式。更具体地说：任何用户 |x coord inv trafo| 都会被\emph{忽略}。一个重要的例子是 |symbolic x coords|：归一化坐标将是某些关联数字，而不是符号。而
+    |\pgfplotspointgetcoordinates| 返回的结果则是符号。对于对数坐标轴，归一化值是对数。
+
+    通常，当你希望执行某种数学运算（如求平均或做差）时，归一化值会更有用。
+
+    此函数需要显式调用。目前 |ybar stacked| 用它来对齐 |nodes near coords|。
+\end{command}
+
+
+\section{图层访问}
+
+\begin{command}{\pgfplotsonlayer\marg{layer name}}
+    一个底层命令，它会检查当前坐标轴是否启用了图层支持；如果启用，则调用 |\pgfonlayer|\marg{layer name}。
+
+    必须有一个 |\endpgfplotsonlayer| 来结束该环境。
+\end{command}
+
+\begin{command}{\endpgfplotsonlayer}
+    |\pgfplotsonlayer| 的结束。
+\end{command}
+
+\begin{command}{\pgfonlayer\marg{layer name}}
+    \PGF{} 的一个底层命令，它会把直到匹配的 |\endpgfonlayer| 之前的所有内容收集到图层 \meta{layer name} 中。
+
+    \meta{layer name} 必须是活动的，即它必须是 |set layers| 图层名集合的一部分。
+
+    唯一的特殊情况是：如果你在某处调用 |\pgfdeclarelayer{discard}|，这个特殊图层具有一个「神奇的名字」，当用 |\pgfonlayer{discard}| 启用时，它充当 |/dev/null|：它不必是活动的，分配给该图层的所有内容都会被丢弃——只要它不在图层名配置之中。
+
+    必须有一个 |\endpgfonlayer| 来结束该环境。
+\end{command}
+
+\begin{command}{\endpgfonlayer}
+    |\pgfonlayer| 的结束。
+\end{command}
+
+
+\begin{command}{\pgfsetlayers\marg{layer list}}
+    这是 \PGF{} 的一个底层命令。在撰写本文时，它是告诉 \PGF{} 当前/下一张图应使用哪些图层的唯一方式。它由 |set layers| 隐式使用。
+\end{command}

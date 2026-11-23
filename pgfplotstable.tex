@@ -1,0 +1,4299 @@
+
+%%%%%%%%%%%%%%%%%%[basicstyle=\footnotesize\ttfamily]%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Package pgfplots.sty documentation.
+%
+% Copyright 2007-2009 by Christian Feuersaenger.
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifdefined\pdfvariable
+    \pdfvariable minorversion=5
+    \pdfvariable objcompresslevel=2
+\else\ifdefined\XeTeXversion
+    \special{pdf:minorversion 5}
+    \special{dvipdfmx:config z 2} % also sets normal compresslevel=2
+\else
+    \pdfminorversion=5 % to allow compression
+    \pdfobjcompresslevel=2
+\fi\fi
+\documentclass[a4paper,doc2]{ltxdoc}
+\input{pgfplots.preamble.tex}
+
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{eurosym}
+\usepackage{multirow}
+
+\pgfqkeys{/codeexample}{%
+    every codeexample/.style={
+        width=4cm,
+        /pgfplots/every axis/.append style={legend style={fill=graphicbackground}}
+    },
+    narrow/.style={width=7cm},
+    tabsize=4,
+}
+
+\pgfkeys{/pgfmanual/gray key prefixes/.add={/pgfplots/table/,/pgf/number format/,}{}}
+
+\makeatletter
+\pgfkeys{%
+    /codeexample/prettyprint/key name with handler/.code 2 args={%
+        \gdef\pgfplotstablemanualautocheck{}%
+        \foreach \special in {columns,create on use,alias,display columns}{%
+            \expandafter\pgfutil@in@\expandafter{\special/}{#1}%
+            \ifpgfutil@in@
+                \xdef\pgfplotstablemanualautocheck{\special}%
+                \breakforeach
+            \fi
+        }%
+        \ifx\pgfplotstablemanualautocheck\pgfutil@empty%
+            \pgfmanualpdfref{#1}{#1}/\pgfmanualpdfref{/handlers/#2}{#2}%
+        \else
+            \expandafter\def\expandafter\temp\expandafter##\expandafter1\pgfplotstablemanualautocheck/##2\relax{%
+                \pgfmanualpdfref
+                    {/pgfplots/table/\pgfplotstablemanualautocheck}%
+                    {##1\pgfplotstablemanualautocheck/}%
+                ##2/%
+                \pgfmanualpdfref{/handlers/#2}{#2}%
+            }%
+            \temp#1\relax
+        \fi
+    },
+    /pdflinks/search key prefixes in/.add={/pgf/number format/,}{,/pgfplots/table/create col/},
+    /pdflinks/show labels=false,
+}
+\makeatother
+
+\pgfplotstableset{
+    %debug=true,
+    begin table=\begin{tabular}[b],
+}
+
+\title{%
+    \PGFPlotstable{} 宏包手册\\
+    {\small\PGFPlots{} 的组成部分，版本 \pgfplotsversion}\\
+    {\small\url{https://github.com/pgf-tikz/pgfplots}}}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+    本宏包从输入读取以制表符分隔的数值表格，并生成排版精美的
+    \LaTeX{} tabular 代码。它会按所需精度四舍五入，并以不同的数字格式样式打印。
+\end{abstract}
+
+\tableofcontents
+
+
+\section{引言}
+
+\PGFPlotstable{} 是 \PGFPlots{} 的一个轻量子宏包，它借用 \PGFPlots{} 的表格输入
+方法和数字格式化技术，把以制表符分隔的表格转换为 tabular。
+
+它的输入是一个文本文件，包含以空白分隔的行，可能以列名开头。它的输出是一个
+\LaTeX{} tabular\footnote{关于纯 \TeX{} 和 Con\TeX{}t，请参见
+节~\ref{sec:pgfplotstable:context} 中的说明。}，其中包含文本表格中被选中的列，
+按所需精度四舍五入，并以所需的数字格式（定点、整数、科学计数法等）打印。
+输出是 \LaTeX{} 代码，该代码最终由 \LaTeX{} 排版。
+
+换句话说，\PGFPlotstable{} 不过是一个多少有点聪明的代码生成器，吐出类似
+|\begin{tabular}...\end{tabular}| 的东西。如果你想定制依赖于行或列的样式，
+或者你有数值数据、希望自动格式化其内容，就可以使用它。
+
+它通过下面的方式使用
+%
+% NO GALLERY
+\begin{codeexample}[code only]
+\usepackage{pgfplotstable}
+% recommended:
+%\usepackage{booktabs}
+%\usepackage{array}
+%\usepackage{colortbl}
+\end{codeexample}
+%
+\noindent 并且要求已安装 \PGFPlots{} 和 \PGF{} $ \ge 2.00$。
+
+\begin{command}{\pgfplotstableset\marg{key-value-options}}
+    本宏包的用户界面基于键值选项。它们决定显示什么、如何排版以及计算什么。
+
+    键值对可以通过两种方式设置：
+    %
+    \begin{enumerate}
+        \item 作为整个文档（或文档某一部分）的默认设置，使用
+            |\pgfplotstableset|\marg{options}。例如，文档的导言区可以包含
+            %
+% NO GALLERY
+\begin{codeexample}[code only]
+\pgfplotstableset{fixed zerofill,precision=3}
+\end{codeexample}
+            %
+            以配置小数点后保留 $3$ 位精度，并补零使所有定点数都恰好有 $3$ 位。
+        \item 作为只影响单个表格的选项。它作为可选参数提供给相应的表格排版命令，
+            例如 |\pgfplotstabletypeset|\oarg{options}\marg{file}。
+    \end{enumerate}
+    %
+    下面的例子会展示这两种方式。
+
+    了解 |pgfkeys| 有助于更深入地理解本宏包，因为 |/.style|、|/.append style|
+    等都是 |pgfkeys| 特有的。要进一步了解 |pgfkeys|，请参阅
+    \PGF{} 手册~\cite[Section ``pgfkeys'']{tikz} 或更简短的介绍~\cite{keyvalintro}。
+    否则，直接跳到本文档提供的例子即可。
+
+    你会看到键前缀 |/pgfplots/table/| 和 |/pgf/number format/|。
+    在 \PGFPlotstable{} 中使用时，这些前缀可以省略；它们属于 |pgfkeys| 的
+    ``默认键路径''。
+\end{command}
+
+
+\section{加载并显示数据}
+
+\subsection{文本表格输入格式}
+
+\PGFPlotstable{} 处理纯文本文件表格，其中的条目（``单元格''）由一个分隔字符隔开。
+初始的分隔字符是 ``空白''，意思是 ``至少一个空格或制表符''（参见下面的选项
+|col sep|）。这类表格可以有一行表头，其中包含列名，而其余大多数列通常包含数值数据。
+
+\noindent 下面的列表展示了 |pgfplotstable.example1.dat|，本文档中会经常用到它。
+%
+\begin{codeexample}[code only]
+# Convergence results
+# fictional source, generated 2008
+level    dof      error1            error2   info     grad(log(dof),log(error2)) quot(error1)
+1        4        2.50000000e-01    7.57858283e-01    48       0                 0
+2        16       6.25000000e-02    5.00000000e-01    25       -3.00000000e-01   4
+3        64       1.56250000e-02    2.87174589e-01    41       -3.99999999e-01   4
+4        256      3.90625000e-03    1.43587294e-01    8        -5.00000003e-01   4
+5        1024     9.76562500e-04    4.41941738e-02    22       -8.49999999e-01   4
+6        4096     2.44140625e-04    1.69802322e-02    46       -6.90000001e-01   4
+7        16384    6.10351562e-05    8.20091159e-03    40       -5.24999999e-01   4
+8        65536    1.52587891e-05    3.90625000e-03    48       -5.35000000e-01   3.99999999e+00
+9        262144   3.81469727e-06    1.95312500e-03    33       -5.00000000e-01   4.00000001e+00
+10       1048576  9.53674316e-07    9.76562500e-04    2        -5.00000000e-01   4.00000001e+00
+\end{codeexample}
+%
+以 `|%|' 或 `|#|' 开头的行被视为注释行，会被忽略。
+
+\begin{command}{\pgfplotstabletypeset\oarg{optional arguments}\marg{file name {\normalfont or} \textbackslash macro {\normalfont or} inline table}}
+    加载（或获取）一个表格，并使用当前的数字格式和表格选项配置对其排版。
+
+    如果第一个参数是文件名，则从磁盘加载表格。如果它是一个已加载的表格
+    （参见 |\pgfplotstableread| 或 |\pgfplotstablenew|），就直接使用它。
+    否则，如果它是内联表格数据，这些数据会像在文件中找到的那样被解析
+    （参见 |\pgfplotstableread|）。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[sci zerofill]{
+    a b
+    5000 1.234e5
+    6000 1.631e5
+    7000 2.1013e5
+    9000 1000000
+}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfplotstabletypeset{pgfplotstable.example1.dat}
+\end{codeexample}
+
+    \noindent 可以用 \meta{optional arguments} 定制配置。配置可以针对整个表格，
+    也可以针对特定的列（或行）。
+
+\begin{codeexample}[]
+\pgfplotstableset{% global config, for example in the preamble
+    % these columns/<colname>/.style={<options>} things define a style
+    % which applies to <colname> only.
+    columns/dof/.style={int detect,column type=r,column name=\textsc{Dof}},
+    columns/error1/.style={
+        sci,sci zerofill,sci sep align,precision=1,sci superscript,
+        column name=$e_1$,
+    },
+    columns/error2/.style={
+        sci,sci zerofill,sci sep align,precision=2,sci 10e,
+        column name=$e_2$,
+    },
+    columns/{grad(log(dof),log(error2))}/.style={
+        string replace={0}{}, % erase '0'
+        column name={$\nabla e_2$},
+        dec sep align,
+    },
+    columns/{quot(error1)}/.style={
+        string replace={0}{}, % erase '0'
+        column name={$\frac{e_1^{(n)}}{e_1^{(n-1)}}$}
+    },
+    empty cells with={--}, % replace empty cells with '--'
+    every head row/.style={before row=\toprule,after row=\midrule},
+    every last row/.style={after row=\bottomrule}
+}
+\pgfplotstabletypeset[ % local config, applies only for this table
+    1000 sep={\,},
+    columns/info/.style={
+        fixed,fixed zerofill,precision=1,showpos,
+        column type=r,
+    }
+]
+{pgfplotstable.example1.dat}
+\end{codeexample}
+
+    \noindent 所有这些选项都会在后面各节中详细解释。
+
+    你也可以使用类似于 tabular 环境的输入格式：
+    %
+\begin{codeexample}[width=8cm]
+\pgfplotstabletypeset
+    [col sep=&,row sep=\\,sci zerofill]
+{
+    level &  dof &    error \\
+    1 &      4 &      2.50000000e-01 \\
+    2 &      16 &     6.25000000e-02 \\
+    3 &      64 &     1.56250000e-02 \\
+    4 &      256 &    3.90625000e-03 \\
+    5 &      1024 &   9.76562500e-04 \\
+    6 &      4096 &   2.44140625e-04 \\
+    7 &      16384 &  6.10351562e-05 \\
+    8 &      65536 &  1.52587891e-05 \\
+    9 &      262144 & 3.81469727e-06 \\
+    10 &     1048576 &9.53674316e-07 \\
+}
+\end{codeexample}
+
+    技术说明：每个被打开的文件都会记录到你的日志文件中。
+\end{command}
+
+\begin{command}{\pgfplotstabletypesetfile\oarg{optional arguments}\marg{file name}}
+    加载表格 \meta{file name} 并对其排版。从 \PGFPlotstable{} 1.2 起，
+    这个命令是 |\pgfplotstabletypeset| 的别名，也就是说第一个参数既可以是文件名，
+    也可以是一个已加载的表格。
+\end{command}
+
+\begin{commandlist}{%
+    \pgfplotstableread\marg{file name}\marg{\textbackslash macro},
+    \pgfplotstableread\marg{inline table}\marg{\textbackslash macro}%
+}
+    把一个表格加载到 \TeX{} 宏 \meta{\textbackslash macro} 中。该宏会把表格存为内部
+    结构，可多次使用。
+    %
+\begin{codeexample}[]
+\pgfplotstableread{pgfplotstable.example1.dat}\loadedtable
+\pgfplotstabletypeset[columns={dof,error1}]\loadedtable
+\hspace{2cm}
+\pgfplotstabletypeset[columns={dof,error2}]\loadedtable
+\end{codeexample}
+    %
+    第一个参数可以像本例这样是一个 \meta{file name}。也可以直接提供表格数据：
+    %
+\begin{codeexample}[code only]
+% Alternative: inline table data:
+\pgfplotstableread{
+level   dof     error1  error2  info    grad(log(dof),log(error2))      quot(error1)
+1       4       2.50000000e-01  7.57858283e-01  48      0               0
+2       16      6.25000000e-02  5.00000000e-01  25      -3.00000000e-01 4
+3       64      1.56250000e-02  2.87174589e-01  41      -3.99999999e-01 4
+4       256     3.90625000e-03  1.43587294e-01  8       -5.00000003e-01 4
+5       1024    9.76562500e-04  4.41941738e-02  22      -8.49999999e-01 4
+6       4096    2.44140625e-04  1.69802322e-02  46      -6.90000001e-01 4
+7       16384   6.10351562e-05  8.20091159e-03  40      -5.24999999e-01 4
+8       65536   1.52587891e-05  3.90625000e-03  48      -5.35000000e-01 3.99999999e+00
+9       262144  3.81469727e-06  1.95312500e-03  33      -5.00000000e-01 4.00000001e+00
+10      1048576 9.53674316e-07  9.76562500e-04  2       -5.00000000e-01 4.00000001e+00
+}\loadedtable
+% can be used as above:
+\pgfplotstabletypeset[columns={dof,error1}]\loadedtable
+\hspace{2cm}
+\pgfplotstabletypeset[columns={dof,error2}]\loadedtable
+\end{codeexample}
+    %
+    它会自动检查第一个参数包含的是内联数据还是文件名。
+
+    判断第一个参数是内联数据还是文件名的检查如下进行：如果 |format=auto|，
+    则第一个参数被视为文件名，除非它包含 |row sep| 字符（参见 |row sep|）。
+    如果 |format=inline|，它总是被视为内联数据。如果 |format=file|，它就是文件名。
+
+
+    \paragraph{特殊情况与更多细节：}
+
+    \begin{itemize}
+        \item 内联数据格式是 ``脆弱的''。如果你遇到问题，请用 `|\\|'
+            配合 |row sep=\\| 来结束表格（|row sep| 的文档中包含其他方式和更多解释）。
+        \item 这个命令还有一些变体，它们并不真正建立一个结构体，而是把每一行
+            报告给一个 ``监听器''。还有一个结构体可以避免被 \TeX{} 作用域保护。
+            如果你需要这类东西，请阅读源代码注释。
+        \item 技术说明：每个被打开的文件都会记录到你的日志文件中。
+        \item 注意：避免把 `|\table|' 用作名字，它会与 \LaTeX{} 的
+            |\begin{table}| 冲突。
+    \end{itemize}
+\end{commandlist}
+
+\begin{key}{/pgfplots/table/col sep=\mchoice{space,tab,comma,semicolon,colon,braces,\&,ampersand} (initially space)}
+    指定读取表格时所用的列分隔字符。初始选项 |space| 表示 ``至少一个空白''。
+    空白指制表位或空格（换行符总是用于分隔行）。
+
+    例如，文件 |pgfplotstable.example1.csv| 使用逗号作为分隔字符。
+    %
+\begin{codeexample}[code only]
+# Convergence results
+# fictional source generated 2008
+level,dof,error1,error2,info,{grad(log(dof),log(error2))},quot(error1)
+1,9,2.50000000e-01,7.57858283e-01,48,0,0
+2,25,6.25000000e-02,5.00000000e-01,25,-1.35691545e+00,4
+3,81,1.56250000e-02,2.87174589e-01,41,-1.17924958e+00,4
+4,289,3.90625000e-03,1.43587294e-01,8,-1.08987331e+00,4
+5,1089,9.76562500e-04,4.41941738e-02,22,-1.04500712e+00,4
+6,4225,2.44140625e-04,1.69802322e-02,46,-1.02252239e+00,4
+7,16641,6.10351562e-05,8.20091159e-03,40,-1.01126607e+00,4
+8,66049,1.52587891e-05,3.90625000e-03,48,-1.00563427e+00,3.99999999e+00
+9,263169,3.81469727e-06,1.95312500e-03,33,-1.00281745e+00,4.00000001e+00
+10,1050625,9.53674316e-07,9.76562500e-04,2,-1.00140880e+00,4.00000001e+00
+\end{codeexample}
+    %
+    因此，我们读取它时需要指定 |col sep=comma|。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[col sep=comma]{pgfplotstable.example1.csv}
+\end{codeexample}
+    %
+    如果你的所有表格都用逗号作为列分隔符，你可以在导言区调用一次
+    |\pgfplotstableset{col sep=comma}|。
+
+    请注意，如果单元格条目（例如列名）包含分隔字符，你需要用\emph{花括号}
+    把该列条目括起来：|{grad(log(dof),log(error2)}|。如果你想使用不配对的花括号，
+    需要在花括号前写一个反斜杠。例如，名字 `|column{withbrace|' 需要写成
+    `|column\{withbrace|'。
+
+    当 |col sep|$\neq$|space| 时，空格会被视为参数的一部分（不做裁剪）。
+    不过（和 \TeX{} 中通常一样），连续多个空格和制表符会被替换为一个空白。
+    当然，如果 |col sep=tab|，制表符就是列分隔符，会被特殊处理。
+
+    此外，如果在 |col sep=space| 的情况下需要空单元格，你必须用 |{}| 来界定
+    这样一个单元格，因为 |col sep=space| 使用\emph{至少}一个空白（会吞掉其后所有的空白）。
+
+    取值 |col sep=braces| 比较特殊，因为它实际上使用两个分隔字符。
+    对于这个选项，每个单元格条目都由一对开花括号和闭花括号界定，即 \meta{entry}。
+    此外，在 |braces| 情形下，单元格条目之间的任何空白（空格和制表符）都会被\emph{跳过}，
+    直到找到下一个 \meta{entry}。
+
+    |col sep=braces| 的另一个特别之处是它支持\emph{多行}单元格：配对花括号内的一切
+    都被视为某个单元格的一部分，这包括换行：\footnote{配对花括号内换行的这种处理，
+    实际上同样适用于其他所有列分隔符（这是 \TeX{} 的读行特性）。换句话说：只要你把
+    单元格用配对花括号括起来，那么对每一种列分隔符你\emph{都可以}使用多行单元格。
+    不过，\texttt{col sep=braces} 有一个特殊处理：行尾算作空白字符；而对于其他所有
+    \texttt{col sep} 取值，这种空白都会被抑制，以消除多余空格。}
+
+    |col sep=&| 的情形（通常配合 |row sep=\\|）允许像你平时在 \LaTeX{} 中那样
+    输入表格来读取。这会自动启用 |trim cells|。
+\end{key}
+
+\begin{key}{/pgfplots/table/trim cells=\mchoice{true,false} (initially false)}
+    如果启用，读取表格时会去除前导和尾随空白。
+
+    当 |col sep|$\neq$|space| 而你的单元格中含有空格时，这可能是必要的。
+    对于 |col sep=&|，它会自动启用。
+\end{key}
+
+\begin{key}{/pgfplots/table/header=\mchoice{true,false,has colnames} (initially true)}
+    配置在输入过程中是否应自动识别列名。
+
+    第一个非注释行\emph{可以}是包含列名的表头。|header| 键配置如何检测是否真的如此。
+
+    选项 \declaretext{true} 启用列名的自动检测：如果第一个非注释行至少包含一个
+    非数值条目（例如 `|a name|'），则该行中的每个条目都被认为是列名。如果第一个
+    非注释行只包含数值数据，它就被用作数据行。在这种情况下，列索引将被指定为列 ``名''。
+
+    选项 \declaretext{false} 与上一种情形相同，也就是说即使第一行包含字符串，
+    它们也不会被识别为列名。
+
+    最后，选项 \declaretext{has colnames} 与 |false| 相反：它假定第一个非注释行
+    \emph{包含}列名。
+    换句话说：即使第一行只含有数字，它们也会被视为列\emph{名}。
+
+    注意，这个键只配置\emph{输入}表格的表头。要配置\emph{输出}表头，
+    可参看 |every head row|。
+\end{key}
+
+\begin{pgfplotskey}{table/format=\mchoice{auto,inline,file} (initially auto)}
+    配置 |\pgfplotstableread|\marg{input} 的第一个参数所期待的格式。
+
+    选项 \declaretext{inline} 直接把表格数据作为参数，其中行由 |row sep| 分隔。
+    内联数据是 ``脆弱的''，因为 \TeX{} 可能吞掉行尾字符（或 |col sep| 字符）。
+    细节见 |row sep|。
+
+    选项 \declaretext{file} 期待一个文件名。
+
+    选项 \declaretext{auto} 在提供给 |\pgfplotstableread| 的第一个参数中查找 |row sep|。
+    如果找到 |row sep|，就是内联数据，否则就是文件名。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{table/row sep=\mchoice{newline,\string\\} (initially newline)}
+    配置用于分隔内联表格数据格式（见 |format=inline|）中各行的字符。
+
+    选项 \declaretext{newline} 使用表格数据中（即输入文件或任何内联表格数据）
+    所出现的行尾。
+
+    选项 \declaretext{\string\\} 用 `|\\|' 来表示一行的结束。
+
+    注意，对内联表格数据使用 \declaretext{newline} 是 ``脆弱的''：你不能在
+    \TeX{} 宏内部提供这样的数据（这不适用于输入文件）。每当遇到问题时，
+    请按如下方式处理：
+    %
+    \begin{enumerate}
+        \item 第一种办法：在任何宏声明\emph{之外}调用
+            |\pgfplotstableread|\marg{data}|\yourmacro|。
+        \item 使用 |row sep=\\|。
+    \end{enumerate}
+    %
+    如果你对内联数据和特殊的 |col sep| 选项（如 |col sep=tab|）遇到问题，同样适用。
+
+    这类问题的原因在于：\TeX{} 会扫描宏体并把换行替换为空白。它还会做其他这类替换，
+    而这些替换无法撤销（甚至可能无法被发现）。
+\end{pgfplotskey}
+
+\begin{key}{/pgfplots/table/ignore chars=\marg{comma-separated-list} (initially empty)}
+    允许为单个字符定义一个 ``忽略列表''。在输入文件中找到、同时也出现在
+    \meta{comma-separated-list} 中的任何字符，都会被悄悄丢弃。其处理完全等同于
+    你一开始根本就没有写出它们。
+
+    例如，假设我们有 |pgfplotstable.example5.dat|，其内容为
+    %
+        \lstinputlisting[basicstyle=\ttfamily\footnotesize]{pgfplotstable.example5.dat}
+
+    \noindent 那么，我们可以通过下面的写法忽略其中若干字符
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset
+    [col sep=comma,ignore chars={(,),\ ,\#}]
+    {pgfplotstable.example5.dat}
+\end{codeexample}
+
+    \meta{comma-separated-list} 的每个列表元素应恰好包含一个字符，这些单个字符之间
+    用逗号分隔。某些特殊字符，如逗号、空白、井号、百分号或反斜杠，需要在前面加一个
+    反斜杠来转义。
+
+    除了普通字符之外，它还支持从输入文件中消除任何二进制代码。例如，假设你的文件中
+    有代码为 |0x01|（十六进制记法）的二进制字符。那么，使用
+    %
+\begin{codeexample}[code only]
+\pgfplotstableset{ignore chars={\^^01}}
+\end{codeexample}
+    \noindent 来悄悄消除它们。|^^|\meta{digit}\meta{digit} 记法是 \TeX{} 的一个特性，
+    用于以十六进制编码提供字符，其中 \meta{digit} 是 |0123456789abcdef| 之一。
+    我不知道 |\^^01| 中的反斜杠是否总是必要，你可以试试看。还有一种基于字符的记法，
+    其中 |\^^M| 是 \meta{newline}，|\^^I| 是 \meta{tab}。更多细节参见~\cite{texbook}。
+
+    注意，剥离所有这些字符之后，输入表格必须仍然有效——它仍应包含列分隔符且各列平衡。
+
+    这个设置同样适用于 \PGFPlots{} 的 |\addplot table| 和 |\addplot file|。
+
+    注意，当 |ignore chars| 应用于 |format=inline| 或 |format=auto| 时是 ``脆弱的''。
+    如果遇到问题，请考虑使用 |format=file|。\footnote{关于处理脆弱的内联表格格式的
+    更多信息，另见 |row\ sep|。}
+\end{key}
+
+\begin{key}{/pgfplots/table/white space chars=\marg{comma-separated-list} (initially empty)}
+    允许定义一个单个字符的列表，这些字符实际上被当作空白处理（除制表符和空格之外）。
+    它在想要使用多个列分隔字符时可能有用。
+
+    |white space chars| 列表的用法与 |ignore chars| 完全相同，上面的说明同样适用。
+\end{key}
+
+\begin{key}{/pgfplots/table/text special chars=\marg{comma-separated-list} (initially empty)}
+    允许定义一个单个字符的列表，这些字符实际上被当作普通文本处理
+    （就像任何类别码为~$12$ 的字符一样）。
+
+    |text special chars| 列表的用法与 |ignore chars| 完全相同，上面的说明同样适用。
+
+    注意，某些（特定的）特殊字符是由 |verb string type| 安装的。
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    font=\ttfamily,
+    verb string type,
+]{
+URI
+http://example.org/a#b
+}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgfplots/table/comment chars=\marg{comma-separated-list} (initially empty)}
+    允许添加一个或多个\emph{额外的}注释字符。这些字符中的每一个都具有与 |#| 字符
+    类似的效果，也就是说该输入行中其后的所有字符都会被跳过。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[comment chars=!]{
+! Some comments
+1 0
+2 -10
+! another comment line
+3 0
+}
+\end{codeexample}
+    %
+    上面的例子使用 `|!|' 作为额外的注释字符（这样就能解析 Touchstone 文件）。
+\end{key}
+
+\begin{key}{/pgfplots/table/percent is letter=\mchoice{true,false} (initially false)}
+    允许控制如何处理输入文件中的百分号字符。\PGFPlotstable{} 过去会保留 \TeX{} 中
+    百分号作为注释字符的特殊含义，也就是说百分号之后的所有字符都会被忽略。
+
+    取值 \declaretext{true} 表示百分号只是一个普通字母，没有特殊含义。
+    取值 \declaretext{false} 表示百分号仍像过去那样是特殊的。
+\end{key}
+
+\begin{key}{/pgfplots/table/text indicator=\marg{char} (initially empty)}
+    允许定义一个文本指示字符。如果定义了它，就可以用它在单元格正文中括起分隔符：
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[text indicator=",string type]{
+A B
+"A long cell" normalcell
+}
+\end{codeexample}
+
+    如果 |text indicator| 也出现在单元格内部，就必须把它双写：
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[text indicator=",string type]{
+A B
+"A long ""cell""" normalcell
+}
+\end{codeexample}
+
+    不以文本指示符开头的单元格按通常方式处理。注意，|text indicator| 不支持多行单元格。
+\end{key}
+
+\begin{key}{/pgfplots/table/skip first n=\marg{integer} (initially 0)}
+    允许跳过输入文件的前 \meta{integer} 行。这些行不会被处理。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[skip first n=4]{%<- this '%' is important. Otherwise, the
+                                      %newline here would delimit an (empty) row.
+    XYZ Format,
+    Version 1.234
+    Date 2010-09-01
+    @author Mustermann
+    A B C
+    1 2 3
+    4 5 6
+}
+\end{codeexample}
+\end{key}
+
+% FIXME: duplicate code in pgfplotstable.tex and pgfplots.reference.axis-addplot.tex
+\begin{key}{/pgfplots/table/search path=\marg{comma-separated-list} (initially .)}
+    允许为输入表格提供搜索路径。每当 \PGFPlots{} 试图读取一个数据文件时，都会计算
+    这个变量。这包括 |\pgfplotstableread| 和 |\addplot table|；它的值是一个逗号分隔的
+    路径名列表。所请求的文件将从该列表中第一个匹配的位置读取。
+
+    使用 `|.|' 表示用 \TeX{} 正常的文件搜索过程来搜索（即通常在当前工作目录中）。
+
+    \meta{comma-separated-list} 中的条目可以相对于当前工作目录，也就是说像
+    |search path={.,../datafiles}| 这样是可以接受的。
+\end{key}
+
+% FIXME: duplicate code in pgfplotstable.tex and pgfplots.reference.axis-addplot.tex
+\begin{key}{/pgfplots/table/search path/implicit .=\mchoice{true,false} (initially true)}
+    \PGFPlotstable{} 允许隐式地把 `|.|' 添加到 |search path| 的值中，因为在搜索路径的
+    许多应用中通常都这样假定。
+
+    初始配置 |search path/implicit .=true| 将确保：如果用户的值不包含 `|.|'，
+    就在 |search path| 前面加上 `|.|'。
+
+    取值 |search path/implicit .=false| 则不添加 `|.|'。
+
+    请记住，`|.|' 表示 ``让 \TeX{} 自己去搜索文件''。这通常会在当前工作目录中找到文件，
+    但也会包括对 |TEXINPUTS| 的处理。
+\end{key}
+
+
+\subsection{选择列及其外观样式}
+
+\begin{key}{/pgfplots/table/columns=\marg{comma-separated-list}}
+    选择表格中特定的列。如果此选项为空（未提供），则选择所有可用的列。
+
+    在 \meta{comma-separated-list} 内部，应填写出现在表格表头中的列名。如果没有表头，
+    就直接用列索引。如果有列名，则可以用特殊语法 |[index]|\meta{integer} 按索引选择列。
+    第一列的索引为~$0$。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[columns={dof,level,[index]4}]{pgfplotstable.example1.dat}
+\end{codeexample}
+
+    |pgfkeys| 的特殊功能 |\pgfplotstableset{columns/.add={}{,a further col}}|
+    允许把一个值（这里是 `|,a further col|'）\emph{追加}到当前值之后。
+    细节参见 |/.add|。
+\end{key}
+
+\begin{pgfplotstablealiaskey}
+    为 \meta{real col name} 所表示的列指定新名字 \meta{col name}。此后，
+    访问 \meta{col name} 将使用与列 \meta{real col name} 相关联的数据。
+    %
+\begin{codeexample}[]
+% in preamble:
+\pgfplotstableset{
+    alias/newname/.initial=b,
+}
+
+% in document:
+\pgfplotstabletypeset[
+    columns={a,newname},% access to `newname' is the same as to `b'
+]{
+    a b
+    1 2
+    3 4
+    5 6
+}%
+\end{codeexample}
+    %
+    你可以用 |columns/|\meta{col name}|/.style| 来为这个别名（而不是原始列名）指定样式。
+
+    如果同时存在一个别名和一个同名的列，则优先使用列名。此外，如果还存在一个同名的
+    |create on use| 声明，也优先使用它。
+
+    如果 \meta{col name} 包含键设置所需的字符，你需要用花括号把它括起来：
+    ``|alias/{name=wi/th,special}/.initial={othername}|''。
+
+    每当查询列时都会用到这个键，它也适用于 \PGFPlots{} 的 |\addplot table| 语句。
+\end{pgfplotstablealiaskey}
+
+\begin{pgfplotstablecolumnkey}
+    只为 \meta{column name} 设置 \meta{key-value-list} 中的所有选项。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    columns/error1/.style={
+        column name=$L_2$,
+        sci,sci zerofill,sci subscript,
+        precision=3},
+    columns/error2/.style={
+        column name=$A$,
+        sci,sci zerofill,sci subscript,
+        precision=2},
+    columns/dof/.style={
+        int detect,
+        column name=\textsc{Dof}
+    }
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    如果你的列名包含逗号 `|,|'、斜杠 `|/|' 或等号 `|=|'，你需要用花括号把列名括起来。
+    %
+\begin{codeexample}[narrow]
+\pgfplotstabletypeset[
+    columns={dof,error1,{grad(log(dof),log(error2))}},
+    columns/error1/.style={
+        column name=$L_2$,
+        sci,sci zerofill,sci subscript,
+        precision=3},
+    columns/dof/.style={
+        int detect,
+        column name=\textsc{Dof}},
+    columns/{grad(log(dof),log(error2))}/.style={
+        column name=slopes $L_2$,
+        fixed,fixed zerofill,
+        precision=1}
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    如果你的表格没有列名，可以直接用整数索引代替 \meta{column name} 来引用列。
+    如果你有列名，就不能用索引来设置列样式。
+\end{pgfplotstablecolumnkey}
+
+\begin{pgfplotstabledisplaycolumnkey}
+    把 \meta{key-value-list} 中的所有选项只应用于输出表中出现在位置 \meta{index} 的那一列。
+
+    与 |table/columns/|\meta{name} 样式不同，此选项引用的是输出表而不是输入表。
+    由于输出表没有唯一的列名，你只能通过索引访问列。
+
+    索引从~$\mathit{index}=0$ 开始。
+
+    显示列样式覆盖输入列样式。
+\end{pgfplotstabledisplaycolumnkey}
+
+\begin{stylekey}{/pgfplots/table/every col no \meta{index}}
+    一个与 |display columns/|\meta{index} 相同的样式：它只应用于输出表中位置
+    \meta{index} 处的列。
+
+    细节见 |display columns/|\meta{index}。
+\end{stylekey}
+
+\begin{key}{/pgfplots/table/column type=\marg{tabular column type} (initially c)}
+    包含 |tabular| 的列类型。
+
+    如果所有列类型都为空，整个参数就被跳过（假定不生成 |tabular| 环境）。
+
+    使用 |\pgfplotstableset{column type/.add=|\marg{before}\marg{after}|}|
+    来\emph{修改}一个值，而不是覆盖它。|/.add| 键处理器对其他选项同样有效。
+    %
+\begin{codeexample}[narrow]
+\pgfplotstabletypeset[
+    columns={dof,error1,info},
+    column type/.add={|}{}% results in '|c'
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgfplots/table/column name=\marg{\TeX{} display column name} (initially \textbackslash pgfkeysnovalue)}
+    在当前上下文中设置列的显示名。
+
+    建议在某个特定列的样式内部提供此选项，也就是使用
+
+    |columns/|\marg{lowlevel colname}|/.style={column name=|\marg{\TeX{} display column name}|}| .
+
+    这里，``lowlevel colname'' 指的是出现在你输入表格中的列名。这个底层列名有一些限制
+    （例如它必须可展开——也就是说很多控制序列是被禁止的）。|column name| 的值只在
+    |\pgfplotstabletypeset| 内部使用，用于为相关列生成一个\emph{显示}名。
+
+    注意，你可以用 |column name={}| 提供一个\emph{空}显示名。在 |\pgfplotstabletypeset|
+    中使用时，这会在该列上方得到一个空字符串。
+
+    初始配置是 |column name=\pgfkeysnovalue|。这构成一个特殊的 ``空'' 值，告诉
+    |\pgfplotstabletypeset| 应回退到该列的名字（即底层名字）。
+\end{key}
+
+\begin{codekey}{/pgfplots/table/assign column name}
+    允许\emph{修改} |column name| 的值。
+
+    参数 |#1| 是当前的列名，也就是在计算完 |column name| 之后的值。在
+    |assign column name| 之后，应设置一个新的（可能已修改的）|column name| 值。
+
+    也就是说，你可以用 |column name| 来直接指定名字本身，而用 |assign column name|
+    来生成最终的 \TeX{} 代码（例如插入 |\multicolumn{1}{c}{#1}|）。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    assign column name/.style={
+        /pgfplots/table/column name={\textbf{#1}}
+    },
+]
+{
+first second
+1 2
+3 4
+}
+\end{codeexample}
+
+    注意，\PGFPlotstable{} 对表头提供的后处理能力有限，特别是 |postproc cell content|
+    及其同类只适用于 ``普通'' 单元格。如果你想修改表头单元格的外观，应考虑使用
+    |assign column name|。
+
+    默认为空，表示不做改动。
+\end{codekey}
+
+\begin{stylekey}{/pgfplots/table/multicolumn names=\marg{tabular column type} (initially c)}
+    一个样式，它在当前上下文中用
+    |\multicolumn{1}|\marg{tabular column type}\marg{the column name} 语句来排版每个列名。
+
+    这里，\meta{the column name} 照例用 |column name| 来设置。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/dec sep align=\marg{header column type} (initially c)}
+    一个样式，它把数值型列按小数点对齐。
+
+    第一个参数决定表头列的对齐方式。
+
+    请注意，使用这个样式需要 |\usepackage{array}|。
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstabletypeset[
+    columns={dof,error1,error2,info,{grad(log(dof),log(error2))}},
+    columns/error1/.style={dec sep align},
+    columns/error2/.style={sci,sci subscript,sci zerofill,dec sep align},
+    columns/info/.style={fixed,dec sep align},
+    columns/{grad(log(dof),log(error2))}/.style={fixed,dec sep align}
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+
+    或者用逗号作为小数点：
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstabletypeset[
+    use comma,
+    columns={dof,error1,error2,info,{grad(log(dof),log(error2))}},
+    columns/error1/.style={dec sep align},
+    columns/error2/.style={sci,sci subscript,sci zerofill,dec sep align},
+    columns/info/.style={fixed,dec sep align},
+    columns/{grad(log(dof),log(error2))}/.style={fixed,dec sep align}
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    建议使用 |fixed zerofill| 和/或 |sci zerofill| 来强制小数点后至少有一位数字，
+    以改善指数的位置：
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstabletypeset[
+    use comma,
+    columns={dof,error1,error2,info,{grad(log(dof),log(error2))}},
+    columns/error1/.style={dec sep align,sci zerofill},
+    columns/error2/.style={sci,sci subscript,sci zerofill,dec sep align},
+    columns/info/.style={fixed,dec sep align},
+    columns/{grad(log(dof),log(error2))}/.style={fixed,dec sep align,fixed zerofill}
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+
+    样式 |dec sep align| 实际上引入了两个新的 |tabular| 列，\footnote{遗憾的是，
+    \texttt{dec sep align} 目前在列类型修改方面还不够灵活。特别是，无法把彩色列或
+    单元格与 \texttt{dec sep align} 结合使用。\texttt{\textbackslash rowcolor} 命令可以
+    正常工作；由 \texttt{colortbl} 引入的颜色残留会被自动调整。}即 |r@{}l|。
+    它会相应地为列名引入多列，并处理没有小数点的数字。
+
+    注意，对于定点数，也可以用 |fixed zerofill| 配合 |column type=r| 来获得类似效果，
+    作为一种替代方案。
+
+    请注意，这个样式会覆盖 |column type|、|assign cell content| 以及某些数字格式设置。
+\end{stylekey}
+
+%--------------------------------------------------
+% FIXME : doesn't really work as intended:
+% \begin{stylekey}{/pgfplots/table/dec sep align/no unbounded}
+%     Changes the internal processing of |dec sep align| such that unbounded values like $NaN$ and $\pm \infty$ will be aligned in exactly the same way as the column name.
+%
+%     This avoids funny spacing around unbounded coordinates when used with |dec sep align|.
+
+% NO GALLERY
+% \begin{codeexample}[]
+% \pgfplotstabletypeset{pgfplotstable.example4.dat}
+% \vrule
+%
+% \pgfplotstabletypeset[
+%     columns/b/.style={fixed,precision=1},
+% ]
+%     {pgfplotstable.example4.dat}
+% \vrule
+%
+% \pgfplotstabletypeset[
+%     columns/b/.style={fixed,precision=1,dec sep align},
+% ]
+%     {pgfplotstable.example4.dat}
+% \vrule
+%
+% \pgfplotstabletypeset[
+%     columns/b/.style={fixed,precision=1,dec sep align,dec sep align/no unbounded},
+% ]
+%     {pgfplotstable.example4.dat}
+% \end{codeexample}
+% \end{stylekey}
+%--------------------------------------------------
+
+\begin{stylekey}{/pgfplots/table/sci sep align=\marg{header column type} (initially c)}
+    一个样式，它把数值型列按科学计数法中的指数对齐。
+
+    第一个参数决定表头列的对齐方式。
+
+    它的工作方式与 |dec sep align| 类似，即引入两个人为列 |r@{}l| 用于对齐。
+
+    请注意，使用这个样式需要 |\usepackage{array}|。
+
+    请注意，这个样式会覆盖 |column type|、|assign cell content| 以及某些数字格式设置。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/dcolumn=\marg{tabular column type}\marg{type for column name} (initially \{D\{.\}\{.\}\{2\}\}\{c\})}
+    一个样式，可与 David Carlisle 的 |dcolumn| 宏包配合使用。它也能实现按小数点对齐。
+    不过，小数点必须恰好是一个字符，这与 `|{,}|'（|use comma| 的默认设置）不兼容。
+\end{stylekey}
+
+\begin{pgfplotskey}{table/sort=\marg{true,false} (initially false)}
+    如果设为 |true|，|\pgfplotstabletypeset| 会在执行其操作之前先对表格排序。
+
+    关于如何配置 |sort key| 和 |sort cmp|，参见 |\pgfplotstablesort| 的说明。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    sort,sort key=error2,
+    columns={dof,error1,error2},
+    columns/error1/.style={sci,sci subscript,sci zerofill,dec sep align},
+    columns/error2/.style={sci,sci subscript,sci zerofill,dec sep align},
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+
+    |sort| 机制在真正的排版例程开始之前应用，也就是说它的效果与你在排版表格之前
+    手动调用 |\pgfplotstablesort| 相同（不过 |sort| 键的优点是会尊重 |include outfiles|
+    缓存机制）。任何 |create on use| 规范都会在调用 |sort key| 之前被解析。
+
+    %The |sort| key applies also to |\addplot table[sort,read completely]|.
+\end{pgfplotskey}
+
+\begin{stylekey}{/pgfplots/table/every first column}
+    一个只为每个第一列安装的样式。
+    %
+\begin{codeexample}[narrow]
+\pgfplotstabletypeset[
+ every head row/.style={before row=\hline,after row=\hline\hline},
+ every last row/.style={after row=\hline},
+ every first column/.style={
+  column type/.add={|}{}
+ },
+ every last column/.style={
+  column type/.add={}{|}
+ }]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every last column}
+    一个只为每个最后一列安装的样式。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every even column}
+    一个为每个列索引为偶数的列（从~$0$ 开始）安装的样式。
+{
+\pgfplotstableset{
+    columns={dof,error1,{grad(log(dof),log(error2))},info},
+    columns/error1/.style={
+        column name=$L_2$,
+        sci,sci zerofill,sci subscript,
+        precision=3},
+    columns/dof/.style={
+        int detect,
+        column name=\textsc{Dof}},
+    columns/{grad(log(dof),log(error2))}/.style={
+        column name=slopes $L_2$,
+        fixed,fixed zerofill,
+        precision=1}}
+
+\begin{codeexample}[code only]
+\pgfplotstableset{
+    columns={dof,error1,{grad(log(dof),log(error2))},info},
+    columns/error1/.style={
+        column name=$L_2$,
+        sci,sci zerofill,sci subscript,
+        precision=3},
+    columns/dof/.style={
+        int detect,
+        column name=\textsc{Dof}},
+    columns/{grad(log(dof),log(error2))}/.style={
+        column name=slopes $L_2$,
+        fixed,fixed zerofill,
+        precision=1}}
+\end{codeexample}
+
+\begin{codeexample}[narrow,graphic=white]
+% requires \usepackage{colortbl}
+\pgfplotstabletypeset[
+ every even column/.style={
+  column type/.add={>{\columncolor[gray]{.8}}}{}
+}]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every column}
+    一个应用于每一列的样式。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    every column/.code={
+        \ifnum\pgfplotstablecol>0
+            \pgfkeysalso{column type/.add={|}{}}%
+        \fi
+    },
+]
+{
+first second third
+1 2 3
+4 5 6
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every odd column}
+    一个为每个列索引为奇数的列（从~$0$ 开始）安装的样式。
+\end{stylekey}
+
+\begin{command}{\pgfplotstablecol}
+    在计算行或列选项期间，这个命令展开为当前列的索引。
+\end{command}
+
+\begin{command}{\pgfplotstablecolname}
+    在计算列选项期间，这个命令展开为当前列的名字。它在 |\pgfplotstabletypeset|
+    处理列样式（包括节~\ref{sec:pgfplotstable:preproc} 中讲解的预处理步骤）、
+    准备输出单元格内容以及检查行谓词期间有效。
+\end{command}
+
+\begin{command}{\pgfplotstablerow}
+\label{pgfplotstable:page:tablerow}
+    在计算行或列选项期间，这个命令展开为当前行的索引。
+
+    ``列选项的计算'' 适用于节~\ref{sec:data:processing} 中的任何样式，
+    即预处理、排版和后处理。
+
+    宏 |\pgfplotstablerow| 可以取 $0,1,2,\dotsc,n-1$ 中的任意值，
+    其中 $n$ 是 |\pgfplotstablerows| 的值。
+
+    ``行选项的计算'' 适用于诸如 |every last row| 之类的内容。
+
+    注意，对于表头行，它会取特殊值 $-1$。
+\end{command}
+
+\begin{command}{\pgfplotstablecols}
+    在计算行或列选项期间，这个命令展开为输出表中的列总数。
+\end{command}
+
+\begin{command}{\pgfplotstablerows}
+    在计算\emph{列}期间，这个命令展开为\emph{输入}行的总数。
+    你可以在 |row predicate| 内部使用它。
+
+    在计算\emph{行}期间，这个命令展开为\emph{输出}行的总数。
+\end{command}
+
+\begin{command}{\pgfplotstablename}
+    在 |\pgfplotstabletypeset| 期间，这个宏以顶层展开的形式包含表格的宏名。
+    如果你不熟悉 ``顶层展开'' 和 `|\expandafter|'，那你大概永远也用不到这个宏。
+
+    进阶用户可能会从类似
+
+    |\expandafter\pgfplotstabletypeset\pgfplotstablename|.
+
+    的表达式中受益。
+
+    对于从磁盘加载（且没有显式指定宏名）的表格，它会展开为一个临时宏。
+\end{command}
+
+
+\subsection{配置行外观：样式}
+
+下面这些样式允许在\emph{所有单元格内容都已分配之后}配置最终的表格代码。
+
+\begin{key}{/pgfplots/table/before row=\marg{\TeX{} code}}
+    包含一段 \TeX{} 代码，它会被安装在一行中第一个单元格之前。
+
+    请记住，\PGFPlotstable{} 并不做什么神奇的事——它只是一个生成 |tabular| 环境的
+    代码生成器。因此，你可以在这里添加任何你平时会写进 |tabular| 环境的 \TeX{} 代码。
+
+    一个例子是多列标题，对此 \PGFPlotstable{} 没有自带的解决方案：
+    %
+\begin{codeexample}[]
+% \usepackage{booktabs}
+\pgfplotstabletypeset[
+    column type=l,
+    every head row/.style={
+        before row={
+            \toprule
+            & \multicolumn{2}{c}{Singular} & \multicolumn{2}{c}{Plural}\\
+        },
+        after row=\midrule,
+    },
+    every last row/.style={
+        after row=\bottomrule},
+    columns/person/.style       ={column name=},
+    columns/singGaeilge/.style  ={column name=Gaeilge},
+    columns/pluralGaeilge/.style={column name=Gaeilge},
+    columns/singEnglish/.style  ={column name=English},
+    columns/pluralEnglish/.style={column name=English},
+    col sep=&,row sep=\\,
+    string type,
+]{
+person & singEnglish  & singGaeilge & pluralEnglish  & pluralGaeilge\\
+1st    & at me        & agam        & at us          & againn\\
+2st    & at you       & agat        & at you         & agaibh\\
+3st    & at him       & aige        & at them        & acu\\
+       & at her       & aici        &                &\\
+}
+\end{codeexample}
+%
+    \noindent 这个例子声明了很多选项，最后跟着一个简短的内联表格。|every head row|
+    样式通过逐字的 |tabular| 代码配合 |booktabs| 横线来配置 |\multicolumn| 标题。
+    在试验过程中，考虑使用 |debug| 或 |outfile| 键可能会有帮助。要修改列标题，
+    需要用 |columns/...| 样式。
+
+    有时，你会想把 |\multicolumn| 和 |\rowcolor| 结合起来。据我对 \LaTeX{} 的了解，
+    这有点复杂：它要求在 |\multicolumn| 内部使用 |\columncolor|。和上面的例子一样，
+    有必要对 \PGFPlotstable{} 生成的代码稍作修改。请记住，\PGFPlotstable{} 只是一个
+    生成 |tabular| 环境的代码生成器——你想怎么改就怎么改。下面的例子演示了
+    |\multicolumn| 与 |\rowcolor| 的结合。它取自一个（必须承认，相当进阶的）应用：
+    %
+\begin{codeexample}[]
+\newcolumntype{C}{>{\centering\arraybackslash}p{6mm}}% a centered fixed-width-column
+\pgfplotstabletypeset[
+    col sep=&,
+    row sep=\\,
+    every head row/.style={
+    % as in the previous example, this patches the first row:
+        before row={
+            \hline
+            \rowcolor{lightgray}
+            \multicolumn{3}{|>{\columncolor{lightgray}}c|}{Quantenzahlen} & Term-\\
+            \rowcolor{lightgray}
+        },
+        after row=\hline,
+    },
+    every last row/.style={
+        after row=\hline},
+    % define column-specific styles:
+    columns/n/.style={column type=|C,column name=$n$},
+    columns/l/.style={column type=|C,column name=$\ell$},
+    columns/lambda/.style={column type=|C,column name=$\lambda$},
+    columns/text/.style={column type=|c|,column name=bezeichnung,
+        string type % <-it contains formatted data
+    },
+] {
+n & l & lambda & text\\
+1 & 0 & 0 & $1 s\sigma$ \\
+2 & 0 & 0 & $2 s\sigma$ \\
+2 & 1 & 0 & $2 p\sigma$ \\
+2 & 1 & 1 & $2 p \pi $\\
+3 & 2 & 0 & $3 d\sigma$ \\
+3 & 2 & 2 & $3 d\delta$ \\
+}
+\end{codeexample}
+
+    除数字格式（它实际上会调用 |\pgfmathprintnumber|）之外，上面的代码等价于下面的列表
+    %
+\begin{codeexample}[code only]
+\newcolumntype{C}{>{\centering\arraybackslash}p{6mm}}% a centered fixed-width-column
+\begin{tabular}{|C|C|C|c|}
+\hline
+\rowcolor{lightgray} \multicolumn{3}{|>{\columncolor{lightgray}}c|}{Quantenzahlen} & Term-\\
+\rowcolor{lightgray} $n$ & $\ell$ & $\lambda$ & bezeichnung\\
+\hline
+$1$ & $0$ & $0$ & $1 s\sigma$ \\
+$2$ & $0$ & $0$ & $2 s\sigma$ \\
+$2$ & $1$ & $0$ & $2 p\sigma$ \\
+$2$ & $1$ & $1$ & $2 p \pi$ \\
+$3$ & $2$ & $0$ & $3 d\sigma$ \\
+$3$ & $2$ & $2$ & $3 d\delta$ \\
+\hline
+\end{tabular}
+\end{codeexample}
+
+    显然，定义大量样式所带来的额外开销，只有在你需要数字打印、自动化处理，
+    或拥有一大批相似表格时才值得。
+\end{key}
+
+\begin{key}{/pgfplots/table/after row=\marg{\TeX{} code}}
+    包含一段 \TeX{} 代码，它会被安装在一行中最后一个单元格之后（即在 |\\| 之后）。
+\end{key}
+
+\begin{stylekey}{/pgfplots/table/every even row}
+    一个为每个行索引为偶数的行安装的样式。第一行被认为是 ``表头'' 行，不计入。
+    索引从~$0$ 开始。
+{
+\pgfplotstableset{
+    columns={dof,error1,{grad(log(dof),log(error2))}},
+    columns/error1/.style={
+        column name=$L_2$,
+        sci,sci zerofill,sci subscript,
+        precision=3},
+    columns/dof/.style={
+        int detect,
+        column name=\textsc{Dof}},
+    columns/{grad(log(dof),log(error2))}/.style={
+        column name=slopes $L_2$,
+        fixed,fixed zerofill,
+        precision=1},
+}
+
+\begin{codeexample}[code only]
+\pgfplotstableset{
+    columns={dof,error1,{grad(log(dof),log(error2))}},
+    columns/error1/.style={
+        column name=$L_2$,
+        sci,sci zerofill,sci subscript,
+        precision=3},
+    columns/dof/.style={
+        int detect,
+        column name=\textsc{Dof}},
+    columns/{grad(log(dof),log(error2))}/.style={
+        column name=slopes $L_2$,
+        fixed,fixed zerofill,
+        precision=1}}
+\end{codeexample}
+
+\begin{codeexample}[narrow,graphic=white]
+% requires \usepackage{booktabs}
+\pgfplotstabletypeset[
+    every head row/.style={
+        before row=\toprule,after row=\midrule},
+    every last row/.style={
+        after row=\bottomrule},
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+
+\begin{codeexample}[narrow,graphic=white]
+% requires \usepackage{booktabs,colortbl}
+\pgfplotstabletypeset[
+    every even row/.style={
+        before row={\rowcolor[gray]{0.9}}},
+    every head row/.style={
+        before row=\toprule,after row=\midrule},
+    every last row/.style={
+        after row=\bottomrule},
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every odd row}
+    一个为每个行索引为奇数的行安装的样式。第一行被认为是 ``表头'' 行，不计入。
+    索引从~$0$ 开始。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every head row}
+    一个为 tabular 中每个第一行安装的样式。它可用于调整列名的选项，
+    或添加额外的横线/颜色。
+
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+  % suppress the header row 'col1  col2  col3':
+  every head row/.style={output empty row},
+  col sep=comma,
+  columns/col1/.style={string type,column type=r},
+  columns/col2/.style={string type,column type=l},
+  columns/col3/.style={string type,column type=l},
+  ]
+{
+    col1,col2,col3
+    Col A,B,C
+    The first column,E,F
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every first row}
+    一个为每个第一\emph{数据}行（即在表头行之后）安装的样式。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every last row}
+    一个为每个最后一行安装的样式。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every row no \meta{index}}
+    一个为索引为 \meta{index} 的行安装的样式。
+\end{stylekey}
+
+\begin{keylist}{%
+    /pgfplots/table/every nth row=\marg{integer}\marg{options},
+    /pgfplots/table/every nth row=\marg{integer\oarg{shift}}\marg{options}%
+}
+    这允许为每第 $n$ 行安装 \meta{options}，其中 $n=$\meta{integer}。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    every nth row={3}{before row=\midrule},
+    every head row/.style={
+        before row=\toprule,after row=\midrule},
+    every last row/.style={
+        after row=\bottomrule},
+]{
+    a b
+    0 0
+    1 1
+    2 2
+    3 3
+    4 4
+    5 5
+    6 6
+    7 7
+    8 8
+}
+\end{codeexample}
+    %
+    |every nth row| 只考虑数据行；它永远不会应用于列名，数据行按 $i=0,1,2,\dotsc$
+    编号（上面的例子把它应用于 $a = 3,6$ 的行）。由于 $i=0$ 的情形可由
+    |every first row| 处理，它不纳入 |every nth row| 的考虑。
+
+    第二种语法允许提供一个额外的 \meta{shift}：
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    every nth row={3[+1]}{before row=\midrule},
+]{
+    a b
+    0 0
+    1 1
+    2 2
+    3 3
+    4 4
+    5 5
+    6 6
+    7 7
+    8 8
+    9 9
+    10 10
+}
+\end{codeexample}
+    %
+    \noindent 这里，该样式应用于行 $i=1,4,7,10$（数学上，当 $(i \mod n) = $
+    \meta{shift} 时应用它）。\meta{shift} 可以为负。
+
+    你可以定义多个 |every nth row| 样式，它们按出现顺序处理（考虑使用
+    |before row/.add=|\marg{before existing}\marg{after existing} 来修改已有的值）。
+
+    注意，|every nth row/.style 2 args=...| 与 |every nth row=...| 相同。
+\end{keylist}
+
+\begin{stylekey}{/pgfplots/table/output empty row}
+    一个抑制当前行输出的样式。
+
+    这个样式会在很晚的时候才计算，即在所有特定列的内容修改都已应用之后。
+    它等价于
+    %
+\begin{codeexample}[code only]
+\pgfplotstableset{
+    output empty row/.style={
+        typeset cell/.style={@cell content={}}
+    },
+}
+\end{codeexample}
+
+    一个应用示例参见 |every head row|。
+\end{stylekey}
+
+
+\subsection{配置单个单元格外观：样式}
+
+除了修改列样式和行样式的各种方式之外，还有一些样式可以修改单个单元格。
+
+\begin{stylekey}{/pgfplots/table/every row \meta{rowindex} column \meta{colindex}}
+    一个最多应用于一个单元格的样式：即行索引为 \meta{rowindex}、列索引为
+    \meta{colindex} 的那个单元格。这些索引都从~$0$ 开始。
+
+    这个样式在与 |preproc cell content|、|assign cell content| 和
+    |postproc cell content| 键相同的上下文中计算，修改这些参数中的任何一个都是
+    正当做法。也可以通过给 |@cell content| 赋一个值来替换初始单元格值。
+
+    例如，看下面这个未经修改的表格：
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    col sep=&,row sep=\\]{
+  colA & colB & colC \\
+  11   & 12   & 13   \\
+  21   & 22   & 23   \\
+}
+\end{codeexample}
+
+    现在，我们修改其中一个单元格的数字格式，同时修改另一个（单个）单元格的格式：
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    every row 1 column 2/.style={/pgf/number format/sci},
+    every row 0 column 0/.style={postproc cell content/.style={@cell content=\textbf{##1}}},
+    col sep=&,row sep=\\]{
+  colA & colB & colC \\
+  11   & 12   & 13   \\
+  21   & 22   & 23   \\
+}
+\end{codeexample}
+    注意，这个样式（只）应用于输入的行/列值。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every row no \meta{rowindex} column no \meta{colindex}}
+    这实际上是一样的——|row no| 和 |row| 都受支持，|column| 和 |column no| 也是如此。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/every row \meta{rowindex} column \meta{colname}}
+    一个与上面类似的样式，但它允许用列\emph{名}而不是列索引。列名需要用与其他
+    特定列样式相同的方式提供（如果 \meta{colname} 包含特殊字符，还要加上额外的
+    花括号）。
+
+    上面的例子因此可以变成：
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    every row 1 column colB/.style={string replace*={2}{4}},
+    every row 0 column colA/.style={preproc/expr={##1*8}},
+    col sep=&,row sep=\\]{
+  colA & colB & colC \\
+  11   & 12   & 13   \\
+  21   & 22   & 23   \\
+}
+\end{codeexample}
+    这个例子使用了 |string replace*| 预处理器样式和 |preproc/expr| 样式。
+    所有预处理器或后处理器样式都可以使用。
+
+    预定义的选项参见节~\ref{sec:data:processing}。
+\end{stylekey}
+
+
+\subsection{定制并获取 Tabular 代码}
+
+下面这些键允许修改对齐方式（|begin table|）和 |font|，并允许把生成的代码写入
+|outfile|（另见 |write to macro|）。此外，还可以对生成的代码做精细调整，
+以提供 \LaTeX{} 之外的其他种类表格输出。
+
+\begin{stylekey}{/pgfplots/table/every table=\marg{file name}}
+    一个在每个 |\pgfplotstabletypeset| 命令开头安装的样式。\footnote{\texttt{every table}
+    样式是在提供给 \texttt{\textbackslash pgfplotstabletypeset} 的选项\emph{之后}
+    安装的；它优先级更高。}
+
+    表格文件名作为第一个参数给出。
+\end{stylekey}
+
+\begin{key}{/pgfplots/table/font=\marg{font name} (initially empty)}
+    指定用于整个表格的字体。
+\end{key}
+
+\begin{key}{/pgfplots/table/begin table=\marg{code} (initially \textbackslash begin\{tabular\})}
+    包含一段 \marg{code}，它作为表格的开头生成。
+
+    下面的例子用 |longtable| 代替\index{longtable} |tabular|：
+    %
+\begin{codeexample}[code only]
+\pgfplotstableset{
+    begin table=\begin{longtable},
+    end table=\end{longtable},
+}
+\end{codeexample}
+
+    注意，|longtable| 允许对多页表格\index{Multi-page} 借助其
+    \declareandlabel{\endhead} 宏使用\emph{重复表头}：\index{Replicate headers}
+    %
+\begin{codeexample}[code only]
+% replicate column names on top of every page of a multi-page table:
+\pgfplotstableset{
+    row sep=\\,
+    begin table=\begin{longtable},
+    end table=\end{longtable},
+    every head row/.append style={after row=\endhead},
+}
+\end{codeexample}
+
+    如果希望第一页有不同的表头，可以用 |longtable| 宏包提供的
+    \declareandlabel{\endfirsthead}：
+    %
+\begin{codeexample}[code only]
+% replicate column names on top of every page of a multi-page table,
+% but with different values for first page:
+\pgfplotstableset{
+    row sep=\\,
+    begin table=\begin{longtable},
+    end table=\end{longtable},
+    every head row/.append style={after row={%
+            \caption{The caption}%
+            \endfirsthead
+            \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
+            \endhead
+        },
+    },
+}
+\end{codeexample}
+    %
+    \noindent 上一个例子用到了 |longtable| 的宏 |\caption|、|\endfirsthead|、|\thetable|
+    和 |\endhead|。此外，它还要求\emph{显式}给出列数（这里是 |{3}|）。
+
+    也可以\emph{修改} |begin table| 的值。例如，
+\begin{codeexample}[code only]
+\pgfplotstableset{
+    begin table/.add={}{[t]},
+}
+\end{codeexample}
+    %
+    会在前面 prepend 空字符串 |{}|，并在后面 append 前缀 |[t]|。
+    于是 `|\begin{tabular}|' 变成 `|\begin{tabular}[t]|'。
+\end{key}
+
+\begin{key}{/pgfplots/table/end table=\marg{code} (initially \textbackslash end\{tabular\})}
+    包含一段 \meta{code}，它作为表格的结尾生成。
+\end{key}
+
+\begin{codekey}{/pgfplots/table/typeset cell}
+    一个代码键，它把 \declareandlabel{/pgfplots/table/@cell content} 赋给当前单元格的
+    最终输出。
+
+    第一个参数 |#1| 是该单元格的最终值。在这个宏之后，|@cell content| 的值会被写入输出。
+
+    默认实现是
+    %
+\begin{codeexample}[code only]
+/pgfplots/table/typeset cell/.code={%
+    \ifnum\c@pgfplotstable@colindex=\c@pgfplotstable@numcols\relax
+        \pgfkeyssetvalue{/pgfplots/table/@cell content}{#1\\}%
+    \else
+        \pgfkeyssetvalue{/pgfplots/table/@cell content}{#1&}%
+    \fi
+},
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    在这个上下文中，|\pgfplotstablecol| 的值从 $1$ 开始，也就是说它取 $1,\dotsc,n$
+    范围内的值，其中 $n=$ |\pgfplotstablecols|。这简化了对是否为最后一列的判断。
+\end{codekey}
+
+\begin{key}{/pgfplots/table/outfile=\marg{file name} (initially empty)}
+\label{page:outfile}
+    把生成的 tabular 代码写入 \meta{file name}。之后就可以用
+    |\input|\marg{file name} 来使用它，此时不再需要 \PGFPlotstable{}，因为它包含的是
+    一个完全普通的 |tabular|。
+    %
+    \pgfplotstableset{begin table=\begin{tabular}}
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    columns={dof,error1},
+    outfile=pgfplotstable.example1.out.tex]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    而 |pgfplotstable.example1.out.tex| 的内容为
+    %
+    %\lstdefineformat{inp}{\\\\=\string\newline}%
+    \lstinputlisting[basicstyle=\ttfamily\footnotesize]{pgfplotstable.example1.out.tex}
+
+    命令 |\pgfutilensuremath| 会检查数学模式是否处于激活状态，并在必要时切换到数学模式。
+    \footnote{请注意，如果你想脱离 \PGF{} 独立使用这个输出文件，需要把
+    \lstinline{\\pgfutilensuremath} 替换为 \lstinline{\\ensuremath}。这可以通过
+    \lstinline{\\let\\pgfutilensuremath=\\ensuremath} 来完成，从而启用 \LaTeX{} 命令
+    \lstinline{\\ensuremath}。}
+\end{key}
+
+\begin{key}{/pgfplots/table/include outfiles=\marg{boolean} (initially false)}
+    如果启用，任何已存在的 outfile 都会被 |\input| 进来，而不是被覆盖。
+    %
+\begin{codeexample}[code only]
+\pgfplotstableset{include outfiles} % for example in the document's preamble
+\end{codeexample}
+    %
+    这允许你手动把任何修正放进生成的输出文件中，因为 \PGFPlotstable{} 不会自动覆盖
+    所得表格。
+
+    这会影响那些设置了 |outfile| 选项的表格。如果你想把它应用到每个表格，可以考虑
+    %
+\begin{codeexample}[code only]
+\pgfplotstableset{every table/.append style={outfile={#1.out}}}
+\end{codeexample}
+    %
+    \noindent 它会为每个表格生成一个 |outfile| 名字。
+\end{key}
+
+\begin{key}{/pgfplots/table/force remake=\marg{boolean} (initially false)}
+    如果启用，|include outfiles| 的效果就会被禁用。由于所有键设置只持续到下一个
+    花括号（或 |\end|\meta{}）为止，这个键可用于重新生成某些输出文件，而其他文件仍被
+    包含进来。
+\end{key}
+
+\begin{key}{/pgfplots/table/write to macro=\marg{\textbackslash macroname}}
+    如果 |write to macro| 的值非空，完整生成的（tabular）代码将被写入宏
+    \meta{\textbackslash macroname}。
+
+    如果你\emph{只}需要所得的宏，参见 |typeset=false| 键。
+\end{key}
+
+\begin{key}{/pgfplots/table/skip coltypes=\mchoice{true,false} (initially false)}
+    允许跳过 |\begin{tabular}|\marg{coltypes} 中的 \meta{coltypes}。
+    这可以为那些没有 \LaTeX{} 表格格式的其他表格类型提供简化。
+\end{key}
+
+\begin{key}{/pgfplots/table/typeset=\mchoice{true,false} (initially true)}
+    一个布尔值，用于禁用最后的排版阶段。如果只关心生成的代码、而不希望 \TeX{} 在
+    输出 |pdf| 中产生任何内容，请配合 |write to macro| 使用 |typeset=false|。
+\end{key}
+
+\begin{key}{/pgfplots/table/debug=\marg{boolean} (initially false)}
+    如果启用，它会把每个最终的 tabular 代码写入你的日志文件。
+\end{key}
+
+\begin{key}{/pgfplots/table/TeX comment=\marg{comment sign} (initially \%)}
+    插入 outfile 中用于抑制尾随空白的注释符号。
+\end{key}
+
+\noindent 作为最后一个例子，我们用 \PGFPlotstable{} 来写一个 |.html| 文件
+（还包括数字格式和四舍五入！）：
+%
+% \usepackage{listings}
+\begin{codeexample}[width=8cm]
+\pgfplotstabletypeset[
+    begin table={<table>}, end table={</table>},
+    typeset cell/.style={
+      /pgfplots/table/@cell content={<td>#1</td>}
+    },
+    before row=<tr>,after row=</tr>,
+    skip coltypes, typeset=false,
+    verbatim,% configures number printer
+    TeX comment=,
+    columns={level,dof,error1},
+    outfile=pgfplotstable.example1.out.html,
+]{pgfplotstable.example1.dat}
+\lstinputlisting
+    [basicstyle=\ttfamily\footnotesize]
+    {pgfplotstable.example1.out.html}
+\end{codeexample}
+
+
+\subsection{为 \texttt{tabular} 定义列类型}
+
+除了输入文本文件之外，有时还希望为已有的 \texttt{tabular} 环境定义列类型。
+
+\begin{command}{\newcolumntype\marg{letter}\oarg{number of
+    arguments}$>$\marg{before column}\meta{column type}$<$\marg{after column}
+}
+    命令 |\newcolumntype| 是 |array| 宏包的一部分，它定义一个新的列类型
+    \meta{letter}，供 \LaTeX{} tabular 环境使用。
+    %
+\begin{codeexample}[code only]
+\usepackage{array}
+\end{codeexample}
+
+\begin{codeexample}[]
+\newcolumntype{d}{>{-}c<{+}}
+\begin{tabular}{dl}
+a & b \\
+c & d \\
+\end{tabular}
+\end{codeexample}
+
+    现在，可以在 \meta{before column} 和 \meta{after column} 中使用环境
+    |pgfplotstablecoltype| 来定义数值型列：
+    %
+% \usepackage{array}
+\begin{codeexample}[]
+% requires \usepackage{array}
+\newcolumntype{L}[1]
+    {>{\begin{pgfplotstablecoltype}[#1]}r<{\end{pgfplotstablecoltype}}}
+
+\begin{tabular}{L{int detect}L{sci,sci subscript,sci zerofill}}
+9      & 2.50000000e-01\\
+25     & 6.25000000e-02\\
+81     & 1.56250000e-02\\
+289    & 3.90625000e-03\\
+1089   & 9.76562500e-04\\
+4225   & 2.44140625e-04\\
+16641  & 6.10351562e-05\\
+66049  & 1.52587891e-05\\
+263169 & 3.81469727e-06\\
+1050625& 9.53674316e-07\\
+\end{tabular}
+\end{codeexample}
+    %
+    \noindent 环境 |pgfplotstablecoltype| 接受一个可选参数，其中可包含任何数字格式选项。
+    如果数值型列中含有非数值数据，就会出错，因此列名可能需要用 |\multicolumn| 来处理。
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\newcolumntype{L}[1]
+    {>{\begin{pgfplotstablecoltype}[#1]}r<{\end{pgfplotstablecoltype}}}
+
+\begin{tabular}{L{int detect}L{sci,sci subscript,sci zerofill}}
+\multicolumn{1}{r}{Dof} & \multicolumn{1}{r}{Error}\\
+9      & 2.50000000e-01\\
+25     & 6.25000000e-02\\
+81     & 1.56250000e-02\\
+289    & 3.90625000e-03\\
+1089   & 9.76562500e-04\\
+4225   & 2.44140625e-04\\
+16641  & 6.10351562e-05\\
+66049  & 1.52587891e-05\\
+263169 & 3.81469727e-06\\
+1050625& 9.53674316e-07\\
+\end{tabular}
+\end{codeexample}
+\end{command}
+
+
+\subsection{数字格式选项}
+\label{sec:number:printing}
+
+下面这段摘自 \cite{tikz}，解释如何配置数字格式。公共选项前缀
+|/pgf/number format| 可以省略；它会被自动识别。
+
+所有这些数字格式选项也可应用于 \PGFPlots{}。
+
+\begin{command}{\pgfmathprintnumber\marg{x}}
+    为（实）数 \meta{x} 生成美观排版的输出。输入数 \meta{x} 用
+    |\pgfmathfloatparsenumber| 解析，它支持任意精度。
+
+    数字在数学模式下用当前这一组数字打印选项排版，见下文。也可以用
+    |\pgfmathprintnumber[|\meta{options}|]|\marg{x} 来提供可选参数。
+\end{command}
+
+\begin{command}{\pgfmathprintnumberto\marg{x}\marg{\textbackslash macro}}
+    把所得的数返回给 \meta{\textbackslash macro}，而不是直接排版它。
+\end{command}
+
+\begin{key}{/pgf/number format/fixed}
+    配置 |\pgfmathprintnumber| 把数字四舍五入到小数点后固定位数，
+    并丢弃任何尾随零。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed,precision=2}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-04}\hspace{1em}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{24415.98123}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+
+    如何修改外观参见节~\ref{sec:number:styles}。
+\end{key}
+
+\begin{key}{/pgf/number format/fixed zerofill=\marg{boolean}  (default true)}
+    启用或禁用对任何以定点格式绘制的数字的补零。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=2}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-04}\hspace{1em}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{24415.98123}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+    %
+    这个键影响用 |fixed| 或 |std| 样式绘制的数字（后者仅在未选择科学格式时）。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,std,fixed zerofill,precision=2}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-05}\hspace{1em}
+\pgfmathprintnumber{1}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+
+    如何修改外观参见节~\ref{sec:number:styles}。
+\end{key}
+
+\begin{key}{/pgf/number format/sci}
+    配置 |\pgfmathprintnumber| 以科学格式显示数字，即符号、尾数和指数（基数~$10$）。
+    尾数会被四舍五入到所需的 |precision|（或 |sci precision|，见下文）。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,precision=2}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-04}\hspace{1em}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{24415.98123}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+
+    关于如何改变指数显示样式，见节~\ref{sec:number:styles}。
+\end{key}
+
+\begin{key}{/pgf/number format/sci zerofill=\marg{boolean}  (default true)}
+    启用或禁用对任何以科学格式绘制的数字的补零。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,sci zerofill,precision=2}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-04}\hspace{1em}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{24415.98123}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+    %
+    和 |fixed zerofill| 一样，这个选项只影响以 |sci| 格式绘制的数字
+    （或在选择了科学格式时的 |std|）。
+
+    如何修改指数显示样式参见节~\ref{sec:number:styles}。
+\end{key}
+
+\begin{stylekey}{/pgf/number format/zerofill=\marg{boolean} (default true)}
+    同时设置 |fixed zerofill| 和 |sci zerofill|。
+\end{stylekey}
+
+\begin{keylist}{/pgf/number format/std,%
+    /pgf/number format/std=\meta{lower e},
+    /pgf/number format/std=\meta{lower e}:\meta{upper e}%
+}
+    把 |\pgfmathprintnumber| 配置为一种标准算法。它根据数量级选择 |fixed| 或 |sci|。
+    设 $n=s \cdot m \cdot 10^e$ 为输入数，$p$ 为当前精度。如果
+    $-p/2 \le e \le 4$，就用 |fixed| 格式显示该数；否则用 |sci| 格式显示。
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,std,precision=2}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-04}\hspace{1em}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{24415.98123}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+    %
+    可以用可选的整数参数定制这些参数：如果 $\text{\meta{lower e}} \le e \le
+    \text{\meta{upper e}}$，就以 |fixed| 格式显示该数，否则以 |sci| 格式显示。
+    注意，为得到有用的结果，\meta{lower e} 应为负。科学格式所用的精度必要时可用
+    |sci precision| 调整。
+
+\end{keylist}
+
+\begin{keylist}{/pgf/number format/relative*=\meta{exponent base 10}}
+    配置 |\pgfmathprintnumber| 相对于某个数量级 $10^r$ 来格式化数字，
+    其中 $r$ 是一个整数。
+
+    这个键针对不同的使用场景。
+
+
+    \paragraph{第一个使用场景：}
+
+    为一\emph{序列}数字提供统一的格式。考虑下面这个测试：
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/relative*={1}}
+\pgfmathprintnumber{6.42e-16}\hspace{1em}
+\pgfmathprintnumber{1.2}\hspace{1em}
+\pgfmathprintnumber{6}\hspace{1em}
+\pgfmathprintnumber{20.6}\hspace{1em}
+\pgfmathprintnumber{87}
+\end{codeexample}
+    %
+    \noindent 用任何其他样式，|6.42e-16| 都会被作为一个孤立的数字来格式化。在这里，
+    它被四舍五入为 |0|，因为相对于 $10^1$（指数 $1$ 是传给 |relative| 的参数）来看，
+    它没有有效数字。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/relative*={2}}
+\pgfmathprintnumber{123.345}\hspace{1em}
+\pgfmathprintnumber{0.0012}\hspace{1em}
+\pgfmathprintnumber{0.0014}\hspace{1em}
+\end{codeexample}
+    %
+    \noindent 上面的例子把初始的 |precision=2| 应用到 |123.345|——相对于 $100$。
+    |123.345| 相对于 $100$ 的两位有效数字是 |123|。注意，``|123.345| 的 $2$ 位
+    有效数字'' 等同于 ``把 |1.2345| 四舍五入到 $2$ 位''，结果会是 |1.2300|。
+    类似地，另外两个数相对于 $100$、用给定的 |precision| 来看都是 |0|。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/relative*={-3}}
+\pgfmathprintnumber{123.345}\hspace{1em}
+\pgfmathprintnumber{0.0012}\hspace{1em}
+\pgfmathprintnumber{0.0014}\hspace{1em}
+\end{codeexample}
+
+    \paragraph{第二个使用场景：}
+
+    在存在\emph{不精确}数字时改善四舍五入。假设某种有限精度的运算得到了结果
+    |123456999|（就像 \pgfname 的 |fpu| 那样）。你知道它的精度大约是五到六位
+    有效数字。而你想输出定点数。在这种情况下，尾随的几位 |....999| 是有限精度
+    造成的数值假象。用 |relative*=3,precision=0| 来消除这些假象：
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,relative*={3},precision=0}
+\pgfmathprintnumber{123456999}\hspace{1em}
+\pgfmathprintnumber{123456999.12}
+\end{codeexample}
+    %
+    \noindent 这里，|precision=0| 表示我们考察 |123456.999| 并把它四舍五入到 $0$ 位。
+    最后再把小数点移回初始位置。加上 |relative style=fixed| 就得到定点输出格式：
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,relative*={3},precision=0,relative style=fixed}
+\pgfmathprintnumber{123456999}\hspace{1em}
+\pgfmathprintnumber{123456999.12}
+\end{codeexample}
+    %
+    \noindent 注意，这个使用场景还有另一种替代方案，稍后会讨论：即 |fixed relative| 样式。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed relative,precision=6}
+\pgfmathprintnumber{123456999}\hspace{1em}
+\pgfmathprintnumber{123456999.12}
+\end{codeexample}
+
+    你也许会问，为什么这个键的名字里有个星号。简短回答是：还有一个
+    \declareandlabel{/pgf/number format/relative} 数字打印器，它会做出一些出乎意料的
+    行为。键 |relative*| 修正了这一点。已有代码仍会沿用旧的行为。
+
+    从技术上讲，这个键的工作方式如下：如前所述，作用于 |123456999.12| 的
+    |relative*=3| 键把小数点移动三位，并考察 |123456.99912|。用数学语言说，
+    给定一个数 $x = \pm m \cdot 10^e$，我们尝试应用 |relative*=|$r$。该方法随后把
+    $x / 10^r$ 四舍五入到 |precision| 位。之后再把结果乘以 $10^r$ 并排版。
+\end{keylist}
+
+\begin{stylekey}{/pgf/number format/every relative}
+    一个样式，它配置 |relative| 方法最终如何显示其结果。
+
+    初始配置是
+    %
+\begin{codeexample}[code only]
+\pgfkeys{/pgf/number format/every relative/.style=std}
+\end{codeexample}
+
+    注意，在计算所得样式时舍入是关闭的（因为 |relative| 已经对该数做过舍入）。
+
+    尽管受支持，我不建议在此情形下使用 |fixed zerofill| 或 |sci zerofill|——
+    它可能造成精度比实际所用更高的错觉（因为 |fixed zerofill| 可能只是简单地补上
+    |.00|，而在 |relative| 对结果舍入之前原本还有别的信息）。
+\end{stylekey}
+
+\begin{key}{/pgf/number format/relative style=\marg{options}}
+    等同于 |every relative/.append style=|\marg{options}。
+\end{key}
+
+\begin{keylist}{/pgf/number format/fixed relative}
+    配置 |\pgfmathprintnumber| 以与 |fixed| 样式类似的方式格式化数字，
+    但 |precision| 是相对于该数的指数来解释的。
+
+    其动机是获得与 |sci| 相同的四舍五入效果，但以 |fixed| 样式显示该数：
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed relative,precision=3}
+\pgfmathprintnumber{1000.0123}\hspace{1em}
+\pgfmathprintnumber{100.0567}\hspace{1em}
+\pgfmathprintnumber{0.000010003452}\hspace{1em}
+\pgfmathprintnumber{0.010073452}\hspace{1em}
+\pgfmathprintnumber{1.23567}\hspace{1em}
+\pgfmathprintnumber{1003.75}\hspace{1em}
+\pgfmathprintnumber{1006.75}\hspace{1em}
+\end{codeexample}
+
+    |fixed relative| 的效果是：无论该数有多少个前导零，它都把该数四舍五入到
+    \emph{恰好}前 \meta{precision} 位非零数字。
+
+    如果你想要 |fixed|、并且知道只有前 $n$ 位数字是正确的，就用 |fixed relative|。
+    如果你需要科学显示样式、且只有前 $n$ 位数字是正确的，就用 |sci|。
+
+    注意，|fixed relative| 会忽略 |fixed zerofill| 标志。
+
+    另见 |relative*| 键。注意，|relative=|\marg{exponent} 键在尝试对数字四舍五入之前，
+    会先把小数点显式地移到某个指定位置。之后它 ``从右往左舍入''，也就是舍入到那个
+    显式选定的数字位置。与之相反，|fixed relative| ``从左往右舍入''：它取\emph{第一个}
+    非零数字，临时把小数点放在这个数字之后，然后对该数四舍五入。舍入样式 |fixed|
+    则保持小数点不动，只对该数字之后的一切进行舍入。|sci| 样式与 |fixed relative| 类似。
+\end{keylist}
+
+\begin{key}{/pgf/number format/int detect}
+    配置 |\pgfmathprintnumber| 自动检测整数。如果输入数是整数，则完全不显示小数点。
+    否则选择科学格式。
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,int detect,precision=2}
+\pgfmathprintnumber{15}\hspace{1em}
+\pgfmathprintnumber{20}\hspace{1em}
+\pgfmathprintnumber{20.4}\hspace{1em}
+\pgfmathprintnumber{0.01}\hspace{1em}
+\pgfmathprintnumber{0}
+\end{codeexample}
+\end{key}
+
+\begin{command}{\pgfmathifisint\marg{number constant}\marg{true code}\marg{false code}}
+    一个命令，它做与 |int detect| 相同的检查，但如果 \meta{number constant} 确实是
+    整数，就执行 \meta{true code}，否则执行 \meta{false code}。
+
+    作为副作用，|\pgfretval| 会包含解析后的数字，要么是整数格式，要么是解析出的
+    浮点数。
+
+    参数 \meta{number constant} 会用 |\pgfmathfloatparsenumber| 解析。
+\begin{codeexample}[]
+15 \pgfmathifisint{15}{is an int: \pgfretval.}{is no int}\hspace{1em}
+15.5 \pgfmathifisint{15.5}{is an int: \pgfretval.}{is no int}
+\end{codeexample}
+\end{command}
+
+\begin{key}{/pgf/number format/int trunc}
+    把每个数字截断为整数（丢弃小数点后的任何数字）。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,int trunc}
+\pgfmathprintnumber{4.568}\hspace{1em}
+\pgfmathprintnumber{5e-04}\hspace{1em}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{24415.98123}\hspace{1em}
+\pgfmathprintnumber{123456.12345}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/frac}
+    把数字显示为分数。
+    %
+\begin{codeexample}[width=3cm]
+\pgfkeys{/pgf/number format/frac}
+\pgfmathprintnumber{0.333333333333333}\hspace{1em}
+\pgfmathprintnumber{0.5}\hspace{1em}
+\pgfmathprintnumber{2.133333333333325e-01}\hspace{1em}
+\pgfmathprintnumber{0.12}\hspace{1em}
+\pgfmathprintnumber{2.666666666666646e-02}\hspace{1em}
+\pgfmathprintnumber{-1.333333333333334e-02}\hspace{1em}
+\pgfmathprintnumber{7.200000000000000e-01}\hspace{1em}
+\pgfmathprintnumber{6.666666666666667e-02}\hspace{1em}
+\pgfmathprintnumber{1.333333333333333e-01}\hspace{1em}
+\pgfmathprintnumber{-1.333333333333333e-02}\hspace{1em}
+\pgfmathprintnumber{3.3333333}\hspace{1em}
+\pgfmathprintnumber{1.2345}\hspace{1em}
+\pgfmathprintnumber{1}\hspace{1em}
+\pgfmathprintnumber{-6}
+\end{codeexample}
+
+    \begin{key}{/pgf/number format/frac TeX=\marg{\textbackslash macro} (initially \texttt{\textbackslash frac})}
+        允许在 |frac| 显示类型内部使用不同的 |\frac| 实现。
+    \end{key}
+
+    \begin{key}{/pgf/number format/frac denom=\meta{int} (initially empty)}
+        允许为 |frac| 提供自定义分母。
+        %
+\begin{codeexample}[width=3cm]
+\pgfkeys{/pgf/number format/.cd,frac, frac denom=10}
+\pgfmathprintnumber{0.1}\hspace{1em}
+\pgfmathprintnumber{0.5}\hspace{1em}
+\pgfmathprintnumber{1.2}\hspace{1em}
+\pgfmathprintnumber{-0.6}\hspace{1em}
+\pgfmathprintnumber{-1.4}\hspace{1em}
+\end{codeexample}
+    \end{key}
+
+    \begin{key}{/pgf/number format/frac whole=\mchoice{true,false} (initially true)}
+        配置是否应把完整的整数部分放在分数部分之前。这样分数部分会小于 $1$。
+        用 |frac whole=false| 来避免整数部分。
+        %
+\begin{codeexample}[width=3cm]
+\pgfkeys{/pgf/number format/.cd,frac, frac whole=false}
+\pgfmathprintnumber{20.1}\hspace{1em}
+\pgfmathprintnumber{5.5}\hspace{1em}
+\pgfmathprintnumber{1.2}\hspace{1em}
+\pgfmathprintnumber{-5.6}\hspace{1em}
+\pgfmathprintnumber{-1.4}\hspace{1em}
+\end{codeexample}
+    \end{key}
+
+    \begin{key}{/pgf/number format/frac shift=\marg{integer} (initially 4)}
+        如果你遇到稳定性问题，可以尝试换一个 |frac shift|。较大的 shift 值 $k$
+        会使结果对不精确的数据或不精确的运算更敏感。
+
+        从技术上讲，过程如下。如果 $r < 1$ 是尾数的小数部分，则计算一个尺度
+        $i = 1/r \cdot 10^k$，其中 $k$ 是 shift；$i$ 的小数部分被忽略。$1/r$ 是在
+        内部计算的，其误差会被放大。
+
+        如果你仍然遇到稳定性问题，请在导言区中启用 |fp|。这样 |frac| 样式就会在
+        计算 $1/r$ 时自动采用 |fp| 更高的绝对精度。
+    \end{key}
+\end{key}
+
+\begin{key}{/pgf/number format/precision=\marg{number}}
+    为任何显示操作设置期望的舍入精度。对于科学记数格式，这会影响尾数。
+\end{key}
+
+\begin{key}{/pgf/number format/sci precision=\meta{number or empty} (initially empty)}
+    仅为 |sci| 样式设置期望的舍入精度。
+
+    用 |sci precision={}| 可恢复初始配置（即对所有数字样式都使用提供给 |precision|
+    的参数）。
+\end{key}
+
+\begin{key}{/pgf/number format/read comma as period=\mchoice{true,false} (initially false)}
+    这是少数几个允许定制数字解析器的键之一。如果打开这个开关，逗号会被当作小数点来读。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/read comma as period}
+\pgfmathprintnumber{1234,56}
+\end{codeexample}
+    %
+    这通常是不希望的，因为它可能与数学解析指令产生副作用。不过，它支持用于格式化
+    输入数字或输入表格。考虑用 |use comma| 让结果也以逗号排版。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    read comma as period,
+    use comma}
+\pgfmathprintnumber{1234,56}
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    这个键需要比~\pgfname~3.0.0 更新的 \pgfname\ 版本。
+\end{key}
+
+
+\subsubsection{修改数字格式的显示样式}%
+\label{sec:number:styles}
+
+你可以修改数字的显示方式。例如，如果你使用 `\texttt{fixed}' 样式，输入数会被
+四舍五入到所需精度，并用当前的定点显示样式来排版该数。其他任何格式也同样如此：
+先用四舍五入例程得到正确的数字，再由一个显示样式生成合适的 \TeX{} 代码。
+
+\begin{key}{/pgf/number format/set decimal separator=\marg{text}}
+    把 \meta{text} 指定为任何定点数（包括 sci 格式中的尾数）的小数点。
+\end{key}
+
+\begin{key}{/pgf/number format/dec sep=\marg{text}}
+    只是 |set decimal separator| 的另一个名字。
+\end{key}
+
+\begin{key}{/pgf/number format/set thousands separator=\marg{text}}
+    把 \meta{text} 指定为任何定点数（包括 sci 格式中的尾数）的千位分隔符。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,
+    precision=2,
+    set thousands separator={}}
+\pgfmathprintnumber{1234.56}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,
+    precision=2,
+    set thousands separator={}}
+\pgfmathprintnumber{1234567890}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,
+    precision=2,
+    set thousands separator={.}}
+\pgfmathprintnumber{1234567890}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,
+    precision=2,
+    set thousands separator={,}}
+\pgfmathprintnumber{1234567890}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,
+    precision=2,
+    set thousands separator={{{{,}}}}}
+\pgfmathprintnumber{1234567890}
+\end{codeexample}
+    %
+    最后一个例子使用逗号，并禁用了默认的逗号间距。
+\end{key}
+
+\begin{key}{/pgf/number format/1000 sep=\marg{text}}
+    只是 |set thousands separator| 的另一个名字。
+\end{key}
+
+\begin{key}{/pgf/number format/1000 sep in fractionals=\marg{boolean} (initially false)}
+    配置小数部分是否也应按三位一组分组。
+
+    取值 |true| 会对整数部分和小数部分都启用 |1000 sep|。取值 |false| 则只对整数部分
+    启用 |1000 sep|。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    precision=999,
+    set thousands separator={\,},
+    1000 sep in fractionals,
+}
+\pgfmathprintnumber{1234.1234567}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,fixed zerofill,
+    precision=9,
+    set thousands separator={\,},
+    1000 sep in fractionals,
+}
+\pgfmathprintnumber{1234.1234567}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/min exponent for 1000 sep=\marg{number} (initially 0)}
+    定义绘制千位分隔符所需的科学记数法中的最小指数。指数等于位数减一，因此
+    $\mathit{number}=4$ 会从 $1e4 = 10000$ 起使用千位分隔符。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    int detect,
+    1000 sep={\,},
+    min exponent for 1000 sep=0}
+\pgfmathprintnumber{5000}; \pgfmathprintnumber{1000000}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    int detect,
+    1000 sep={\,},
+    min exponent for 1000 sep=4}
+\pgfmathprintnumber{1000}; \pgfmathprintnumber{5000}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    int detect,
+    1000 sep={\,},
+    min exponent for 1000 sep=4}
+\pgfmathprintnumber{10000}; \pgfmathprintnumber{1000000}
+\end{codeexample}
+    %
+    \noindent 取值 |0| 会禁用这个特性（负值会被忽略）。
+\end{key}
+
+
+\begin{key}{/pgf/number format/use period}
+    一个预定义样式，它把句号 `\texttt{.}' 装为小数点、把逗号 `\texttt{,}' 装为
+    千位分隔符。这个样式是默认的。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed,precision=2,use period}
+\pgfmathprintnumber{12.3456}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed,precision=2,use period}
+\pgfmathprintnumber{1234.56}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/use comma}
+    一个预定义样式，它把逗号 `\texttt{,}' 装为小数点、把句号 `\texttt{.}' 装为
+    千位分隔符。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed,precision=2,use comma}
+\pgfmathprintnumber{12.3456}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,fixed,precision=2,use comma}
+\pgfmathprintnumber{1234.56}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/skip 0.=\marg{boolean} (initially false)}
+    配置像 $0.1$ 这样的数字是否应排版为 $.1$。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,precision=2,
+    skip 0.}
+\pgfmathprintnumber{0.56}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,
+    fixed,
+    fixed zerofill,precision=2,
+    skip 0.=false}
+\pgfmathprintnumber{0.56}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/showpos=\marg{boolean} (initially false)}
+    启用或禁用对非负数显示加号。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/showpos}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/showpos=false}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,showpos,sci}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+\end{key}
+
+\begin{stylekey}{/pgf/number format/print sign=\marg{boolean}}
+    一个样式，它就是 |showpos=|\meta{boolean} 的别名。
+\end{stylekey}
+
+\begin{key}{/pgf/number format/sci 10e}
+    对任何以科学格式显示的数字使用 $m \cdot 10^e$。
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,sci 10e}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/sci 10\textasciicircum e}
+    与 `|sci 10e|' 相同。
+\end{key}
+
+\begin{key}{/pgf/number format/sci e}
+    对任何以科学格式显示的数字，使用常见科学工具所生成的 `$1e{+}0$' 格式。
+
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,sci e}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/sci E}
+    与上相同，但用大写 `\texttt{E}'。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,sci E}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/sci subscript}
+    对任何以科学格式显示的数字，把指数排版为下标。这个样式占用的空间非常小。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,sci subscript}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/sci superscript}
+    对任何以科学格式显示的数字，把指数排版为上标。这个样式占用的空间非常小。
+    %
+\begin{codeexample}[]
+\pgfkeys{/pgf/number format/.cd,sci,sci superscript}
+\pgfmathprintnumber{12.345}
+\end{codeexample}
+\end{key}
+
+\begin{key}{/pgf/number format/sci generic=\marg{keys}}
+    允许为科学格式定义自定义数字样式。这里，\meta{keys} 可以是下列选项之一
+    （省略长键前缀）：
+
+    \begin{key}{/pgf/number format/sci generic/mantissa sep=\marg{text} (initially empty)}
+        提供尾数与指数之间的分隔符。例如它可以是 |\cdot|，
+    \end{key}
+
+    \begin{key}{/pgf/number format/sci generic/exponent=\marg{text} (initially empty)}
+        提供用于格式化指数的文本。实际的指数可作为参数 |#1| 获取（见下文）。
+    \end{key}
+
+\begin{codeexample}[]
+\pgfkeys{
+    /pgf/number format/.cd,
+    sci,
+    sci generic={mantissa sep=\times,exponent={10^{#1}}}}
+\pgfmathprintnumber{12.345};
+\pgfmathprintnumber{0.00012345}
+\end{codeexample}
+    %
+    这些 \meta{keys} 可以依赖三个参数：|#1| 是指数，|#2| 包含浮点数的标志位，
+    |#3| 是（未经处理、未格式化的）尾数。
+
+    注意，|sci generic|\emph{并不}适合用来修改定点数的外观，也不能用来格式化尾数
+    （尾数是像定点数那样排版的）。要定制尾数，请用 |dec sep|、|1000 sep| 和
+    |print sign|。
+\end{key}
+
+\begin{key}{/pgf/number format/retain unit mantissa=\mchoice{true,false} (initially true)}
+    允许省略单位尾数。
+    %
+\begin{codeexample}[]
+\pgfkeys{
+    /pgf/number format/.cd,
+    sci, retain unit mantissa=false}
+\pgfmathprintnumber{10.5};
+\pgfmathprintnumber{10};
+\pgfmathprintnumber{1010};
+\pgfmathprintnumber[precision=1]{-1010};
+\end{codeexample}
+    %
+    这个特性在四舍五入到所需精度之后应用：如果余下的尾数等于~$1$，就把它省略。
+    它适用于所有涉及科学格式的样式（包括 |std|）。
+\end{key}
+
+\begin{key}{/pgf/number format/@dec sep mark=\marg{text}}
+    会被放在小数点应在位置的紧前面。不过，即使没有小数点，也会插入 \meta{text}。
+    它旨在作为辅助例程查找对齐位置的占位符。
+
+    这个键绝不应用来修改小数点！请改用 |dec sep|。
+\end{key}
+
+\begin{key}{/pgf/number format/@sci exponent mark=\marg{text}}
+    会被放在科学记数法中指数的紧前面。它旨在作为辅助例程查找对齐位置的占位符。
+
+    这个键绝不应用来修改指数！
+\end{key}
+
+\begin{key}{/pgf/number format/assume math mode=\marg{boolean} (default true)}
+    如果你不希望做任何数学模式检查，就把它设为 |true|。
+
+    初始设置会在每个最终数字周围装一个 |\pgfutilensuremath|，以便在必要时切换到
+    数学模式。如果你知道数学模式处于激活状态、且不想要 |\pgfutilensuremath|，
+    就用 |assume math mode=true|。
+\end{key}
+
+\begin{stylekey}{/pgf/number format/verbatim}
+    一个样式，它配置数字打印器产生逐字文本输出，也就是不包含 \TeX{} 宏。
+    %
+\begin{codeexample}[]
+\pgfkeys{
+    /pgf/fpu,
+    /pgf/number format/.cd,
+    sci,
+    verbatim}
+\pgfmathprintnumber{12.345};
+\pgfmathprintnumber{0.00012345};
+\pgfmathparse{exp(15)}
+\pgfmathprintnumber{\pgfmathresult}
+\end{codeexample}
+    %
+    这个样式会重置 |1000 sep|、|dec sep|、|print sign|、|skip 0.| 并设置
+    |assume math mode|。此外，它还为科学数字的逐字输出装一个 |sci generic| 格式。
+
+    不过，它仍会尊重 |precision|、|fixed zerofill|、|sci zerofill| 以及总体样式
+    |fixed|、|sci|、|int detect|（及其变体）。如果你想写输出文件，它可能有用。
+\end{stylekey}
+
+
+\section{从输入数据到输出表格：数据处理}
+\label{sec:data:processing}
+
+从一个未经处理的输入表格转换到最终排版好的 |tabular| 代码，对每个单元格都经过
+四个阶段，
+%
+\begin{enumerate}
+    \item 加载表格，
+    \item 预处理，
+    \item 排版，
+    \item 后处理。
+\end{enumerate}
+%
+其主要思想是选定一个排版算法（例如 ``用配置好的数字样式格式化我的数字''）。
+这个算法通常不需要改动。然后可以用零个、一个或多个预处理器和后处理器来做精细调整。
+预处理可以指只选择特定的行，或在排版算法看到内容之前施加某种操作。后处理则指对所得的
+\TeX{} 输出做精细调整——例如处理空单元格、插入单位后缀，或修改单个单元格的字体。
+
+注意，这类操作是逐列处理的。因此，预处理、排版和后处理的键适用于列上的样式。
+它们对 |every last row| 之类的行样式不可用。如果你需要在特定行上施加这类基于内容的
+操作，就得写类似 ``如果 |\pgfplotstablerow| $=$ 就以不同方式生成内容'' 的代码。
+
+
+\subsection{加载表格}
+
+排版表格的这第一步涉及显而易见的输入操作。此外，节~\ref{pgfplotstable:createcol}
+中讲解的 ``新建列'' 操作也在此时处理。表格数据如本手册前面所述那样被读取（或获取）。
+然后，如果缺少列，列别名和 |create on use| 规范会作为加载过程的一部分被处理。
+关于新建列的细节参见节~\ref{pgfplotstable:createcol}。
+
+
+\subsection{排版单元格内容}
+
+排版单元格就是取它们的值并 ``做点什么''。在很多情况下，这会涉及数字格式例程。
+例如，``原始'' 输入数据 |12.56| 可能变成 |1.26| |\cdot| |10^1|。这一阶段的结果不再
+适用于基于内容的计算。排版步骤在预处理步骤之后进行。
+
+排版单元格内容是逐列应用的，也就是说它也能为行样式配置。如何只在特定行上应用这类
+样式，细节见节~\ref{sec:data:processing} 引言中的说明。
+
+\begin{codekey}{/pgfplots/table/assign cell content}
+    允许重新定义分配单元格内容的算法。参数 |#1| 是输入表的（未格式化的）内容。
+
+    所得的输出需要写入 |/pgfplots/table/@cell content|。
+    %
+\pgfplotstableset{
+    %debug=true,
+    begin table=\begin{tabular},% eliminate the '[b]' from the preamble here
+}
+% \usepackage{booktabs}
+% \usepackage{multirow}
+\begin{codeexample}[]
+% An example how to use
+% \usepackage{multirow} and
+% \usepackage{booktabs}:
+\pgfplotstabletypeset[
+    columns/Z/.style={
+        column name={},
+        assign cell content/.code={% use \multirow for Z column:
+            \ifnum\pgfplotstablerow=0
+                \pgfkeyssetvalue{/pgfplots/table/@cell content}
+                    {\multirow{4}{*}{##1}}%
+            \else
+                \pgfkeyssetvalue{/pgfplots/table/@cell content}{}%
+            \fi
+        },
+    },
+    % use \booktabs as well (compare examples above):
+    every head row/.style={before row=\toprule,after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+    row sep=\\,col sep=&,
+    outfile=pgfplotstable.multirow.out,% write it to file
+]{% here: inline data in tabular format:
+    Z    & a & b \\
+    data & 1 & 2 \\
+         & 3 & 4 \\
+         & 5 & 6 \\
+         & 7 & 8 \\
+}
+% ... and show the generated file:
+\lstinputlisting[basicstyle=\footnotesize\ttfamily]{pgfplotstable.multirow.out}
+\end{codeexample}
+        \index{multirow}%
+    %
+    \noindent 上面的例子用 |\usepackage{multirow}| 来格式化列 |Z|。更准确地说，
+    它对列 |Z| 的第 \#0 行使用 |\multirow{4}{*}{data}|，而对列 |Z| 的其他行使用
+    空字符串。
+
+    请注意，你可能需要特别留意 |#1=|\marg{}，也就是空字符串。如果某一列的行数比
+    第一列少，就会出现这种情况。在这种情况下，\PGFPlotstable{} 会自动平衡各列，
+    插入足够多的空单元格，使其与第一列的行数相匹配。
+
+    还要注意，如果某一列的条目比第一列多，这些多余的条目会被跳过，并在日志文件中
+    发出一条警告信息。
+
+    这个键是在一个局部 \TeX{} 分组内部计算的，因此之后任何局部宏赋值都会被清除。
+\end{codekey}
+
+\begin{stylekey}{/pgfplots/table/numeric type}
+    一个样式，它把 |assign cell content|（重）定义回其原始值，即假定数据为数值型。
+
+    它调用 |\pgfmathprintnumberto|，并把结果写入 |@cell content|。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/string type}
+    一个样式，它把 |assign cell content| 重定义为直接返回 ``原始'' 输入数据，
+    也就是作为文本列。这假定输入表格含有合法的 \LaTeX{} 内容（不支持逐字打印）。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/verb string type}
+    一个样式，它把 |assign cell content| 重定义为按原样返回 ``原始'' 内容。
+    因此它与 |string type| 相当类似——但它会返回控制序列以及（许多，而非全部）
+    特殊字符，而不展开它们。
+
+    你可能需要把 |verb string type| 与 |special chars| 结合使用。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/numeric as string type}
+    一个样式，它把 |assign cell content| 重定义为假定输入数据为数值型。它返回一个
+    字符串字面量，以整数或科学（指数）记数法描述输入数。与 |numeric type| 不同，
+    它不应用数字格式。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/date type=\marg{date format}}% (initially \year-\month-\day)}
+    一个样式，它在每个单元格中期望形如 |YYYY-MM-DD| 的 ISO 日期，并在输出时产生
+    美观排版的字符串。输出格式由 \meta{date format} 给出。在 \meta{date format}
+    内部，可以使用下面讲解的若干宏。
+    %
+% \usepackage{pgfcalendar}
+\begin{codeexample}[]
+% Requires
+% \usepackage{pgfcalendar}
+\pgfplotstableset{columns={date,account1}}
+
+% plotdata/accounts.dat contains:
+%
+% date              account1  account2  account3
+% 2008-01-03        60        1200      400
+% 2008-02-06        120       1600      410
+% 2008-03-15        -10       1600      410
+% 2008-04-01        1800      500       410
+% 2008-05-20        2300      500       410
+% 2008-06-15        800       1920      410
+
+% Show the contents in `string type':
+\pgfplotstabletypeset[
+    columns/date/.style={string type}
+]{plotdata/accounts.dat}
+\hspace{1cm}
+% Show the contents in `date type':
+\pgfplotstabletypeset[
+    columns/date/.style={date type={\monthname\ \year}}
+]{plotdata/accounts.dat}
+\end{codeexample}
+    %
+    这个样式 \textbf{需要} 加载 \PGF{} \textbf{日历宏包}：
+    %
+\begin{codeexample}[code only]
+\usepackage{pgfcalendar}
+\end{codeexample}
+
+    \begin{command}{\year}
+        在 \meta{date format} 内部，这个宏展开为以数字表示的年份（如 |2008|）。
+    \end{command}
+
+    \begin{command}{\month}
+        在 \meta{date format} 内部，这个宏展开为以数字表示的月份，从~$1$ 开始
+        （如 |1|）。
+    \end{command}
+
+    \begin{command}{\monthname}
+        在 \meta{date format} 内部，这个宏展开为当前语言所设定的月份名
+        （如 |January|）。如何修改语言见下文。
+    \end{command}
+
+    \begin{command}{\monthshortname}
+        在 \meta{date format} 内部，这个宏展开为当前语言所设定的月份缩写名
+        （如 |Jan|）。如何修改语言见下文。
+    \end{command}
+
+    \begin{command}{\day}
+        在 \meta{date format} 内部，这个宏展开为以数字表示的日（如 |31|）。
+    \end{command}
+
+    \begin{command}{\weekday}
+        在 \meta{date format} 内部，这个宏展开为星期几的编号（周一为 $0$，
+        周二为 $1$，依此类推）。
+    \end{command}
+
+    \begin{command}{\weekdayname}
+        在 \meta{date format} 内部，这个宏展开为当前语言中的星期名
+        （如 |Wednesday|）。如何修改语言见下文。
+    \end{command}
+
+    \begin{command}{\weekdayshortname}
+        在 \meta{date format} 内部，这个宏展开为当前语言中的星期缩写名
+        （如 |Wed|）。如何修改语言见下文。
+    \end{command}
+
+
+    \subsubsection*{修改日期所用的语言}
+
+    日期功能是用 \PGF{} 日历模块实现的。这个模块会使用 |translator| 宏包
+    （如果它已被加载）。抱歉，我还没有更多细节。更多信息请参见 \cite{tikz}。
+\end{stylekey}
+
+
+\subsection{预处理单元格内容}
+\label{sec:pgfplotstable:preproc}
+
+预处理步骤允许在应用任何排版例程（如数字格式）\emph{之前}修改单元格内容。
+因此，如果表格含有数值数据，就可以在这一阶段施加数学运算。此外，还可以根据
+单元格的数值来清除单元格。预处理步骤在数据获取步骤（``加载步骤''）之后进行。
+这尤其意味着你可以创建（或复制）列并应用
+operations on them.
+
+预处理按逐列方式应用，也就是说它可以为行样式配置。关于如何只在特定行上应用这类样式，
+细节见节~\ref{sec:data:processing} 引言中的说明。
+
+\begin{codekey}{/pgfplots/table/preproc cell content}
+    允许在调用 |assign cell content| \emph{之前}\emph{修改}单元格内容。
+
+    其语义如下：在预处理程序之前，|@cell content| 含有原始输入数据（或者，
+    可能是另一次预处理调用的结果）。预处理之后，|@cell content| 被填入一个——
+    可能被修改过的——值。所得值随后用作 |assign cell content| 的输入。
+
+    在默认设置下，|assign cell content| 期待数值型输入。因此，
+    预处理程序应产生数值型输出。
+
+    可以用 |/.append code| 或 |/.append style| 键处理器提供多个预处理指令。
+
+    如果你不想要（或不需要）可叠加的预处理程序，也可以用 `|#1|' 来取得文件中
+    所找到的原始输入数据。此外，键 |@unprocessed cell content| 也会包含该原始
+    输入数据。
+\end{codekey}
+
+\begin{stylekey}{/pgfplots/table/string replace=\marg{cell match}\marg{cell replacement}}
+    向当前的 |preproc cell content| 值追加代码，它把任何与 \meta{cell match}
+    精确匹配的单元格替换为 \meta{cell replacement}。这一步不做任何展开；
+    \meta{cell match} 必须逐字匹配。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[columns={level,dof}]
+    {pgfplotstable.example1.dat}
+
+\pgfplotstabletypeset[
+    columns={level,dof},
+    columns/level/.style={string replace={A}{B}}, % does nothing because there is no cell 'A'
+    columns/dof/.style={string replace={256}{-42}}]  % replace cell '256' with '-42'
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+
+    子串替换参见 |string replace*| 方法。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/string replace*=\marg{pattern}\marg{replacement}}
+    向当前的 |preproc cell content| 值追加代码，它把每一处出现的 \meta{pattern}
+    替换为 \meta{replacement}。这一步不做任何展开；\meta{pattern} 必须逐字匹配。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    string replace*={2}{6},
+    col sep=&,row sep=\\]{
+  colA & colB & colC \\
+  11   & 12   & 13   \\
+  21   & 22   & 23   \\
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/clear infinite}
+    向当前的 |preproc cell content| 值追加代码，它把每个无穷数替换为空字符串。
+    这会清除任何含有 $\pm \infty$ 和 NaN 的单元格。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/preproc/expr=\marg{math expression}}
+    向当前的 |preproc cell content| 值追加代码，它对每个单元格计算
+    \meta{math expression}。运算以浮点数进行。
+
+    在 \meta{math expression} 内部，用下列表达式之一来取得当前单元格的值。
+    %
+    \begin{itemize}
+        \item 字符串 `|##1|' 展开为该单元格在输入文件中所找到的内容，
+            忽略前面的预处理程序。
+
+            这通常就足够了。
+        \item 命令 |\thisrow|\marg{the currently processed column name} 展开为
+            当前单元格的内容。这还会包括前面预处理程序的结果。
+
+            注意，在这种上下文中（预处理程序内部）的 |\thisrow{}| 不如在新建列
+            例程上下文中那么强大：其参数必须与当前正在处理的列名精确匹配。
+            你也可以用简写
+
+            |\thisrow{\pgfplotstablecolname}|。
+
+        \item 命令 |\pgfkeysvalueof{/pgfplots/table/@cell content}| 与此相同。
+    \end{itemize}
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[
+    columns={level},
+    columns/level/.style={
+        column name={$2\cdot \text{level}+4$},
+        preproc/expr={2*##1 + 4}
+    }
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+
+    空单元格不会被处理，因为含有 ``空数'' 的数学表达式会失败。
+
+    注意，还有一个 |create col/expr|，它比 |preproc/expr| 更强大。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/multiply by=\marg{real number}}
+    向当前的 |preproc cell content| 值追加代码，它把每个单元格乘以
+    \meta{real number}。运算以浮点数进行。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/divide by=\marg{real number}}
+    向当前的 |preproc cell content| 值追加代码，它把每个单元格除以
+    \meta{real number}。运算以浮点数进行。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/sqrt}
+    向当前的 |preproc cell content| 值追加代码，它对每个非空单元格取平方根
+    $\sqrt{\cdot}$。运算以浮点数进行。
+
+    下面的例子复制列 |error1|，并对这个副本应用 |sqrt|。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    columns={error1,sqrterror1},
+    create on use/sqrterror1/.style={create col/copy=error1},
+    columns/error1/.style={column name=$\epsilon$},
+    columns/sqrterror1/.style={sqrt,column name=$\sqrt \epsilon$},
+    sci,sci 10e,precision=3,sci zerofill
+}
+\pgfplotstabletypeset{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    关于 |create on use| 的细节，请参见节~\ref{pgfplotstable:createcol}。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/multiply -1}
+    向当前的 |preproc cell content| 值追加代码，它把每个单元格乘以 $-1$。
+    这个样式与 |multiply by=-1| 做同样的事，只是更快，因为只改变符号。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    columns={dof,error2,slopes2},
+    columns/error2/.style={sci,sci zerofill},
+    columns/slopes2/.style={dec sep align,empty cells with={\ensuremath{-}}},
+    create on use/slopes2/.style=
+        {create col/gradient loglog={dof}{error2}}}
+
+\pgfplotstabletypeset{pgfplotstable.example1.dat}
+
+\pgfplotstabletypeset[columns/slopes2/.append style={multiply -1}]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+\end{stylekey}
+
+\begin{codekey}{/pgfplots/table/row predicate}
+    一个布尔谓词，它允许根据当前行的索引来选择输入表格中的特定行。参数 |#1| 含有
+    当前行的索引（从~$0$ 开始，不计注释行或列名）。
+
+    返回值被赋给 \TeX{} 条件 \declareandlabel{\ifpgfplotstableuserow}。如果该布尔值
+    未被改动，则返回值为真。
+    %
+\begin{codeexample}[newline=]
+% requires \usepackage{booktabs}
+\pgfplotstabletypeset[
+    every head row/.style={
+        before row=\toprule,after row=\midrule},
+    every last row/.style={
+        after row=\bottomrule},
+    row predicate/.code={%
+        \ifnum#1>4\relax
+            \ifnum#1<8\relax
+                \pgfplotstableuserowfalse
+            \fi
+        \fi}
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    请注意，|row predicate| 是在任何其他影响行（或列）外观的选项\emph{之前}应用的。
+    它在 |assign cell content| 之前计算。其后果之一是：偶数/奇数行样式只针对那些
+    谓词返回 |true| 的行。事实上，你可以用 |row predicate| 在表格真正被处理之前
+    就截断整个表格。
+
+    在 |row predicate| 期间，宏 |\pgfplotstablerows| 包含\emph{输入}行的总数。
+
+    此外，|row predicate| 只适用于排版例程，不适用于读取方法。如果你想只用
+    |\addplot table| 绘制选定的表格条目，请用 \PGFPlots{} 的坐标过滤选项。
+\end{codekey}
+
+\begin{stylekey}{/pgfplots/table/skip rows between index=\marg{begin}\marg{end}}
+    一个样式，它追加一个 |row predicate|，用以丢弃选定的行。选择按索引进行，
+    索引从~$0$ 开始。索引满足 $\mathit{begin} \le i < \mathit{end}$ 的每一行都会被跳过。
+    %
+\begin{codeexample}[narrow]
+% requires \usepackage{booktabs}
+\pgfplotstabletypeset[
+    every head row/.style={
+        before row=\toprule,after row=\midrule},
+    every last row/.style={
+        after row=\bottomrule},
+    skip rows between index={2}{4},
+    skip rows between index={7}{9}
+]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/select equal part entry of=\marg{part no}\marg{part count}}
+    一个样式，它用一个子集选择谓词覆盖 |row predicate|。其思想是把当前列分成
+    \meta{part count} 个等大的部分，只选择 \meta{part no}。
+
+    这可用于模拟多列表格。
+    %
+\begin{codeexample}[]
+% requires \usepackage{booktabs}
+\pgfplotstableset{
+    every head row/.style={before row=\toprule,after row=\midrule},
+    every last row/.style={after row=\bottomrule}}
+
+\pgfplotstabletypeset[string type]{pgfplotstable.example2.dat}%
+~
+\pgfplotstabletypeset[
+    columns={A,B,A,B},
+    display columns/0/.style={select equal part entry of={0}{2},string type},% first part of `A'
+    display columns/1/.style={select equal part entry of={0}{2},string type},% first part of `B'
+    display columns/2/.style={select equal part entry of={1}{2},string type},% second part of `A'
+    display columns/3/.style={select equal part entry of={1}{2},string type},% second part of `B'
+]
+    {pgfplotstable.example2.dat}
+\end{codeexample}
+    %
+    上面的例子左侧原样显示原始文件。右侧显示列 A,B,A,B——但只显示一半元素，
+    即按 \#2 中的 \#0 或 \#1 索引选出的那些。这些部分等大，除一个余数外。
+
+    如果可用行数不能被 \meta{part count} 整除，剩余的条目会被均分到前面的几个部分中。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/unique=\marg{column name}}
+    一个样式，它追加一个 |row predicate|，用以抑制 \meta{column name} 中相同元素的
+    连续出现。例如，如果 \meta{column name} 含有 |1,1,3,5,5,6,5,0|，应用 |unique|
+    的结果是 |1,3,5,6,5,0|（最后那个 |5| 被保留——它前面紧挨着的不是另一个 |5|）。
+
+    该算法用字符串记号比较来查找重复出现。\footnote{更准确地说，比较是用
+    \texttt{\textbackslash ifx} 完成的，也就是单元格内容不会被展开。只会使用
+    输入表格中所见的记号。}
+
+    参数 \meta{column name} 可以是列名、索引、别名或 |create on use| 规范
+    （最后一种不得依赖其他 |create on use| 语句）。不必提供一个属于输出的
+    \meta{column name}。
+
+    不过，|unique| 谓词必须能从第一列开始对所有列计算。这意味着把 |unique| 放在
+    特定列样式的深处是错误的。
+\end{stylekey}
+
+
+\subsection{后处理单元格内容}
+
+后处理步骤在排版阶段之后应用。其主要目的是施加最终的、不基于内容的格式指令。
+
+后处理是逐列应用的，也就是说它也能为行样式配置。如何只在特定行上应用这类样式，
+细节见节~\ref{sec:data:processing} 引言中的说明。
+
+\begin{codekey}{/pgfplots/table/postproc cell content}
+    允许在已分配的单元格内容被分配\emph{之后}对其\emph{修改}，可以是依赖内容的。
+    可能的做法有：把负数画成红色、把单个条目排成粗体，或插入替换文本。
+
+    这个键在 |assign cell content| \emph{之后}计算。其语义是修改一个已有的
+    |@cell content| 值。
+
+    如果你用 |/.append code| 或 |/.append style| 来定义它们，可以有不止一个
+    |postproc cell content| 命令：
+    %
+\begin{codeexample}[]
+% requires \usepackage{eurosym}
+\pgfplotstabletypeset[
+    column type=r,
+    columns={dof,info},
+    columns/info/.style={
+        % stupid example for multiple postprocessors:
+        postproc cell content/.append style={
+            /pgfplots/table/@cell content/.add={$\bf}{$},
+        },
+        postproc cell content/.append style={
+            /pgfplots/table/@cell content/.add={}{\EUR{}},
+        }
+    }]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    上面的代码分两步修改 |@cell content|。其净效果是在前面 prepend ``|$\bf |''，
+    在后面 append ``|$ \EUR|''。应当注意，|pgfkeys|（基本上）以相同方式处理
+    |/.style| 和 |/.code|——二者都是简单的代码键，都可这样使用。你可以把它们与
+    |/.append style| 和 |/.append code| 组合。细节请参见
+    ~\cite[section about pgfkeys]{tikz}。
+
+    与 |assign cell content| 中一样，代码可以求值像 |\pgfplotstablerow| 这样的辅助宏，
+    以只改动特定条目。此外，后处理程序可以依赖未处理的单元格输入（即输入文件中所
+    找到的、或由加载过程产生的输入）和/或预处理后的单元格值。这些值可通过下列方式获得：
+    %
+    \begin{itemize}
+        \item 键 \declareandlabel{@unprocessed cell content}，它存储原始输入，
+        \item 键 \declareandlabel{@cell content after rowcol styles}，它存储计算单元格
+            特定样式之后 |@cell content| 的值，
+        \item 键 \declareandlabel{@preprocessed cell content}，它存储预处理程序的结果，
+        \item 键 \declareandlabel{@cell content}，它包含排版例程的结果，
+        \item 简写 `|#1|'，它也是在输入表格中所找到的未处理输入参数。
+    \end{itemize}
+    %
+    记住，你可以随时用
+
+    |\pgfkeysvalueof{/pgfplots/table/@preprocessed cell content}|
+
+    来访问键值。
+
+    这允许完全基于上下文的格式选项。请记住，由于列平衡可能会出现空字符串——
+    必要时请引入特殊处理。
+
+    有一种特殊情况：当 |@cell content| 本身含有单元格分隔字符 `|&|' 时。
+    在这种情况下，|postproc cell content| 会对 & 之前和之后的每一部分\emph{分别}调用，
+    然后再插入 &。这使其能与那些在输出中创建人为列的特殊样式兼容（这是允许的，
+    见 |dec sep align|）。为便于对每一部分分别处理，你可以用宏
+    \declareandlabel{\pgfplotstablepartno}。它只在计算 |postproc cell content| 期间
+    定义，并展开为当前部分的索引（从~$0$ 开始）。如果你的文本中没有 &，
+    该值将始终为~$0$。
+
+    这个键是在一个局部 \TeX{} 分组内部计算的，因此之后任何局部宏赋值都会被清除。
+
+    下面的例子可用于在斜率列中插入一个短横线 $-$：
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    create on use/slopes1/.style=
+        {create col/gradient loglog={dof}{error1}}}
+
+\pgfplotstabletypeset[
+    columns={dof,error1,slopes1},
+    columns/error1/.style={sci,sci zerofill},
+    columns/slopes1/.style={
+        postproc cell content/.append code={%
+            \ifnum\pgfplotstablerow=0
+                \pgfkeyssetvalue{/pgfplots/table/@cell content}{\ensuremath{-}}%
+            \fi
+        }%
+    }]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    由于这在更一般的情形下也可能有用，它已作为 |empty cells with| 样式提供。
+
+    注意，现在表头行也会被这个键修改（如果你想修改表头单元格内容，见
+    |assign column name|）。
+\end{codekey}
+
+\begin{stylekey}{/pgfplots/table/empty cells with=\marg{replacement}}
+    向 |postproc cell content| 追加代码，它把任何空单元格替换为 \meta{replacement}。
+
+    如果 |dec sep align| 处于激活状态，替换值只会插入到小数点之前的那一部分。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/set content=\marg{content}}
+    一个样式，它把 |postproc cell content| 重定义为始终返回值 \meta{content}。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/fonts by sign=\marg{\TeX{} code for positive}\marg{\TeX{} code for negative}}
+    向 |postproc cell content| 追加代码，它允许为正数和负数设置字体。
+
+    参数 \meta{\TeX{} code for positive} 和 \meta{\TeX{} code for negative}
+    会被插入到排版好的单元格内容紧前面。两种修改 \LaTeX{} 字体的方式都可以用：
+    |\textbf|\marg{argument} 或 |{\bfseries |\marg{argument}|}| 方式。
+    %
+
+% \usepackage{pgfcalendar}
+\begin{codeexample}[]
+% Requires
+% \usepackage{pgfcalendar}
+
+% plotdata/accounts.dat contains:
+%
+% date              account1  account2  account3
+% 2008-01-03        60        1200      400
+% 2008-02-06        120       1600      410
+% 2008-03-15        -10       1600      410
+% 2008-04-01        1800      500       410
+% 2008-05-20        2300      500       410
+% 2008-06-15        800       1920      410
+
+\pgfplotstabletypeset[
+    columns={date,account1},
+    column type=r,
+    columns/date/.style={date type={\monthname\ \year}},
+    columns/account1/.style={fonts by sign={}{\color{red}}}
+]
+    {plotdata/accounts.dat}
+\end{codeexample}
+    %
+    事实上，这个样式的参数不必是字体改动。样式 |fonts by sign| 会把若干花括号和
+    相应的参数插入 |@cell content|。更准确地说，对于负数它会得到
+    |{|\meta{\TeX{} code for negative}|{|\meta{cell value}|}}|，而对于其他所有数字得到
+    |{|\meta{\TeX{} code for positive}|{|\meta{cell value}|}}|。
+\end{stylekey}
+
+
+\section{在新表格或新列中生成数据}
+\label{pgfplotstable:createcol}
+
+可以从零开始创建新表格，也可以在表格从磁盘加载后修改它们。
+
+
+\subsection{从零创建新表格}
+
+\begin{commandlist}{%
+    \pgfplotstablenew\oarg{options}\marg{row count}\marg{\textbackslash table},
+    \pgfplotstablenew*\oarg{options}\marg{row count}\marg{\textbackslash table}%
+}
+    从零创建一个新表格。
+
+    新表格将包含 |columns| 键中列出的所有列。对于 |\pgfplotstablenew|，
+    |columns| 键需要在 \oarg{options} 中提供。对于 |\pgfplotstablenew*|，
+    则使用 |columns| 的当前值，无论它在何处、何时被设置。
+
+    此外，每个要生成的列都必须有 |create on use| 语句（见下一小节）。\footnote{目前，
+    你至少需要提供一个列：对于完全空的表格，实现会出错。如果你不提供任何列名，
+    会创建一个哑列。} 各列按其在 |columns| 中出现的顺序独立生成。一旦某一列完成，
+    就可以用任何基本层级的访问机制来访问它。因此，你可以构建相互依赖的列。
+
+    该表格将恰好包含 \meta{row count} 行。如果 \meta{row count} 是一条
+    |\pgfplotstablegetrowsof| 语句，就会执行该语句并使用所得的行数。否则，
+    \meta{row count} 会作为数字计算。
+    %
+\begin{codeexample}[]
+% this key setting could be provided in the document's preamble:
+\pgfplotstableset{
+    % define how the 'new' column shall be filled:
+    create on use/new/.style={create col/set list={4,5,6,7,...,10}}}
+% create a new table with 11 rows and column 'new':
+\pgfplotstablenew[columns={new}]{11}\loadedtable
+% show it:
+\pgfplotstabletypeset[empty cells with={---}]\loadedtable
+\end{codeexample}
+
+\begin{codeexample}[]
+% create a new table with 11 rows and column 'new':
+\pgfplotstablenew[
+    % define how the 'new' column shall be filled:
+    create on use/new/.style={create col/expr={factorial(15+\pgfplotstablerow)}},
+    columns={new}]
+    {11}
+    \loadedtable
+% show it:
+\pgfplotstabletypeset\loadedtable
+\end{codeexample}
+\end{commandlist}
+
+\begin{command}{\pgfplotstablevertcat\marg{\textbackslash table1}\marg{\textbackslash table2 or filename}}
+\label{table:vertcat}
+    把 \meta{\textbackslash table2} 的内容追加到 \meta{\textbackslash table1}
+    （``纵向拼接''）。更准确地说，只有 \meta{\textbackslash table1} 中已存在的列
+    会被追加，且 \meta{\textbackslash table1} 中存在的每一列都必须在
+    \meta{\textbackslash table2} 中存在（或者必须有 |alias| 或 |create on use|
+    规范来生成它们）。
+
+    如果第二个参数是文件名，就从磁盘加载该文件。
+
+    如果 \meta{\textbackslash table1} 不存在，就把 \meta{\textbackslash table2}
+    复制到 \meta{\textbackslash table1}。
+    %
+\begin{codeexample}[code only]
+\pgfplotstablevertcat{\output}{datafile1} % loads `datafile1' -> `\output'
+\pgfplotstablevertcat{\output}{datafile2} % appends rows of datafile2
+\pgfplotstablevertcat{\output}{datafile3} % appends rows of datafile3
+\end{codeexample}
+
+    \paragraph{说明：}
+
+    输出表格 \meta{\textbackslash table1} 会在当前 \TeX{} 作用域中定义，
+    并在之后被清除。当前 \TeX{} 作用域由额外的一对花括号界定。然而，每个
+    \LaTeX{} 环境，以及遗憾地还有 \Tikz\ 的 |\foreach| 语句，都会引入 \TeX{} 作用域。
+
+    \PGFPlots{} 有一些循环语句不会引入额外作用域。例如，
+    %
+\begin{codeexample}[code only]
+\pgfplotsforeachungrouped \i in {1,2,...,10} {%
+    \pgfplotstablevertcat{\output}{datafile\i} % appends `datafile\i' -> `\output'
+}%
+\end{codeexample}
+    %
+    这些循环宏在 \PGFPlots{} 手册的参考章节 ``Miscellaneous Commands'' 中有讲解。
+\end{command}
+
+\begin{command}{\pgfplotstableclear\marg{\textbackslash table}}
+    清除一个表格。注意，在表格操作周围加上额外的花括号 `|{ ... }|' 要可靠得多——
+    这些花括号界定了一个变量（包括表格）的作用域。
+\end{command}
+
+
+\subsection{从已有列创建新列}
+
+\begin{command}{\pgfplotstablecreatecol\oarg{options}\marg{new col name}\marg{\textbackslash table}}
+    创建一个名为 \meta{new col name} 的新列，并把它追加到一个已存在的表格
+    \meta{\textbackslash table}。
+
+    最终用户大概根本不需要直接使用 |\pgfplotstablecreatecol|——有一个高层框架
+    |create on use|，它在内部调用该命令，并可通过简单的键值赋值来使用（见下文）。
+    不过，本文档讲解如何利用已有列的值来填充新单元格。
+
+    这个命令提供了一个灵活的框架来生成新列。它被设计为利用已有的值来创建新列——
+    例如用逻辑或数值方法组合已有值。它提供对某一行的值、上一行的值和下一行值的
+    快速访问。
+
+    下面的文档面向所有想\emph{编写}专用列的人。它并不特别难，只是技术性较强，
+    需要一些 |pgfkeys| 知识。如果你不喜欢它，可以改用预定义的列生成样式——
+    并在 \meta{options} 中启用这些样式。
+
+    列条目会用命令键 \declaretext{create col/assign} 来创建。它会对表格的每一行调用。
+    它应把内容赋给 \declaretext{create col/next content}。在计算期间，宏
+    |\thisrow|\marg{col name} 展开为由 \meta{col name} 指定的列在当前行的值。
+    此外，|\nextrow|\marg{col name} 展开为指定列在\emph{下}一行的值，
+    |\prevrow|\marg{col name} 展开为\emph{上}一行的值。
+
+    因此，其思想就是简单地重定义命令键 |create col/assign|，让它按需要填充新单元格。
+
+    第一行和最后一行有两个特殊的 |assign| 例程：\emph{最后}一行的内容用
+    \declaretext{create col/assign last} 计算，其语义相同。\emph{第一}行的内容用
+    \declaretext{create col/assign first} 计算，以简化此处的特殊情形。
+    这两个首行/末行命令是可选的，默认调用普通的 |assign| 例程。
+
+    |assign| 键的计算在局部 \TeX{} 分组中进行（也就是说之后任何局部定义都会被清除）。
+
+    在单元格赋值期间，下面这些宏很有用：
+    %
+    \begin{enumerate}
+        \item \declareandlabel{\prevrow}\marg{col name} /
+            \declareandlabel{\getprevrow}\marg{col name}\marg{\textbackslash
+            macro}
+
+            这两个例程返回存储在指定列 \meta{col name} \emph{上}一行的值。
+            |get| 例程把它存入 \meta{\textbackslash macro}。
+
+            参数 \meta{col name} 必须表示一个已存在的列名，或一个已存在
+            |alias/|\meta{col name} 的列名。
+        \item \declareandlabel{\thisrow}\marg{col name} /
+            \declareandlabel{\getthisrow}\marg{col name}\marg{\textbackslash
+            macro}
+
+            这两个例程返回存储在指定列中的\emph{当前}行的值。|get| 例程把它存入
+            \meta{\textbackslash macro}。
+
+            参数 \meta{col name} 必须表示一个已存在的列名，或一个已存在
+            |alias/|\meta{col name} 的列名。
+        \item \declareandlabel{\nextrow}\marg{col name} /
+            \declareandlabel{\getnextrow}\marg{col name}\marg{\textbackslash
+            macro}
+
+            这两个例程返回\emph{下}一行的值。
+
+            参数 \meta{col name} 必须表示一个已存在的列名，或一个已存在
+            |alias/|\meta{col name} 的列名。
+        \item |\pgfplotstablerow| 和 |\pgfplotstablerows|，分别包含当前行的索引和
+            行总数。细节见第~\pageref{pgfplotstable:page:tablerow} 页。
+        \item |\pgfmathaccuma| 和 |\pgfmathaccumb| 可用于传递中间结果。二者的值会在
+            一次列赋值到下一次列赋值之间保持。离开赋值例程后，其他所有局部变量都会被
+            删除。二者的初始值都是空字符串，除非它们已被列创建样式初始化。
+        \item |\pgfplotstablename|，一个包含当前正在处理的表格名字的宏
+            （也就是说它包含 |\pgfplotstablecreatecol| 的第二个参数）。
+        \item 在本宏包各部分都有效的命令，例如 |\pgfplotstablerow| 用于取得当前行索引，
+            或 |\pgfplotstablerows| 用于取得行总数。
+    \end{enumerate}
+    %
+    \meta{col name} 应为\emph{物理}列名，不允许别名或列索引
+    （除非列索引与列名相同）。
+
+    下面的例子取我们熟悉的输入表格，创建 |level| 列的一个副本。此外，它产生大量输出
+    以展示可用的宏。最后，它用 |\pgfkeyslet| 把所得 |\entry| 的内容赋给
+    |next content|。
+    %
+\begin{codeexample}[]
+\pgfplotstableread{pgfplotstable.example1.dat}\loadedtable
+\pgfplotstablecreatecol[
+    create col/assign/.code={%
+        \getthisrow{level}\entry
+        \getnextrow{level}\nextentry
+        \edef\entry{thisrow=\entry; nextrow=\nextentry.
+            (\#\pgfplotstablerow/\pgfplotstablerows)}%
+        \pgfkeyslet{/pgfplots/table/create col/next content}\entry
+    }]
+    {new}\loadedtable
+
+\pgfplotstabletypeset[
+    column type=l,
+    columns={level,new},
+    columns/new/.style={string type}
+]\loadedtable
+\end{codeexample}
+
+    还有一个特点：你可以用 |columns=|\marg{column list} 来降低这个命令的运行时复杂度。
+    这只在 |columns| 键直接提供在 \meta{options} 中时才有效。此时 |\thisrow| 及其
+    变体只为 |columns| 值中列出的那些列定义。
+
+
+    \paragraph{限制。}
+
+    目前，你一次只能访问一列的三个值：当前行、上一行和下一行。对任意索引的访问
+    （尚）不受支持。
+
+
+    \paragraph{说明：}
+
+    如果你想用这个命令（或相关的 |create on use| 简化形式）从零创建一个表格，
+    请参见 |\pgfplotstablenew|。
+
+    |assign| 的默认实现是产生空字符串。|assign last| 的默认实现是调用 |assign|，
+    因此如果你从不真正使用下一行的值，就不需要改动 |assign last|。|assign first|
+    也是如此。
+\end{command}
+
+\begin{pgfplotstablecreateonusekey}
+    允许对列 \meta{col name} 进行 ``惰性创建''。每当按名字查询列 \meta{col name} 时
+    （例如在 |\pgfplotstabletypeset| 命令中），如果这样一列尚不存在，它就会被即时创建。
+    %
+\begin{codeexample}[narrow]
+% requires \usepackage{array}
+\pgfplotstableset{% could be used in preamble
+    create on use/quot1/.style=
+        {create col/quotient={error1}}}
+
+\pgfplotstabletypeset[
+    columns={error1,quot1},
+    columns/error1/.style={sci,sci zerofill},
+    columns/quot1/.style={dec sep align}]
+{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    上面的例子查询 |quot1|，而它在输入文件中尚不存在。因此会检查是否存在针对
+    |quot1| 的 |create on use| 样式。确实存在，于是就用它来创建这一缺失的列。
+    |create col/quotient| 键在下文讨论；它计算列 |error1| 中相邻行的商。
+
+    一条 |create on use| 规范会被转换为
+
+    |\pgfplotstablecreatecol[|\meta{create options}|]|\marg{col name}\marg{the table}，
+
+    或者等价地，转换为
+
+    |\pgfplotstablecreatecol[|create on use/\meta{col name}|]|\marg{col name}\marg{the table}。
+
+    这个特性允许某种惰性，因为你可以省略冗长的表格修改。不过，惰性是有代价的：
+    在上面的例子中，生成的列在从 |\pgfplotstabletypeset| 返回后就会\emph{丢失}。
+
+    |create on use| 的优先级高于 |alias|。
+
+    如果 \meta{col name} 包含键设置所需的字符，你需要用花括号把它括起来：
+    ``|create on use/{name=wi/th,special}/.style={...}|''。
+
+    关于 |create on use| 的更多例子会在下文讨论可用的列创建样式时给出。
+
+    注意，|create on use| 在 \PGFPlots{} 中也可用，即在 |\addplot table| 与
+    |read completely| 键配合使用时。
+\end{pgfplotstablecreateonusekey}
+
+
+\subsection{预定义的列生成方法}
+
+下面这些键既可用于 |\pgfplotstablecreatecol|，也可用于更简单的
+|create on use| 框架。
+
+
+\subsubsection{从某处获取数据}
+
+\begin{stylekey}{/pgfplots/table/create col/set=\marg{value}}
+    一个用于列创建上下文的样式，它创建一个新列，并把 \meta{value} 写入每个新单元格。
+    该值以字符串形式（逐字）写入。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    create on use/my new col/.style={create col/set={--empty--}},
+    columns/my new col/.style={string type}
+}
+
+\pgfplotstabletypeset[
+    columns={level,my new col},
+]{pgfplotstable.example1.dat}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/set list=\marg{comma-separated-list}}
+    一个用于列创建上下文的样式，它创建一个由 \meta{comma-separated-list} 中各条目
+    组成的新列。该值以字符串形式（逐字）写入。
+
+    \meta{comma-separated-list} 通过 \Tikz 的 |\foreach| 命令处理，也就是说你可以用
+    |...| 表达式来给出数字（或字符）范围。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    create on use/my new col/.style={
+        create col/set list={A,B,C,4,50,55,...,100}},
+    columns/my new col/.style={string type}
+}
+
+\pgfplotstabletypeset[
+    columns={level,my new col},
+]{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    \noindent 新列会被填充或截断到所需的行数。如果列表中的元素不够，就会产生空单元格。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/copy=\marg{column name}}
+    一个用于列创建上下文的样式，它直接复制已有的列 \meta{column name}。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    create on use/new/.style={create col/copy={level}}
+}
+
+\pgfplotstabletypeset[
+    columns={level,new},
+    columns/new/.style={column name=Copy of level}
+]{pgfplotstable.example1.dat}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/copy column from table=\marg{file name or \textbackslash macro}\marg{column name}}
+    一个用于列创建上下文的样式，它创建一个由所给表格的 \meta{column name} 中各条目
+    组成的新列。该参数既可以是文件名，也可以是一个已加载的表格（即
+    |\pgfplotstableread| 所返回的 \meta{\textbackslash macro}）。
+
+    你可以用这个样式（可能配合 |\pgfplotstablenew|）把来自不同表格的某一类公共列
+    合并进一个大表格。
+
+    单元格值以字符串形式（逐字）写入。
+
+    \noindent 新列会被填充或截断到所需的行数。如果列表中的元素不够，就会产生空单元格。
+\end{stylekey}
+
+
+\subsubsection{数学运算}
+
+\begin{key}{/pgf/fpu=\mchoice{true,false} (initially true)}
+        \index{Precision}
+    在开始描述列生成方法之前，先就数学库说一句。其核心始终是由 Mark Wibrow 和
+    Till Tantau 编写的 \PGF{} 数学引擎。不过，这个引擎是为生成图形而编写的，
+    并不适合科学计算。
+
+    我给 \PGF{} 增加了一个高精度浮点库，它会成为比 \PGF{} $2.00$ 更新的版本的一部分。
+    它在 \TeX 中提供 IEEE 双精度计算的完整范围。这个 FPU 也是 \PGFPlotstable{} 的
+    一部分，并且默认对 |create col/expr| 和所有其他预定义数学方法激活。
+
+    FPU 不会对新定义的数值型样式激活（尽管它对像 |create col/expr| 这样的预定义
+    数学表达式解析样式是激活的）。如果你想添加自己的例程或样式，就需要使用
+    %
+\begin{codeexample}[code only]
+\pgfkeys{/pgf/fpu=true}
+\end{codeexample}
+    %
+    \noindent 以启用扩展精度。标准数学解析器限于 $\pm 16384.00000$ 范围内的定点数。
+\end{key}
+
+\begin{stylekey}{/pgfplots/table/create col/expr=\marg{math expression}}
+    一个用于 |\pgfplotstablecreatecol| 的样式，它用 \meta{math expression}
+    为新列赋值内容。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    create on use/new/.style={
+        create col/expr={\thisrow{level}*2}}
+}
+
+\pgfplotstabletypeset[
+    columns={level,new},
+    columns/new/.style={column name=$2\cdot $level}
+]{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    宏 |\thisrow|\marg{col name} 和 |\nextrow|\marg{col name} 可用于使用已有表格的值。
+
+    更多信息请参见 |\pgfplotstablecreatecol|。
+
+
+    \paragraph{累加列：}
+
+    |expr| 样式在它的第一个列之前把 |\pgfmathaccuma| 初始化为 |0|。每当它计算出一个
+    新的列值时，就把 |\pgfmathaccuma| 重定义为该结果。也就是说，你可以在
+    \meta{math expression} 内部用 |\pgfmathaccuma| 来累加列。更多细节见
+    |create col/expr accum|。
+
+
+    \paragraph{关于精度和数值范围：}
+        \index{Precision}
+        \index{Floating Point Unit}
+
+    从 1.2 版起，|expr| 使用一个浮点单元。该 FPU 提供科学计算的完整数据范围，
+    相对精度在 $10^{-4}$ 到 $10^{-6}$ 之间。|/pgf/fpu| 键提供更多细节。
+
+
+    \paragraph{接受的运算：}
+
+    \PGF 的数学解析器配合 FPU 提供下列函数和运算符：
+
+    |+|、|-|、|*|、|/|、|abs|、|round|、|floor|、|mod|、|<|、|>|、|max|、|min|、
+    |sin|、|cos|、|tan|、|deg|（弧度转角度）、|rad|（角度转弧度）、|atan|、|asin|、
+    |acos|、|cot|、|sec|、|cosec|、|exp|、|ln|、|sqrt|、常数 |pi| 和 |e|、|^|（幂运算）、
+    |factorial|\footnote{从 \PGF{} 比 $2.00$ 更新的版本起，你可以用后缀运算符
+    \texttt{!} 代替 \texttt{factorial}。}、|rand|（按均匀分布在 $-1$ 到 $1$ 之间取
+    随机数）、|rnd|（按均匀分布在 $0$ 到 $1$ 之间取随机数）、数字格式转换 |hex|、
+    |Hex|、|oct|、|bin| 等等。数学解析器由 Mark Wibrow 和 Till Tantau 编写~\cite{tikz}，
+    FPU 例程是作为 \PGFPlots{} 的一部分开发的。这两部分的文档都可在~\cite{tikz} 中找到。
+    \textbf{注意：}三角函数按角度（而非弧度）工作，除非重新配置 |trig format|！
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/expr accum=\marg{math expression}\marg{accum initial}}
+    |create col/expr| 的一个变体，它还允许定义 |\pgfmathaccuma| 的初始值。
+    情形 \meta{accum initial}=|0| \emph{等价于} |expr=|\marg{math expression}。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{
+    create on use/new/.style={
+        create col/expr={\pgfmathaccuma + \thisrow{level}}},
+    create on use/new2/.style={
+        create col/expr accum={\pgfmathaccuma * \thisrow{level}}{1}%<- start with `1'
+    }
+}
+
+\pgfplotstabletypeset[
+    columns={level,new,new2},
+    columns/new/.style={column name=$\sum$level},
+    columns/new2/.style={column name=$\prod$level}
+]{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    这个例子创建两个列：|new| 列就是 \meta{level} 列中每个值之和（它使用默认的
+    |\pgfmathaccuma=0|）。|new2| 列把 |\pgfmathaccuma| 初始化为 |100|，
+    然后依次减去 \meta{level} 的值。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/quotient=\marg{column name}}
+    一个用于 |\pgfplotstablecreatecol| 的样式，它对由 \meta{column name} 指定的列中
+    每个条目 $i = 1,\dotsc, (n-1)$ 计算商 $c_i := m_{i-1} / m_i$。第一个值 $c_0$
+    保持为空。
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstableset{% configuration, for example, in preamble:
+    create on use/quot1/.style={create col/quotient=error1},
+    create on use/quot2/.style={create col/quotient=error2},
+    columns={error1,error2,quot1,quot2},
+    %
+    % display styles:
+    columns/error1/.style={sci,sci zerofill},
+    columns/error2/.style={sci,sci zerofill},
+    columns/quot1/.style={dec sep align},
+    columns/quot2/.style={dec sep align}
+}
+
+\pgfplotstabletypeset{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    这个样式使用浮点单元的方法，也就是说它以大约 $10^{-7}$ 的相对精度
+    （尾数 $7$ 位有效数字）工作。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/iquotient=\marg{column name}}
+    与 |create col/quotient| 类似，但商是倒数。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/dyadic refinement rate=\marg{column name}}
+    一个用于 |\pgfplotstablecreatecol| 的样式，它计算列 \meta{column name} 中数据的
+    收敛阶 $\alpha$。假定 \meta{column name} 的内容形如 $e_i(h_i) = O(h_i^\alpha)$。
+    假设从一行到下一行有二进加密关系 $h_i = h_{i-1}/2$，则有
+    $h_{i-1}^\alpha / (h_{i-1}/2)^\alpha = 2^\alpha$，于是用下式求得 $\alpha$：
+    %
+        \[
+            c_i := \log_2\left( \frac{e_{i-1}}{e_i} \right).
+        \]
+    %
+    第一个值 $c_0$ 保持为空。
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstabletypeset[% here, configuration options apply only to this single statement:
+    create on use/rate1/.style={create col/dyadic refinement rate={error1}},
+    create on use/rate2/.style={create col/dyadic refinement rate={error2}},
+    columns={error1,error2,rate1,rate2},
+    columns/error1/.style={sci,sci zerofill},
+    columns/error2/.style={sci,sci zerofill},
+    columns/rate1/.style={dec sep align},
+    columns/rate2/.style={dec sep align}]
+    {pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    这个样式使用浮点单元的方法，也就是说它以大约 $10^{-6}$ 的相对精度
+    （尾数 $6$ 位有效数字）工作。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/idyadic refinement rate=\marg{column name}}
+    与 |create col/dyadic refinement rate| 类似，但商是倒数。
+\end{stylekey}
+
+\begin{keylist}{%
+    /pgfplots/table/create col/gradient=\marg{col x}\marg{col y},
+    /pgfplots/table/create col/gradient loglog=\marg{col x}\marg{col y},
+    /pgfplots/table/create col/gradient semilogx=\marg{col x}\marg{col y},
+    /pgfplots/table/create col/gradient semilogy=\marg{col x}\marg{col y}%
+}
+    一个用于 |\pgfplotstablecreatecol| 的样式，它对每一行计算分段梯度
+    $(y_{i+1} - y_i) / (x_{i+1} - x_i )$。$y$ 值取自列 \meta{col y}，$x$ 值取自
+    \meta{col x}。
+
+    对数变体会在开始计算差之前对其参数取自然对数 $\log(\cdot)$。更准确地说，
+    |loglog| 变体对 $x$ 和 $y$ 都取对数，|semilogx| 变体只对~$x$ 取对数，
+    |semilogy| 变体只对~$y$ 取对数。
+    %
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstableset{% configuration, for example in preamble:
+    create on use/slopes1/.style={create col/gradient loglog={dof}{error1}},
+    create on use/slopes2/.style={create col/gradient loglog={dof}{error2}},
+    columns={dof,error1,error2,slopes1,slopes2},
+    % display styles:
+    columns/dof/.style={int detect},
+    columns/error1/.style={sci,sci zerofill},
+    columns/error2/.style={sci,sci zerofill},
+    columns/slopes1/.style={dec sep align},
+    columns/slopes2/.style={dec sep align}
+}
+\pgfplotstabletypeset{pgfplotstable.example1.dat}
+\end{codeexample}
+
+\begin{codeexample}[]
+% requires \usepackage{array}
+\pgfplotstableset{% configuration, for example in preamble:
+    create on use/slopes1/.style={create col/gradient semilogy={level}{error1}},
+    columns={level,error1,slopes1},
+    % display styles:
+    columns/level/.style={int detect},
+    columns/error1/.style={sci,sci zerofill,sci subscript},
+    columns/slopes1/.style={dec sep align}
+}
+\pgfplotstabletypeset{pgfplotstable.example1.dat}
+\end{codeexample}
+    %
+    这个样式使用浮点单元的方法，也就是说它以大约 $10^{-6}$ 的相对精度
+    （尾数 $6$ 位有效数字）工作。
+\end{keylist}
+
+\begin{stylekey}{/pgfplots/table/create col/linear regression=\marg{key-value-config}}
+    用样本数据 $(x_i,y_i)$ 计算线性（最小二乘）回归 $y(x) = a \cdot x + b$，
+    样本数据必须在 \meta{key-value-config} 内部指定。
+    %
+\begin{codeexample}[pre={\vbox\bgroup\hsize=3cm},post=\egroup]
+% load table from somewhere:
+\pgfplotstableread{
+    x y
+    1 1
+    2 4
+    3 9
+    4 16
+    5 25
+    6 36
+}\loadedtbl
+
+% create the `regression' column:
+\pgfplotstablecreatecol[linear regression]
+    {regression}
+    {\loadedtbl}
+% store slope
+\xdef\slope{\pgfplotstableregressiona}
+
+\pgfplotstabletypeset\loadedtbl\\
+
+The slope is `\slope'.
+\end{codeexample}
+    %
+    \noindent 上面的例子从内联数据加载一个表格，追加一个名为 `|regression|' 的列并排版它。
+    由于没有提供 \meta{key-value-config}，将使用 |x=[index]0| 和 |y=[index]1|。
+    |\xdef\slope{...}| 命令把回归线的 `$a$' 值存入一个新定义的宏 `|\slope|'。\footnote{\texttt{\textbackslash xdef} 的意思是 ``全局展开定义''：它把参数展开到不能再展开为止，
+    并给结果赋一个（全局）名字。细节见任何 \TeX{} 书籍。}
+
+    由于这个特性与绘图关系密切，其完整文档已移到 \PGFPlots{} 中。请参考随本宏包附带的
+    \PGFPlots{} 手册。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/function graph cut y=\marg{cut value}\marg{common options}\marg{one key--value set for each plot}}
+    一个用于 |create on use| 语句的专用样式，它计算（一个或多个）离散曲线
+    $y(x_1), \dotsc, y(x_N)$ 与固定 \meta{cut value} 的交点。$x_i$ 被写入表格的单元格。
+
+    在成本—精度图中，这个特性允许提取固定精度下的成本。与之对偶的 |cut x|
+    特性则允许计算固定成本下的精度。
+    %
+    \pgfplotsset{anchor=center,/tikz/baseline}
+\begin{codeexample}[]
+\pgfplotstablenew[
+    create on use/cut/.style={create col/function graph cut y=
+        {2.5e-4} % search for fixed L2 = 2.5e-4
+        {x=Basis,y=L2,ymode=log,xmode=log} % double log, each function is L2(Basis)
+        % now, provide each single function f_i(Basis):
+        {{table=plotdata/newexperiment1.dat},{table=plotdata/newexperiment2.dat}}
+    },
+    columns={cut}]
+    {2}
+    \loadedtable
+
+% Show the data:
+\pgfplotstabletypeset{\loadedtable}
+
+\begin{tikzpicture}
+\begin{loglogaxis}
+    \addplot table[x=Basis,y=L2] {plotdata/newexperiment1.dat};
+    \addplot table[x=Basis,y=L2] {plotdata/newexperiment2.dat};
+    \draw[blue!30!white] (1,2.5e-4) -- (1e5,2.5e-4);
+    \node[pin=-90:{$x=53.66$}] at (53.66,2.5e-4) {};
+    \node[pin=45:{$x=601.83$}] at (601.83,2.5e-4) {};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    在上面的例子中，我们在寻找 $x_1$ 和 $x_2$，使得
+    $f_1(x_1) = \pgfmathprintnumber{2.5e-4}$ 且
+    $f_2(x_2) =\pgfmathprintnumber{2.5e-4}$。左边是自动计算出的结果。右边是一个
+    问题示意图，用 \PGFPlots{} 加上适当标注来把结果可视化。\meta{cut value} 设为
+    |2.5e-4|。\meta{common options} 包含问题设置；在我们这里是对数刻度和列名。
+    第三个参数是一个逗号分隔列表。每个元素 $i$ 是一组键，描述如何取得 $f_i(\cdot)$。
+
+    在 \meta{common options} 和 \meta{one key--value set for each plot} 中，
+    都可以使用下列键：
+    %
+    \begin{itemize}
+        \item |table=|\marg{table file or \textbackslash macro}：要么是文件名，
+            要么是一个已加载的表格，作为数据点的来源，
+        \item |x=|\marg{col name}：$x$ 轴的列名，
+        \item |y=|\marg{col name}：$y$ 轴的列名。
+        \item |foreach=|\marg{\textbackslash foreach loop
+            head}\marg{file name pattern} 这个稍微高级的语法
+            允许在一个循环中自动收集表格：
+            %
+\begin{codeexample}[]
+\pgfplotstablenew[
+    % same as above...
+    create on use/cut/.style={create col/function graph cut y=
+        {2.5e-4}% search for fixed L2 = 2.5e-4
+        {x=Basis,y=L2,ymode=log,xmode=log,
+         foreach={\i in {1,2}}{plotdata/newexperiment\i.dat}}%
+        {}% just leave this empty.
+    },
+    columns={cut}]
+    {2}
+    \loadedtable
+% Show the data:
+\pgfplotstabletypeset{\loadedtable}
+\end{codeexample}
+            %
+            \PGFPlotstable{} 会调用 |\foreach |\meta{\textbackslash foreach loop
+            head}，并在每次迭代时展开 \meta{file name pattern}。每次迭代都会生成一个
+            形如
+
+            |table=|\marg{expanded pattern}|,x=|\marg{value of x}|,y=|\marg{value of y}
+
+            的更简单列表项。
+
+            也可以在 \meta{one key--value set for each plot} 内部提供 |foreach=|。
+            |foreach| 键优先于 |table|。|\foreach| 所接受语法的细节见 \pgfname\ 手册。
+    \end{itemize}
+    %
+    键 |xmode| 和 |ymode| 可取 |log| 或 |linear|。上面提到的所有键都有共同的键路径
+
+    \textcolor{red!75!black}{\texttt{/pgfplots/table/create col/function graph cut/}}。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/table/create col/function graph cut x=\marg{cut value}\marg{common options}\marg{one key--value set for each plot}}
+    与上面相同，只是把 $x$ 和 $y$ 互换。
+\end{stylekey}
+
+
+\section{杂项}
+
+\subsection{把（修改后的）表格写入磁盘}
+
+\begin{key}{/pgfplots/table/outfile=\marg{file name} (initially empty)}
+    把完全处理后的表格作为 \TeX{} 文件写入 \meta{file name}。这个键在第
+    ~\pageref{page:outfile} 页有详细描述。
+\end{key}
+
+\begin{command}{\pgfplotstablesave\oarg{options}\marg{\textbackslash macro or input file name}\marg{output file name}}
+    这个命令取一个表格并把它写入一个新的数据文件（不进行任何排版）。
+
+    如果第一个参数是文件名，就先加载该文件。
+
+    这个命令只是以清空的输出参数调用 |\pgfplotstabletypeset|。也就是说，任何列创建
+    方法在此同样适用，包括任何后处理步骤（但不做最终排版）。
+
+    |\pgfplotstablesave| 使用键 |reset styles| 和 |disable rowcol styles|
+    来清除任何排版相关选项。
+
+    此外，它设置 |string type| 以允许逐字输出。如果你只有数值数据，可能想改用
+    |numeric as string type|——这样会把算术得到的整数以非科学记数法显示。\footnote{不过要注意，\texttt{string type} 也不会对整数做舍入或截断，
+    即便它们以浮点数显示。}
+    %
+\begin{codeexample}[]
+\pgfplotstablesave[
+    create on use/postproc1/.style={create col/dyadic refinement rate=error1},
+    columns={dof,error1,postproc1}
+]
+    {pgfplotstable.example1.dat}
+    {pgfplotstable.example1.out.dat}
+\end{codeexample}
+    %
+    现在，|pgfplotstable.example1.out.dat| 的内容是
+    %
+    \lstinputlisting[basicstyle=\ttfamily\footnotesize,tabsize=8]{pgfplotstable.example1.out.dat}
+
+    你可以在 \meta{options} 内部用 |col sep| 键为输出文件定义列分隔符。如果你需要不同的
+    输入列分隔符，请用 |in col sep| 代替 |col sep|。
+
+
+    \paragraph{说明}
+
+    \begin{itemize}
+        \item 如果 |col sep=space|，空单元格会被填为 |{}|。可用 |empty cells with|
+            样式来改变这一点。
+        \item 如果你需要改变基于列/行的样式，请在 \meta{options} 内部使用
+            |disable rowcol styles=false|。
+    \end{itemize}
+\end{command}
+
+
+\subsection{杂项键}
+
+\begin{key}{/pgfplots/table/disable rowcol styles=\mchoice{true,false} (initially false)}
+    如果希望 |\pgfplotstabletypeset| \emph{不}设置任何只适用于特定列或只适用于
+    特定行的样式，就把它设为 |true|。
+
+    这会禁用下列样式
+    %
+    \begin{itemize}
+        \item |columns/|\meta{column name},
+        \item |display columns/|\meta{column index},
+        \item |every col no |\meta{column index},
+        \item |every row no |\meta{row index}.
+    \end{itemize}
+\end{key}
+
+\begin{key}{/pgfplots/table/reset styles}
+    重置所有不显式依赖列名/行名和列索引/行索引的表格排版样式。受影响的样式有
+    %
+    \begin{itemize}
+        \item |every table|,
+        \item |every even row|, |every odd row|, |every column|,
+            |every even column|, |every odd column|,
+        \item |every first column|, |every last column|, |every first row|,
+            |every last row|,
+        \item |every head row|,
+        \item |postproc cell content|, |preproc cell content|.
+    \end{itemize}
+    %
+    如果你想全部重置，还应考虑键 |disable rowcol styles|。
+\end{key}
+
+
+\subsection{样式与键的定义和使用小结}
+
+本节小结 |pgfkeys| 的特性。完整文档见 \pgfname{} 手册~\cite{tikz}。
+
+\begin{handler}{{.style}=\marg{key-value-list}}
+    定义或重定义样式 \meta{key}。样式是一个普通键，在被设置时会设置
+    \meta{key-value-list} 中的所有选项。
+
+    用 |\pgfplotstableset{|\meta{key}|/.style={|\meta{key-value-list}|}}| 在
+    命名空间 |/pgfplots/table| 中（重）定义样式 \meta{key}。
+\end{handler}
+
+\begin{handler}{{.append style}=\marg{key-value-list}}
+    把 \meta{key-value-list} 追加到一个已存在的样式 \meta{key}。这是修改预定义样式的
+    首选方式：只做追加可保持与未来版本的兼容。
+
+    用 |\pgfplotstableset{|\meta{key}|/.append style={|\meta{key-value-list}|}}| 把
+    \meta{key-value-list} 追加到样式 \meta{key}。这会假定前缀 |/pgfplots/table|。
+\end{handler}
+
+\begin{handler}{{.initial}=\marg{value}}
+    定义一个新 \meta{key} 并赋值 \meta{value}。
+\end{handler}
+
+\begin{handler}{{.add}=\marg{before}\marg{after}}
+    通过前插 \meta{before}、后追加 \meta{after} 来修改 \meta{key}。
+    %
+\begin{codeexample}[]
+\pgfplotstableset{columns={a column}}
+`\pgfkeysvalueof{/pgfplots/table/columns}';
+\pgfplotstableset{columns/.add={}{,another}}
+`\pgfkeysvalueof{/pgfplots/table/columns}';
+\pgfplotstableset{columns/.add={}{,and one more}}
+`\pgfkeysvalueof{/pgfplots/table/columns}'.
+\end{codeexample}
+    %
+    这可在 |\pgfplotsinvokeforeach| 或类似的（无分组！）循环结构内部使用。
+\end{handler}
+
+\begin{handler}{{.code}=\marg{\TeX{} code}}
+    有时，\PGFPlots{} 用户界面会提供替换其
+    例程。这是通过所谓 ``代码键'' 实现的。其含义是用新的 \meta{\TeX{} code}
+    替换原来的键及其行为。在 \meta{\TeX{} code} 内部可以使用任何命令。此外，
+    模式 |#1| 就是提供给该键的参数。
+    %
+\begin{codeexample}[]
+\pgfplotsset{
+    My Code/.code={This is a pgfkeys feature. Argument=`#1'}}
+\pgfplotsset{My Code={is here}}
+\end{codeexample}
+    %
+    这个例子定义了一个（新的）名为 |My Code| 的键。本质上它不过是一个接入键值接口的
+    |\newcommand|。第二条语句 ``调用'' 这个代码键。
+\end{handler}
+
+\begin{handler}{{.append code}=\marg{\TeX{} code}}
+    把 \meta{\TeX{} code} 追加到一个已存在的、名为 \meta{key} 的 |/.code| 键。
+\end{handler}
+
+\begin{handler}{{.code 2 args}=\marg{\TeX{} code}}
+    与 |/.code| 类似，但这个处理程序定义的键接受两个参数。使用这样定义的键时，
+    这两个参数可作为 |#1| 和 |#2| 使用。
+\end{handler}
+
+
+\subsection{原生 \TeX{} 与 Con\TeX{}t 支持}
+\label{sec:pgfplotstable:context}
+
+表格代码生成器被初始化为生成 \LaTeX{} 的 |tabular| 环境。不过，它只依赖于~`|&|'
+作为列分隔符、~`|\\|' 作为行结束符。|column type| 特性或多或少是 |tabular| 特有的，
+但你可以完全禁用它。把 |begin table| 和 |end table| 换成合适的 \TeX{} 或
+Con\TeX{}t 命令即可改变这一点。如果你有有用的默认样式（或 bug 报告），请告诉我。
+
+
+\subsection{基本层级的表格访问与修改}
+
+\PGFPlotstable{} 提供若干在基本层级访问和操作表格的方法。
+
+请记住，\PGFPlotstable{} 是作为表格可视化工具编写的。因此它针对行数较少
+（尽管列可能很多）的情形做了优化。目前表格创建和修改的运行时间为 $O(N^2)$，
+其中 $N$ 是行数。\footnote{\texttt{plot table} 的运行时间借助一个特殊例程随行数线性增长。}
+对于行数少的表格这完全可接受，因为 \TeX{} 处理这些结构相对较快。请保持表格小巧！
+\PGFPlotstable{} \emph{不是}用于大规模矩阵运算的工具。
+
+表格总是以列向量序列的形式存储。因此，遍历某一列中的所有值很简单，而遍历某一行中的
+所有值则复杂且代价高昂。
+
+\begin{command}{\pgfplotstableforeachcolumn\meta{table}\textbackslash as\marg{\textbackslash macro}\marg{code}}
+    遍历 \meta{table} 的每个列名。\meta{\textbackslash macro} 会被设为当前访问到的
+    列名，然后执行 \meta{code}。在 \meta{code} 期间，|\pgfplotstablecol| 表示当前列索引
+    （从 0 开始）。
+    %
+\begin{codeexample}[]
+\begin{minipage}{0.8\linewidth}
+\pgfplotstableread{pgfplotstable.example1.dat}\loadedtable
+\pgfplotstableforeachcolumn\loadedtable\as\col{%
+    column name is `\col'; index is \pgfplotstablecol;\par
+}
+\end{minipage}
+\end{codeexample}
+
+    这个例程不引入 \TeX{} 分组，\meta{code} 内部的变量不受作用域限制。
+\end{command}
+
+\begin{command}{\pgfplotstableforeachcolumnelement\meta{column name}\textbackslash of\meta{table}\textbackslash as\meta{\textbackslash cellcontent}\marg{code}}
+    以只读模式报告固定列 $j$ 的每个表格单元格 $t_{ij}$。
+
+    对于名为 \meta{column name} 的列中的每个单元格，都会执行 \meta{code}。在这次调用
+    期间，宏 \meta{\textbackslash cellcontent} 会包含该单元格的内容，
+    |\pgfplotstablerow| 会包含当前行的索引。
+    %
+\begin{codeexample}[]
+\begin{minipage}{0.8\linewidth}
+\pgfplotstableread{pgfplotstable.example1.dat}\loadedtable
+\pgfplotstableforeachcolumnelement{error1}\of\loadedtable\as\cell{%
+    I have now cell element `\cell' at row index `\pgfplotstablerow';\par
+}
+\end{minipage}
+\end{codeexample}
+    %
+    参数 \meta{column name} 也可以是列索引。此时它应包含 |[index]|\meta{integer}，
+    例如 |[index]4|。此外，列别名以及应即时生成的列（见 |create on use|）也可用作
+    \meta{column name}。
+
+    这个例程不引入 \TeX{} 分组，\meta{code} 内部的变量不受作用域限制。
+\end{command}
+
+\begin{command}{\pgfplotstablemodifyeachcolumnelement\meta{column name}\textbackslash of\meta{table}\textbackslash as\meta{\textbackslash cellcontent}\marg{code}}
+    一个与 |\pgfplotstableforeachcolumnelement| 类似的例程，但在 \meta{code} 期间对
+    \meta{\textbackslash cellcontent} 所做的任何改动都会写回相应的单元格。
+    %
+\begin{codeexample}[]
+\pgfplotstableread{pgfplotstable.example1.dat}\loadedtable
+\pgfplotstablemodifyeachcolumnelement{error1}\of\loadedtable\as\cell{%
+    \edef\cell{\#\pgfplotstablerow: \cell}%
+}
+\pgfplotstabletypeset[columns=error1,string type]{\loadedtable}
+\end{codeexample}
+
+    如果 \meta{column name} 是列别名或已即时创建的列，就会创建一个名为
+    \meta{column name} 的新列。
+\end{command}
+
+\begin{command}{\pgfplotstablegetelem\marg{row}\marg{col}\textbackslash of\meta{table}}
+    选取行 \meta{row}、列 \meta{col} 处的单个表格元素。第二个参数的格式与上一段所述
+    相同：它应是列名或列索引（若是后者需写成 |[index]|\meta{number}）。
+
+    返回值会写入 |\pgfplotsretval|。
+    %
+\begin{codeexample}[]
+\pgfplotstableread{pgfplotstable.example1.dat}{\loadedtable}
+\pgfplotstablegetelem{4}{error1}\of{\loadedtable}
+The value (4,error1) is `\pgfplotsretval'.
+
+\pgfplotstablegetelem{2}{[index]0}\of{\loadedtable}
+The value (2,0) is `\pgfplotsretval'.
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    如果可能，避免在循环内部使用这个命令。它相当慢。
+\end{command}
+
+\begin{command}{\pgfplotstablegetcolumnnamebyindex\marg{col index}\textbackslash of\meta{table}\textbackslash to\meta{macro}}
+    从 \meta{table} 中取出 \meta{col index} 处的列名，并把它存入 \meta{macro}。
+    %
+\begin{codeexample}[]
+\pgfplotstableread{pgfplotstable.example1.dat}{\loadedtable}
+\pgfplotstablegetcolumnnamebyindex{4}\of{\loadedtable}\to\pgfplotsretval
+The name of column 4 `\pgfplotsretval'.
+\end{codeexample}
+    %
+    \noindent Note that \meta{table} must be a \emph{loaded} table, i.e.\@ it
+    must be a macro resulting from |\pgfplotstableread|. Column indices start
+    at~$0$.
+\end{command}
+
+\begin{commandlist}{%
+    \pgfplotstablegetrowsof\marg{file name or \textbackslash loadedtable},
+    \pgfplotstablegetcolsof\marg{file name or \textbackslash loadedtable}%
+}
+    把 |\pgfplotsretval| 定义为一个表格中的行数或列数。\footnote{它也会把
+    \texttt{\textbackslash pgfmathresult} 赋为同一值。} 参数既可以是文件名，
+    也可以是一个已加载的表格（即 |\pgfplotstableread| 的 \meta{\textbackslash macro}）。
+\end{commandlist}
+
+\begin{command}{\pgfplotstablevertcat\marg{\textbackslash table1}\marg{\textbackslash table2 or filename}}
+    关于这个命令的细节见第~\pageref{table:vertcat} 页。
+\end{command}
+
+\begin{command}{\pgfplotstablenew\oarg{options}\marg{row count}\marg{\textbackslash table}}
+    关于这个命令的细节见节~\ref{pgfplotstable:createcol}。
+\end{command}
+\begin{command}{\pgfplotstablecreatecol\oarg{options}\marg{row count}\marg{\textbackslash table}}
+    关于这个命令的细节见节~\ref{pgfplotstable:createcol}。
+\end{command}
+
+\begin{commandlist}{%
+    \pgfplotstabletranspose\oarg{options}\marg{\textbackslash outtable}\marg{\textbackslash table or filename},
+    \pgfplotstabletranspose*\oarg{options}\marg{\textbackslash outtable}\marg{\textbackslash table or filename}%
+}
+    把 \meta{\textbackslash outtable} 定义为 \meta{\textbackslash table or filename} 的
+    转置。输入参数既可以是文件名，也可以是一个已加载的表格。
+
+    带 `|*|' 的版本只有配合 |columns| 选项时才有意义，见下文。
+    %
+\begin{codeexample}[]
+\pgfplotstabletypeset[string type]{pgfplotstable.example3.dat}
+\end{codeexample}
+
+\begin{codeexample}[]
+\pgfplotstabletranspose\loadedtable{pgfplotstable.example3.dat}
+\pgfplotstabletypeset[string type]\loadedtable
+\end{codeexample}
+
+    可选参数 \meta{options} 可以包含影响转置的选项：
+    %
+    \begin{pgfplotskey}{table/colnames from=\marg{colname} (initially empty)}
+        在 |\pgfplotstabletranspose| 内部，这个键处理如何定义输出列名。
+
+        如果 \meta{colname} \emph{为}空（初始值），输出列名就直接是原来的行索引，
+        从~$0$ 开始。
+
+        如果 \meta{colname} 非空，它表示一个输入列名，其单元格值将构成输出列名：
+        %
+\begin{codeexample}[]
+\pgfplotstabletranspose[colnames from=c]\loadedtable{pgfplotstable.example3.dat}
+\pgfplotstabletypeset[string type]\loadedtable
+\end{codeexample}
+        %
+        参数 \meta{colname} 不会作为单元格内容出现。如果 \meta{colname} 中的单元格不能
+        给出唯一的列名，就是错误。
+    \end{pgfplotskey}
+
+    \begin{pgfplotskey}{table/input colnames to=\marg{name} (initially colnames)}
+        在 |\pgfplotstabletranspose| 内部，这个键处理如何对待\emph{输入}列名。
+
+        这个键会再创建一个名为 \meta{name} 的列，其中填入输入列名（作为字符串类型）。
+        %
+\begin{codeexample}[]
+\pgfplotstabletranspose[input colnames to=Input]\loadedtable{pgfplotstable.example3.dat}
+\pgfplotstabletypeset[string type]\loadedtable
+\end{codeexample}
+        %
+        把 \meta{name} 设为空字符串即可禁用这一列。
+        %
+\begin{codeexample}[]
+\pgfplotstabletranspose[input colnames to=]\loadedtable{pgfplotstable.example3.dat}
+\pgfplotstabletypeset[string type]\loadedtable
+\end{codeexample}
+    \end{pgfplotskey}
+
+    \begin{pgfplotskey}{table/columns=\marg{list} (initially empty)}
+        在 |\pgfplotstabletranspose| 内部，这个键处理转置时应考虑哪些输入列。
+
+        如果 \meta{list} 为空，就使用输入表格的所有列（这是初始配置）。
+
+        如果 \meta{list} 非空，它应是一个列名列表。只有这些列会作为转置的输入，
+        就像其余列不存在一样。在 \meta{list} 内提供列别名或 |create on use| 参数
+        是允许的。
+        %
+\begin{codeexample}[]
+\pgfplotstabletranspose[columns={a,b}]\loadedtable{pgfplotstable.example3.dat}
+\pgfplotstabletypeset[string type]\loadedtable
+\end{codeexample}
+
+        这就是 |\pgfplotstabletranspose| 与 |\pgfplotstabletranspose*| 之间唯一的区别：
+        不带 `|*|' 的版本在开始前会\emph{重置} |columns| 键，而带 `|*|' 的版本直接使用
+        |columns| 的当前内容。
+    \end{pgfplotskey}
+\end{commandlist}
+
+\begin{command}{\pgfplotstablesort\oarg{options}\meta{\textbackslash resulttable}\meta{\textbackslash table or filename}}
+    按 \meta{options} 对 \meta{\textbackslash table or filename} 排序，并把排序后的
+    表格写入 \meta{\textbackslash resulttable}。
+
+    使用高层的 |sort| 键可在 |\pgfplotstabletypeset| 期间自动启用排序。
+    %
+\begin{codeexample}[]
+\pgfplotstablesort\result{%
+    a      b  c
+    19     2 [a]
+    -6   -14 [b]
+     4   -14 [c]
+   -11    -9 [d]
+    11    14 [e]
+    -9    -9 [f]
+     1    13 [g]
+     8   -10 [h]
+    16    18 [i]
+    19    -6 [j]
+}
+\pgfplotstabletypeset[columns/c/.style={string type}]{\result}%
+\end{codeexample}
+
+    排序键和比较函数可用下列键定制：
+
+    \begin{key}{/pgfplots/table/sort key=\marg{column} (initially [index]0)}
+        指定含有排序键的列。参数 \meta{column} 可以是输入表格中的任何一列，
+        包括 |create on use|、|alias| 或 |[index]|\meta{integer} 规范。初始设置使用
+        第一个可用列。
+    \end{key}
+
+    \begin{key}{/pgfplots/table/sort key from=\marg{table} (initially empty)}
+        允许从另一个 \meta{table} 加载 |sort key|，该 \meta{table} 既可以是
+        \meta{\textbackslash macro}，也可以是 \meta{file name}。
+    \end{key}
+
+    \begin{key}{/pgfplots/table/sort cmp=\marg{less than routine} (initially float <)}
+        允许使用不同的比较函数。
+
+        \begin{pgfplotskeylist}{%
+            fixed <,
+            fixed >,
+            int <,
+            int >,
+            float <,
+            float >,
+            date <,
+            date >,
+            string <,
+            string >%
+        }
+            这些样式构成预定义的比较函数。|fixed <|、|int <| 和 |float <| 例程作用于
+            数值型数据，其中 |int <| 期待正整数或负整数，另两个期待实数。|fixed <|
+            的数值范围小得多，但比 |float <| 略快。
+
+            |date <| 比较形如 |YYYY-MM-DD| 的日期。|string <| 基于排序键的 ASCII
+            字符码做字典序字符串比较。|string <| 例程还会求值控制序列或活动字符的
+            ASCII 码。\footnote{只要它们尚未被 \TeX 的预处理消耗掉。}
+            %
+\begin{codeexample}[]
+\pgfplotstablesort[sort cmp=string <]\result{% 'Header' is the column name:
+    Header
+    the
+    quick
+    brown
+    fox
+    jumps
+    over
+    the
+    lazy
+    dog
+}
+\pgfplotstabletypeset[string type]{\result}%
+\end{codeexample}
+        \end{pgfplotskeylist}
+
+        参数 \meta{less than routine} 实际上是一个样式：它应是带 |/pgfplots/| 键前缀的
+        一个或多个键。因此，所有这些预定义的排序比较其实都是定义 |iflessthan| 的键。
+        例如，|string <| 的定义如下：
+        %
+\begin{codeexample}[code only]
+\makeatletter
+\pgfplotsset{
+    string </.style={%
+        iflessthan/.code args={##1##2##3##4}{%
+            \t@pgfplots@toka=\expandafter{##1}%
+            \t@pgfplots@tokb=\expandafter{##2}%
+            \edef\pgfplots@loc@TMPa{{\the\t@pgfplots@toka}{\the\t@pgfplots@tokb}}%
+            \expandafter\pgfplotsutilstrcmp\pgfplots@loc@TMPa
+            \if1\pgfplotsretval ##3\else ##4\fi
+        }%
+    },%
+}
+\end{codeexample}
+
+        \begin{codeargskey}{/pgfplots/iflessthan}{#1#2#3#4}
+            允许定义自定义比较函数（严格序）。它比较 |#1 < #2|，若比较为真则调用 |#3|，
+            否则调用 |#4|。比较在局部作用域中求值（局部变量之后会被释放）。
+
+            为了能用作 |sort cmp| 的值，|iflessthan| 例程需要在值
+            |sort cmp=|\meta{less than routine} 内部定义：
+            %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    sort cmp={
+        iflessthan/.code args={#1#2#3#4}{%
+            % here comes your code
+        }%
+    },
+}
+\end{codeexample}
+        \end{codeargskey}
+    \end{key}
+\end{command}
+
+
+\subsection{重复做事：循环}
+
+\begin{command}{\foreach \meta{variables} |in| \meta{list} \marg{commands}}
+    一个由 \Tikz 提供的强大循环命令，见~\cite[Section ``Utilities'']{tikz}。
+    %
+\begin{codeexample}[]
+\foreach \x in {1,2,...,4} {Iterating \x. }%
+\end{codeexample}
+
+    一个与 \PGFPlots{} 相关的例子可以是
+    %
+\begin{codeexample}[code only]
+\foreach \i in {1,2,...,10} {\addplot table {datafile\i}; }%
+\end{codeexample}
+\end{command}
+
+\noindent 下面这些循环命令随 \PGFPlots{} 提供。它们与 \Tikz{} 强大的 |\foreach|
+循环命令类似，但后者并非总能用于表格处理：它的循环体在每次迭代后作用即结束。
+
+下面这些 \PGFPlots{} 循环宏是一种替代。
+
+\begin{command}{\pgfplotsforeachungrouped \meta{variable} |in| \meta{list} \marg{command}}
+    |\foreach| 的一个专用变体，它能做两件事：执行 \meta{command} 时不引入额外分组，
+    并且允许对（简单的！）\meta{$x_0$}|,|\meta{$x_1$}|,...,|\meta{$x_n$}
+    表达式调用数学解析器。
+    %
+\begin{codeexample}[]
+\def\allcollected{}
+\pgfplotsforeachungrouped \x in {1,2,...,4} {Iterating \x. \edef\allcollected{\allcollected, \x}}%
+All collected = \allcollected.
+\end{codeexample}
+
+    一个更有用的例子可能是处理表格：
+    %
+\begin{codeexample}[code only]
+\pgfplotsforeachungrouped \i in {1,2,...,10} {%
+    \pgfplotstablevertcat{\output}{datafile\i} % appends `datafile\i' -> `\output'
+}%
+% since it was ungrouped, \output is still defined (would not work
+% with \foreach)
+\end{codeexample}
+
+    \paragraph{说明：}
+
+    特殊语法
+    \meta{list}=\meta{$x_0$}|,|\meta{$x_1$}|,...,|\meta{$x_n$}，
+    即前面两个元素、后跟省略号和一个末尾元素，会为该循环调用数学解析器。因此，
+    如果 |/pgf/fpu| 处于激活状态，它比任何其他语法都允许更大的数值范围。在其他所有
+    情形下，|\pgfplotsforeachungrouped| 调用 |\foreach| 并不带 \TeX{} 分组地提供结果。
+\end{command}
+
+\begin{command}{\pgfplotsinvokeforeach\marg{list} \marg{command}}
+    |\pgfplotsforeachungrouped|（因而也是 |\foreach|）的一个变体，它对 \meta{list} 中
+    每个元素，把 \meta{command} 内部出现的每个 |#1| 都替换一次。也就是说，它实际上
+    假定 \meta{command} 像一个 |\newcommand| 的函数体。
+
+    换句话说，对 \meta{list} 的每个元素都会调用 \meta{command}。\meta{list} 的当前元素
+    可作为 |#1| 使用。
+
+    与 |\pgfplotsforeachungrouped| 一样，这个命令\emph{不}引入额外作用域
+    （也就是说它也是无分组的）。
+
+    它与 |\foreach \x in |\meta{list}\marg{command} 的区别很细微：|\x| 不会被展开，
+    而 |#1| 会。
+    %
+\begin{codeexample}[]
+\pgfkeys{
+  otherstyle a/.code={[a]},
+  otherstyle b/.code={[b]},
+  otherstyle c/.code={[c]},
+  otherstyle d/.code={[d]}}
+\pgfplotsinvokeforeach{a,b,c,d}
+    {\pgfkeys{key #1/.style={otherstyle #1}}}
+Invoke them: \pgfkeys{key a} \pgfkeys{key b} \pgfkeys{key c} \pgfkeys{key d}
+\end{codeexample}
+    %
+    反例则用一个宏（这里是 |\x|）作为循环参数：
+    %
+\begin{codeexample}[]
+\pgfkeys{
+  otherstyle a/.code={[a]},
+  otherstyle b/.code={[b]},
+  otherstyle c/.code={[c]},
+  otherstyle d/.code={[d]}}
+\pgfplotsforeachungrouped \x in {a,b,c,d}
+    {\pgfkeys{key \x/.style={otherstyle \x}}}
+Invoke them: \pgfkeys{key a} \pgfkeys{key b} \pgfkeys{key c} \pgfkeys{key d}
+\end{codeexample}
+
+    \paragraph{限制：}
+
+    你目前还不能嵌套这个命令（因为它不提供作用域保护）。
+\end{command}
+
+
+\printindex
+
+\bibliographystyle{abbrv} %gerapali} %gerabbrv} %gerunsrt.bst} %gerabbrv}% gerplain}
+\bibliography{pgfplots}
+\end{document}
+% vi: spell spelllang=en

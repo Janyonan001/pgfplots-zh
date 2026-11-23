@@ -1,0 +1,329 @@
+
+\chapter[关于 PGFPlots：预备知识]{关于 {\normalfont\PGFPlots{}}：预备知识}
+
+本节包含关于升级、开发团队、安装（如果你需要手动安装的话）以及
+故障排查的信息。除了升级说明之外，你可以完全跳过本节。
+
+\PGFPlots{} 完全构建在 \Tikz{}/\PGF{} 之上。了解 \Tikz{} 会简化使用
+\PGFPlots{} 的工作，尽管这并非必需。
+
+\section{组成部分}
+
+\PGFPlots{} 由两个组件构成：
+%
+\begin{enumerate}
+    \item 绘图组件（即你当前正在阅读的部分），以及
+    \item \PGFPlotstable{} 组件，它简化数字表格的数字格式化
+        与后处理。它作为一个独立的
+        宏包提供，并拥有自己的手册
+        \href{file:pgfplotstable.pdf}{pgfplotstable.pdf}。
+\end{enumerate}
+
+
+\section{升级说明}
+
+本版本提供了大量改进，感兴趣的读者可以在 \texttt{ChangeLog} 中找到
+全部细节。不过，以下几项变更值得特别注意。
+
+\PGFPlots{} 中一个共通的设置是键 |compat|：强烈建议始终把它写进你的
+|.tex| 文件。虽然这个键给最终用户带来了一些工作，但它也解决了一个常见需求：
+它确保你的 |.tex| 文件总是产生相同的输出，即使你安装了新版本的
+\PGFPlots{}。另一方面，它让我们作为维护者能够修复软件缺陷并引入行为变更，
+前提是这些变更只影响具有合适 |compat| 级别的文档。|compat| 键的确切影响、
+可选取值及其含义将在以下各节中说明。
+
+
+\subsection{新增可选功能}
+
+\PGFPlots{} 在编写时就考虑了向后兼容：旧的 \TeX{}
+文件应当无需修改即可编译，外观也不发生变化。不过，新功能偶尔会导致不同的行为。
+在这种情况下，\PGFPlots{} 会停用新功能。\footnote{如果出现破坏向后兼容的情况，
+我们深表歉意——并请你提交 bug 报告。我们会负责处理。}
+
+任何导致向后兼容问题的新功能或错误修复都需要\emph{手动}且\emph{显式地}
+启用。为此，你应当使用
+%
+\input pgfplots.preliminaries.compatcurrent.tmp
+
+%
+\noindent 放在你的导言区中。这将配置兼容层。
+
+你至少应使用 |compat=1.3|。建议的取值会在运行 \TeX{}
+之后打印到 |.log| 文件中。
+
+以下是一份变更清单，除非使用合适的
+|compat| 级别，否则这些变更处于停用状态：
+%
+\begin{enumerate}
+    \item \PGFPlots{} 1.18 和 1.17 没有额外约束，在
+        兼容级别方面与 1.16 相同。
+    \item \PGFPlots{} 1.16 没有额外约束，在
+        兼容级别方面与 1.15 相同。
+    \item \PGFPlots{} 1.15 启用 |3d log sampling|，并修复
+        柱状图的 |clip limits| 问题。
+    \item \PGFPlots{} 1.14 改变了系统处理非均匀色图的方式，
+        并启用高级 |colormap| 操作（参见
+        |of colormap|）。
+    \item \PGFPlots{} 1.13 修复极坐标轴中的坐标轴标签，并确保
+        |shader=flat| 所选颜色与 |z buffer| 和
+        |mesh/ordering| 无关。此外，它为所有堆叠柱状图启用
+        |stack negative=separate|。保留较旧的兼容级别是为了
+        保留最终用户的临时变通方案。
+    \item \PGFPlots{} 1.12 启用 |lua backend| 并定义
+        |boxplot/estimator=Excel|。
+    \item \PGFPlots{} 1.11 改变了 |axis cs|：它现在是默认
+        坐标系。如果你写 |\draw (1,2) -- (2,2);|，\PGFPlots{}
+        会自动把它视为
+        |\draw (axis cs:1,2) -- (axis cs:2,2);|。
+    \item \PGFPlots{} 1.10 在兼容性方面与 1.9 没有区别。
+    \item \PGFPlots{} 1.9 附带一个预设，用于组合 |ybar stacked| 和
+        |nodes near coords|。此外，它会抑制堆叠柱状图中的空增量。
+        要启用这个新预设，你必须
+        使用 |compat=1.9| 或更高版本。
+    \item \PGFPlots{} 1.8 对标签与刻度比例标签的对齐方式进行了
+        新的修订。此外，它改进了
+        |hide axis| 的包围盒。该修订通过 |compat=1.8| 或
+        更高版本启用。
+
+        配置 |compat=1.8| 是\emph{修复}
+        三维坐标轴中 |axis lines=center| 的\emph{必要}条件。
+    \item \PGFPlots{} 1.7 新增了以坐标轴单位定义柱宽的选项。
+        这些通过 |compat=1.7| 或更高版本启用。
+    \item \PGFPlots{} 1.6 新增了用于更精确缩放的选项，以及
+        针对 |\addplot3 graphics| 的更多缩放选项。这些通过
+        |compat=1.6| 或更高版本启用。
+    \item \PGFPlots{} 1.5.1 将圆和椭圆的半径解释为
+        \PGFPlots{} 坐标（旧版本使用 \pgfname{} 单位向量，
+        它们与 \PGFPlots 没有直接关系）。换句话说：从 1.5.1 版开始，
+        可以在坐标轴内部编写 |\draw circle[radius=5]|。这需要
+        |\pgfplotsset{compat=1.5.1}| 或更高版本。
+
+        若没有此兼容设置，圆和椭圆将像早期版本那样使用
+        \pgfname{} 的底层画布单位。
+    \item \PGFPlots{} 1.5 默认使用 |log origin=0|（这会影响
+        对数柱状图或堆叠对数图）。较旧的版本
+        保持 |log origin=infty|。这需要 |\pgfplotsset{compat=1.5}| 或
+        更高版本。
+    \item \PGFPlots{} 1.4 修复了若干较小的 bug，
+        与早期版本相比可能产生约 $1$--$2\text{pt}$ 的差异。
+        这需要 |\pgfplotsset{compat=1.4}| 或更高版本。
+    \item \PGFPlots{} 1.3 带来了用户界面上的改进。
+        旧版本中“行为选项”与“样式
+        选项”之间的技术区分不再必要（不过仍
+        完全支持）。
+
+        这总是启用的。
+    \item \PGFPlots{} 1.3 有一个新功能，允许自动\emph{把坐标轴标签
+        紧贴刻度标签移动}。强烈推荐使用。它需要
+        |\pgfplotsset{compat=1.3}| 或更高版本。
+
+        由于这会影响间距，默认情况下并不启用。
+    \item \PGFPlots{} 1.3 支持反向坐标轴。不再需要
+        使用带负单位的变通方案。\pgfkeys{/pdflinks/search key
+        prefixes in/.add={/pgfplots/,}{}}
+
+        请查看 |x dir=reverse| 键。
+
+        现有的变通方案仍能正常工作。使用
+        |\pgfplotsset{compat=1.3}| 或更高版本，与 |x dir=reverse| 一起
+        切换到新版本。
+\end{enumerate}
+
+
+\subsection{可能需要注意的旧功能}
+
+\begin{enumerate}
+    \item |scatter/classes| 功能从 1.3 版起会生成恰当的图例。
+        这可能会改变已有使用 |scatter/classes| 的图的图例
+        外观。
+    \item 从 \PGFPlots{} 1.1 开始，\emph{不应再使用} |\tikzstyle|
+        来设置 \PGFPlots{} 选项。
+
+        尽管 |\tikzstyle| 仍被某些较旧的 \PGFPlots{}
+        选项支持，但你应当把任何出现的 |\tikzstyle| 替换为
+        |\pgfplotsset{|\meta{样式名称}|/.style={|\meta{键值列表}|}}|
+        或相应的 |/.append style| 变体。更多细节参见
+        Section~\ref{sec:styles}。
+\end{enumerate}
+%
+对于这些变更带来的任何不便，我深表歉意。
+
+\begin{pgfplotskey}{%
+    compat=\mchoice{
+        1.18,
+        1.17,
+        1.16,
+        1.15,
+        1.14,
+        1.13,
+        1.12,
+        1.11,
+        1.10,
+        1.9,
+        1.8,
+        1.7,
+        1.6,
+        1.5.1,
+        1.5,
+        1.4,
+        1.3,
+        pre 1.3,
+        default
+    } (initially default)}
+    导言区配置
+    %
+\input pgfplots.preliminaries.compatcurrent.tmp
+    %
+    允许在向后兼容与最新功能之间进行选择。
+    这个键被设计为文档中遇到的第一个 \PGFPlots{} 键，因为它会准备
+    全局选项。
+
+    有时，你可能想在同一
+    文档中使用不同的版本。这时，提供
+    %
+\begin{codeexample}[code only]
+\begin{figure}
+    \pgfplotsset{compat=1.4}
+    ...
+    \caption{...}
+\end{figure}
+\end{codeexample}
+    %
+    \noindent 以便把兼容设置限制在当前
+    上下文中（本例中即 |figure| 环境）。
+
+    查看你的 |.log| 文件输出，即可得到 |compat| 的建议取值。
+
+    使用 |\pgfplotsset{compat=default}| 恢复出厂设置。
+
+    尽管通常没有必要，也可以只启用
+    选定的变更，而在总体上保持与旧版本的兼容：
+    %
+    \begin{pgfplotskeylist}{%
+        compat/path replacement=\meta{version},
+        compat/labels=\meta{version},
+        compat/scaling=\meta{version},
+        compat/scale mode=\meta{version},
+        compat/empty line=\meta{version},
+        compat/plot3graphics=\meta{version},
+        compat/bar nodes=\meta{version},
+        compat/BB=\meta{version},
+        compat/bar width by units=\meta{version},
+        compat/pgfpoint substitution=\meta{version},
+        compat/general=\meta{version}
+    }
+        假设我们有一个使用 |\pgfplotsset{compat=1.3}|
+        的文档，并且你想保持这种方式。
+
+        此外，你发现 1.5.1 版支持圆和
+        椭圆。这时，使用
+\begin{codeexample}[]
+% preamble:
+\pgfplotsset{
+    compat=1.3,
+    compat/path replacement=1.5.1,
+}
+\begin{tikzpicture}
+\begin{axis}[
+    extra x ticks={-2,2},
+    extra y ticks={-2,2},
+    extra tick style={grid=major}]
+    \addplot {x};
+    \draw (axis cs:0,0) circle[radius=2];
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+        所有这些键都接受 |compat| 键的可选值。
+
+        |compat/path replacement| 键控制圆和
+        椭圆半径的解释方式。
+
+        |compat/labels| 键控制坐标轴标签的对齐方式：要么
+        紧邻刻度，要么使用绝对偏移。从 |1.8| 起，它还
+        启用了一套全新的坐标轴标签样式修订。在大多数
+        情况下，你看不出区别——但它修复了
+        三维坐标轴中的 |axis lines=center|。
+
+        |compat/scaling| 键控制 1.4 和 1.6 版中引入的
+        一些 bug 修复：为了提高精度，它们可能带来轻微的
+        缩放差异。
+
+        |compat/plot3graphics| 控制
+        |\addplot3 graphics| 的新功能。
+
+        |compat/scale mode| 允许启用/禁用警告“The
+        content of your 3d axis has CHANGED compared to previous versions”，
+        因为 |axis equal| 和 |unit vector ratio| 功能在
+        1.6 之前的所有版本中都是坏的，并在 1.6 中得到了修复。
+
+        |compat/empty line| 允许在输入文件中写入空行以
+        产生一次跳跃。这需要 |compat=1.4| 或更新版本。详见
+        |empty line|。
+
+        |compat/BB| 改变包围盒，使其即使在
+        |hide axis| 的情况下也紧凑贴合。
+
+        |compat/bar width by units| 允许用坐标轴单位来表示
+        |bar width=1|（即以坐标轴单位计）。
+
+        |compat/bar nodes| 启用 |ybar stacked| 和
+        |nodes near coords| 的预设。此外，它为
+        堆叠柱状图启用 |stacked ignores zero|。
+
+        |compat/general| 键控制 |log origin|、|lua backend|、
+        |enable tick line clipping| 和 |boxplot/estimator|。
+
+        |compat/pgfpoint substitution| 键决定 |axis cs| 是否为
+        默认坐标系（自 1.11 起）。
+
+        详细效果可参见本节开头。
+    \end{pgfplotskeylist}
+
+    取值 \meta{version} 可以是 |default|、一个版本号，或 |newest|。
+    取值 |default| 与 |pre 1.3| 相同（除无关紧要的差异外）。
+    强烈\emph{不建议}使用 |newest|：它可能根据 \PGFPlots{}
+    的当前版本而改变你的文档。请查看你的 |.log| 文件，
+    以获得关于最佳版本的建议。
+\end{pgfplotskey}
+
+
+\section{开发团队}
+
+\PGFPlots{} 主要由 Christian Feuersänger 编写，Pascal Wolkotte 和
+Nick Papior Andersen 作为业余项目贡献了许多改进。我们希望它有用，
+并能提供有价值的图。
+
+如果你有兴趣编写一些东西但不知从何入手，可以参阅
+随 \PGFPlots{} 提供的辅助手册
+\href{file:TeX-programming-notes.pdf}{TeX-programming-notes.pdf}。它
+远非完整，但也许是一个好的
+起点（至少能引导你找到更多文献）。
+
+
+\section{致谢}
+
+感谢上帝赐予我享受编程的无数时光。我感谢 Pascal Wolkotte 和
+Nick Papior Andersen 作为开发团队一员所付出的编程努力与贡献。我感谢 Francesco Poli 为 |contour lua| 实现 |lua| 算法。
+我感谢 Jürnjakob Dugge 贡献了
+|hist/density|、用于 \verbpdfref{\addplot3} |graphics| 的 matlab 脚本、出色的
+用户论坛帮助以及有价值的 bug 报告。我感谢 Stefan Tibus，他贡献了
+|\addplot shell| 功能。我感谢 Tom Cashman 贡献了
+|reverse legend| 功能。特别感谢 Stefan Pinnow 持续
+测试 \PGFPlots{}、讨论需求、提出功能请求和
+bug 修复（从而带来众多质量改进），以及移植并
+集成 |colorbrewer| 库。此外，我感谢 Schweitzer 教授
+富有成效的讨论，以及他最初鼓励我开始这样一个
+宏包。感谢 Meine 博士的想法和建议。特别感谢
+Markus Böhning 校对了 \PGF{}、\PGFPlots{} 和
+\PGFPlotstable{} 的所有手册。感谢 Vincent A. Traag 把 |colorbrewer| 配色
+带给 \PGFPlots{}。也感谢众多国际贡献者，他们
+提出了功能请求、发现了 bug，或仅仅是改进了
+手册！
+
+最后但同样重要的是，我感谢 Till Tantau 和 Mark Wibrow 打造了出色的
+图形（及更多）宏包 \PGF{} 和 \Tikz{}，它们正是
+\PGFPlots{} 的基础。
+
+
+\input{pgfplots.install}

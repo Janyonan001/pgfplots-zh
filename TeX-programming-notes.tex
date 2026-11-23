@@ -1,0 +1,1245 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Copyright 2007/2008 by Christian Feuersaenger.
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pdfminorversion=5 % to allow compression
+\pdfobjcompresslevel=2
+\documentclass[a4paper,doc2]{ltxdoc}
+\input{pgfplots.preamble.tex}
+
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{eurosym}
+
+\long\def\codeexamplenl{\noexpand\par}%
+\pgfqkeys{/codeexample}{%
+	every codeexample/.style={
+		width=4cm,
+		/pgfplots/every axis/.append style={legend style={fill=graphicbackground}}
+	},
+	narrow/.style={width=7cm},
+	tabsize=4,
+	%pre={\begin{minipage}{\linewidth}\begingroup},
+	%post={\endgroup\end{minipage}},
+	vbox,
+	newline=\codeexamplenl,
+}
+
+\def\API{\textsc{Api}}%
+
+\title{\TeX\ 编程札记}%\\and Library Functions from \PGF\ and \PGFPlots}
+
+\begin{document}
+\maketitle
+\begin{abstract}%
+	本文档收录的札记面向对 \TeX\ 编程感兴趣的读者。它以大量示例帮助初学者入门，也对希望深入了解 \TeX\ 编程细节、经验丰富的 \TeX nician 有参考价值。但它既不是完整的参考手册，也不是 \TeX\ 的完整使用手册。
+\end{abstract}
+\tableofcontents
+\section{引言}
+本文档旨在为 \TeX\ 编程（不一定是 \TeX\ 排版）提供一条直接的入门途径。目标读者是对编写宏包或库感兴趣的人。
+
+在撰写本文档之时，它还远未完善。尽管如此，它仍可作为感兴趣读者的良好起点。更多细节请参阅下文给出的文献。
+
+\section{\TeX\ 编程}
+\subsection{寄存器中的变量}
+\label{sec:variables}
+\TeX\ 提供若干种不同的变量及其相关寄存器，可以自由操作。
+
+\begin{command}{\count\meta{num}}
+	共有 256 个整数寄存器，提供 32 位整数运算。这些寄存器可以这样使用，例如 |\count0=42 | 或 |\count7=\macro |，其中 |\macro| 展开为一个数字。
+
+	寄存器的值可以用 |\the|\meta{register} 排版输出。
+\begin{codeexample}[]
+\count0=42
+The value is now `\the\count0'.
+\def\macro{-123456}
+\count0=\macro
+The value is now `\the\count0'.
+\end{codeexample}
+
+	`|=|' 符号是可选的，可以省略。所有寄存器有一个共同点：形如 |\count0=|\meta{$\cdots$} 的赋值会把其后的一切不断展开，直到展开不再需要更多数字为止——即使后面跟着不止一个宏。
+\begin{codeexample}[]
+\def\firstmacro{123}
+\def\secondmacro{456}
+\def\thirdmacro{789}
+\count0=\firstmacro\secondmacro\thirdmacro
+The value is now `\the\count0'.
+\end{codeexample}
+ 精确的规则可参见~\cite{texbook}，但应当记住此处需要小心。我的代码曾不止一次未能产生预期结果，原因是 \TeX\ 持续展开宏，导致寄存器得到了意外的值。正确的做法如下：
+\begin{codeexample}[]
+1. \count0=42 % a white space after the number aborts the reading process. It is discarded.
+The value is now `\the\count0'.
+2. The following code will absorb the `3' of '3.':
+\def\macro{1234}
+\count0=\macro % a white space after a macro will be absorbed by TeX, so this is wrong.
+3. The value is now `\the\count0'.
+4. Use \textbackslash relax after an assignment to end scanning:
+\count0=\macro\relax
+5. The value is now `\the\count0'.
+\end{codeexample}
+	命令 |\relax| 告诉 \TeX\ ``放松''：它停止扫描记号，但 |\relax| 自身不展开为任何东西。
+	\index{relax@\texttt{\textbackslash relax}}%
+\end{command}
+
+\begin{command}{\dimen\meta{num}}
+	还有 255 个用于定点数的寄存器，其用法与 |\count| 寄存器大致相同——但 |\dimen| 寄存器的赋值需要带单位，如 `|cm|' 或 `|pt|'。
+
+	用 `|\the|' 进行字符串访问的方式与 |\count| 寄存器完全相同。
+\begin{codeexample}[]
+\dimen0=1pt
+The value is now \the\dimen0.
+\dimen0=0.0001pt
+The value is now \the\dimen0.
+\def\macro{1234.5678}
+\dimen0=\macro pt
+The value is now \the\dimen0.
+\end{codeexample}
+	赋值之后宏展开的相同规则在此同样适用。
+
+	|\dimen| 寄存器在内部用 32 位缩放整数进行运算，即所谓的 `scaled point'，单位为 `|sp|'。有关系 |1pt=65536sp|=$2^{16}$|sp|。32 位中有一位用作符号位。以 |pt| 计的整个数值范围为 $[-(2^{30}-1)/2^{16}, (2^{30}-1)/2^{16} ] = [-16383.9998,+16383.9998]$\footnote{请注意，这并未覆盖 32 位整数的完整范围，原因我不清楚。}。
+\end{command}
+
+\begin{command}{\toks\meta{number}}
+\label{cmd:toks}
+	还有 255 个记号寄存器，可以把它们看作特殊的字符串变量。当然，每个宏赋值 |\def\macro|\marg{content} 也算是某种字符串变量，但记号寄存器是特殊的：当与 |\the\toks|\meta{number} 一起使用时，其内容不会被展开。这可用于细粒度的展开控制，参见下文节~\ref{sec:expansion:control}。
+
+\begin{codeexample}[]
+\toks0={abc}%
+\toks1={DEF}%
+The value is now \the\toks0 \the\toks1.
+\end{codeexample}
+	注意 |\the\toks0| 之后的空白：其作用是在 \TeX\ 扫描 |0| 时停止数字解析。该空白会被丢弃。
+
+	记号寄存器还可以包含特殊记号 |#|，而它在宏内部通常具有特殊含义：
+\begin{codeexample}[]
+\toks0={#1}%
+\message{Meaning is \the\toks0}%
+\end{codeexample}
+	这会在你的日志文件中输出 ``\texttt{Meaning is \#\#1}''。
+
+	记号寄存器主要在细粒度展开控制方面有用，将在节~\ref{sec:expansion:control} 中更深入地讨论。
+\end{command}
+
+\subsubsection{分配寄存器}
+寄存器的数量非常有限。因此，必须仔细考虑如何分配它们。寄存器的典型用途是临时变量（例如某个中间结果）以及在生成文档或其某一部分时需要不断累积的长期资源。
+
+随意覆盖一个寄存器显然是个坏主意。
+
+\TeX\ 只有一种 ``分配'' 寄存器的方式：
+\begin{commandlist}{\newdimen\meta{\textbackslash macroname},\newcount\meta{\textbackslash macroname},\newtoks\meta{\textbackslash macroname}}
+	这些宏分配一个新寄存器，之后便可通过 \meta{\textbackslash macroname} 访问它。
+\begin{codeexample}[]
+\newdimen\variable
+
+\variable=42pt
+
+The value is now \the\variable.
+\end{codeexample}
+
+	得到的 \meta{\textbackslash macroname} 现在可以像直接使用寄存器一样使用。事实上，它往往更简单，因为你无需关心寄存器的编号。
+
+	这种分配依赖于某个全局整数变量，每分配一次它就递增一次。这保证了存放在此类已分配变量中的数据不会意外覆盖其他变量的内容。
+
+	请注意，寄存器无法被释放。
+\end{commandlist}
+
+虽然分配长期变量完全合理，但应当避免仅仅因为需要一个 ``新的'' 临时变量就去分配一个新变量。
+
+合理的做法是分配若干具名变量，如 |\tempa|、|\tempb| 之类，并在每次临时求值时复用它们。当然，需要小心避免意外覆盖。
+
+也可以如上所述使用记号寄存器。不过，其使用应当借助分组加以保护：
+\begin{codeexample}[]
+\toks3={Value outside of group}
+
+\begingroup
+\toks3={Value inside of group}
+toks3 inside of group: \the\toks3
+\endgroup
+
+toks3 outside of group: \the\toks3
+\end{codeexample}
+	分组构成了 \TeX\ 的 ``作用域'' 概念，本文档的其他地方会加以解释。
+
+\subsubsection{使用超过 256 个寄存器}
+\TeX\ 本身被限制为 256 个寄存器。不过，你可以通过使用以下命令手动启用 ``extended \TeX\ 模式''：
+\begin{codeexample}[code only]
+\usepackage{etex}
+\end{codeexample}
+请把它放在导言区的开头。这其实是个非常好的做法：它允许访问 65536 个寄存器。如今涉及大量宏包的文档实际上都需要 |etex|。
+
+请注意，即使有了 |etex|，也不能因此为了存放临时变量而毫无节制地随意分配寄存器。
+
+如果你想要几乎无限的临时变量，应当把临时量存放在宏中。这当然涉及从数字到字符串的转换，但它是避免寄存器数量受限的唯一安全方法。
+
+\subsection{\TeX\ 中的算术}
+\begin{command}{\advance\meta{register}\texttt{ by}\meta{quantity}}
+\begin{codeexample}[]
+\count0=42
+\advance\count0 by 10
+The value is now \the\count0.
+\end{codeexample}
+
+\begin{codeexample}[]
+\dimen0=1pt
+\advance\dimen0 by 10pt
+The value is now \the\dimen0.
+\end{codeexample}
+\end{command}
+
+\begin{command}{\multiply\meta{register}\texttt{ by}\meta{integer}}
+\begin{codeexample}[]
+\count0=42
+\multiply\count0 by -10
+The value is now \the\count0.
+\end{codeexample}
+
+\begin{codeexample}[]
+\dimen0=0.5pt
+\multiply\dimen0 by 20
+The value is now \the\dimen0.
+\end{codeexample}
+\end{command}
+
+\begin{command}{\divide\meta{register}\texttt{ by}\meta{integer}}
+	这允许对 \meta{integer} 做带截断的整数除法。
+\begin{codeexample}[]
+\count0=5
+\divide\count0 by 2
+The value is now \the\count0.
+\end{codeexample}
+
+	|\dimen| 寄存器的缩放：
+\begin{codeexample}[]
+\dimen0=10pt
+\divide\dimen0 by 20
+The value is now \the\dimen0.
+\end{codeexample}
+
+	不可能除以某个非整数。
+\end{command}
+
+\begin{command}{\dimen\meta{number}\texttt{=}\meta{fixed point number without unit}\textbackslash dimen\meta{number}}
+	这允许在 |\dimen| 寄存器中进行定点数乘法。
+\begin{codeexample}[]
+\dimen1=50pt
+\dimen0=0.6\dimen1
+The value is now \the\dimen0.
+\end{codeexample}
+\end{command}
+
+实际上这就是 \TeX\ 所允许的全部。要做一些 ``真正的'' 算术，需要借助强大的宏包，例如带有 |\pgfmathparse|\marg{expression} 的 \PGF。
+
+请注意，这些寄存器有限的数值范围同样适用于任何数值运算的结果。
+
+
+\subsection{展开控制}
+\label{sec:expansion:control}
+展开是 \TeX\ 时刻在做的事情。因此，展开控制是理解如何用 \TeX\ 编程的关键概念。
+
+首先要知道的是：\TeX\ 把输入当作一长串 ``记号'' 序列来处理。记号是 \TeX\ 能够理解的最小单位。每个字符在 \TeX\ 第一次见到它时就成为一个记号。每个宏在 \TeX\ 第一次见到它时也成为一个（单个！）记号。
+
+其次要知道的是字符在 \TeX\ 见到它们\emph{之前}是什么样子。尽管这一知识在日常工作中很少用到，但它仍然重要。输入文档中的字符起初只不过是字符而已。即使是那些已知具有特殊含义的字符，如 `|%|'、`|\|' 或花括号 `|{}|'，也都\emph{不}特殊——直到它们被转换为记号为止。转换发生在 \TeX\ 对字符流进行线性处理、第一次遇到它们的时候。记号一旦成为记号，就永远是同一个记号。如果你设法让 \TeX\ 认为 `|\|' 是一个普通字符，而 \TeX\ 只看到了一个反斜杠，那么这个反斜杠就会是一个普通字符记号——即使其后所有反斜杠的含义再次变为特殊。
+
+现在，我们有一长串记号 \meta{token1}\meta{token2}\meta{token3}\meta{token4}\meta{token5}$\cdots$。\TeX\ 按线性顺序逐个处理这些记号。如果 \meta{token1} 是像 `|a|' 这样的字符记号，它就被排版出来。这不是我现在想在这里讨论的；我的重点是如何用 \TeX\ 编程\footnote{当然，排版本身是一门艺术，有大量相关读物。只是不在本札记中讨论。}。因此，本札记中有趣的是 \meta{token1} 是宏的情形。
+
+\subsubsection{宏}
+我们上面已经见过宏的一些应用。实际上，愿意读 \TeX\ 编程札记的大多数用户都已见过宏，或许自己也写过一些——例如使用 |\newcommand|（|\newcommand| 是 |\def| 的一个 ``更高级'' 版本，仅在 \LaTeX\ 中使用）。
+
+宏有一个名字，在 \TeX\ 中被当作一个基本记号处理（即使名字非常长）。宏有替换文本。\TeX\ 一遇到宏，就用替换文本替换它出现的位置。此外，宏还可以把其后的一个或多个记号作为参数取走。
+\begin{codeexample}[]
+\def\macro{This here is actually the replacement text.}
+Executing it: `\macro'.
+\end{codeexample}
+\begin{codeexample}[]
+\def\macro#1{replacement with first argument=#1}
+Invoking it: \macro{hello!}.
+\end{codeexample}
+这其实并不令人意外。可能令人意外的是，所接受的参数几乎可以是任何东西。
+\begin{codeexample}[]
+\def\macro#1-#2.{replacement with arguments: `#1' and `#2'.}
+Invoking it: \macro a-sign.
+\end{codeexample}
+\noindent 最后一个例子中，|\macro| 会遍历紧随 |\macro| 出现位置之后的记号列表。这个记号列表是 ``|a-sign.|''。宏展开是贪婪的，也就是说会使用第一个匹配的模式。我们的 |\macro| 期待先是某种内容，然后是一个减号 `|-|'，再然后是另一个（可能较长的）参数，最后是一个句点 `|.|'。|\macro| 与减号之间的参数作为 |#1| 可用，减号与句点之间的记号作为 |#2| 可用。
+
+\begin{codeexample}[]
+\def\macro(#1,#2,#3){I found arguments `#1', `#2' and `#3'.}
+\macro(42,43,44)
+\end{codeexample}
+
+如我们所见，宏可以通过展开来操纵输入记号：它们取走某些输入参数（可能没有），并把其他记号插入输入记号列表。这些记号将成为接下来要处理的对象。我们很快会学到更多相关内容。
+
+有一个命令有助于理解 \TeX\ 在这里做了什么：
+
+\begin{command}{\meaning\meta{macro}}
+	这个命令展开为 \TeX\ 所看到的 \meta{macro} 的内容。
+\begin{codeexample}[]
+\def\macro{Replacement \textmacro text  \count0=42 \the\count0.}
+\message{Debug message: '\meaning\macro'}
+\end{codeexample}
+结果是，日志文件和终端输出将包含
+
+|Debug message: 'macro:->Replacement \textmacro text \count 0=42 \the \count 0.'|
+\end{command}
+
+最后一个例子已经展示了关于 |\def| 的一点：替换文本中仍然可以包含其他宏。
+
+\begin{command}{\def\meta{\textbackslash macroname}\meta{argument pattern}\marg{replacement text}}
+	 一个名为 \meta{macroname} 的新宏将被定义（或重新定义）。\marg{replacement text} 是宏体，每当执行该宏时，它就展开为 \marg{replacement text}。\marg{replacement text} 是一个记号列表，可以包含其他宏。在定义之时，\TeX\ \emph{不会}处理（展开）\marg{replacement text}。
+
+	 只有在宏被执行时，\marg{replacement text} 才会被展开。这同样适用于 \marg{replacement text} 内部的任何宏。
+\begin{codeexample}[]
+\def\macroone{This is macro one}
+\def\macrotwo{Macro two contains \macroone.}
+Now, I execute it: \macrotwo.
+\def\macroone{Redefined macroone}
+Now, I execute the second macro again: \macrotwo.
+\end{codeexample}
+
+	宏几乎可以在 \TeX\ 文档的任何地方定义。它们也几乎可以在任何地方被调用。
+
+	\meta{argument pattern} 是一个记号列表，可以包含简单字符串、宏参数 `|#|\meta{number}' 或其他宏记号。第一个参数的 \meta{number} 总是 1，第二个必须是 2，依此类推，最多到 9。合法的参数模式有 `|#1#2#3|'、`|(#1,#2,#3)|' 或 `|---\relax|'。当 \TeX\ 执行一个宏时，它会在输入记号列表中搜索 \meta{argument pattern}，直到找到第一个匹配为止。如果找不到匹配，它就会中止并给出一条（或多或少有点用的）错误信息。
+\begin{codeexample}[]
+\def\macroone abc{\macrotwo}
+\def\macrotwo def{\macrothree}
+\def\macrothree#1{Got `#1'}
+\macroone abcdefg
+\end{codeexample}
+	最后一个例子包含三个宏定义。然后，\TeX\ 遇到 |\macroone|。此时输入记号列表为
+
+	`|\macroone abcdefg|'.
+
+	|\macroone| 后面的空白会被 \TeX\ 忽略，它们用于界定 \meta{\textbackslash macroname}。现在，\TeX\ 尝试为 \meta{argument pattern} 寻找匹配。它期待 `|abc|'——于是找到了 `|abc|'。这三个记号从输入记号列表中被\emph{移除}，然后 \TeX\ 插入 |\macroone| 的替换文本，即 |\macrotwo|。此时，输入记号列表为
+
+	`|\macrotwo defg|'.
+
+	现在，同样的过程对 |\macrotwo| 继续进行：\TeX\ 搜索所期待的 \marg{argument pattern}，即 `|def|'，把这些记号从输入记号列表中抹去，并转而插入 |\macrotwo| 的替换文本。于是得到
+
+	`|\macrothree g|'.
+
+	最后，|\macrothree| 期待一个参数记号（或用括号括起来的记号列表）。下一个记号是 `|g|'，它从输入记号列表中被取走，然后插入替换文本——`|#1|' 被替换为 `|g|'。于是，记号列表为
+
+	`|Got `g'|'.
+
+	这段文本最终被排版出来（因为它不再进一步展开）。
+\end{command}
+
+我们现在看到的是如何用 \TeX\ 宏来修改记号列表。需要明确指出的是：宏展开绝不局限于 \marg{replacement text} 内部所提供的那些记号——如果 \marg{replacement text} 中的最后一个参数是一个需要参数的宏，那么这些参数将从后续记号中取走。通过使用嵌套宏，甚至可以像循环那样处理记号列表的一整段（但我们还不知道如何有条件地影响宏展开，这留待后面讲）。
+
+我们来尝试解决下面这个任务。假设你有一个名为 |\point| 的宏，其 \meta{argument pattern} 为 `|(#1,#2)|'，即
+
+|\def\point(#1,#2){we do something with #1 and #2}|.
+
+\noindent
+再假设你想用存放在另一个宏中的内容来调用 |\point|。毕竟，宏也算是一种字符串变量——累积或生成字符串变量、再把它们用作其他宏的输入，是很合理的。假设我们有 |\temp|，且 |\temp| 的内容是 `|(42,1234)|'。调用 |\point| 的第一个想法是用 |\point\temp|。但是：|\point| 搜索的是以 `|(|' 开头的参数模式，而不是以 |\temp| 开头的！这样调用会失败。
+
+\begin{command}{\expandafter\meta{token}\meta{next token}}
+	|\expandafter| 命令是一种——乍一看令人困惑的——改变输入记号列表的方法。但是：它解决了我们用 |\point\temp| 遇到的问题！
+\begin{codeexample}[]
+\def\point(#1,#2){we do something with #1 and #2}
+\def\temp{(42,1234)}
+\expandafter\point\temp
+\end{codeexample}
+	为什么这样就行了！？命令 |\expandafter| 会在输入记号列表中扫描 |\expandafter| 之后的那个记号。在我们的例子中它是 |\point|。然后，它再扫描下一个记号，在我们的例子中是 |\temp|（记住：宏被视为基本记号，就像字符 `|a|' 之类一样）。这两个被扫描到的参数从输入记号列表中被移除。接着，|\expandafter| 把 \meta{next token}\emph{展开}一次。在我们的例子中，\meta{next token} 是 |\temp|。|\temp| 的第一层展开是 `|(42,1234)|'。然后，|\expandafter| 把（未展开的）\meta{token} 连同（已展开的）\meta{next token} 的内容一起重新插回输入记号列表。分步骤来看：
+
+	\begin{enumerate}
+		\item |\expandafter\point\temp|
+		\item 展开 |\expandafter|：接下来的两个记号是 `|\point\temp|'。
+		\item 把 |\point| 用作 \meta{token}，把 |\temp| 用作 \meta{next token}。
+		\item 把 |\temp| 展开一次，得到记号 `|(42,1234)|'。
+		\item 把 \meta{token} 和 \meta{next token} 的展开结果重新插回输入记号列表。于是列表为
+
+			`|\point(42,1234)|'.
+		\item 把 |\point| 作为下一个记号展开。
+	\end{enumerate}
+
+	再举一个例子：假设我们想调用 |\theimportantmacro|\marg{argument}。但是，\marg{argument} 却存放在另一个宏中！此外，|\theimportantmacro| 被定义为只接受一个参数，而我们想要的参数可能不止一个记号（这意味着需要用花括号把它括起来）。下面的列表可以解决这个问题。
+\begin{codeexample}[]
+\def\theimportantmacro#1{I got the pre-assembled argument `#1' here.}
+\def\temp{xyz}
+\expandafter\theimportantmacro\expandafter{\temp}
+\end{codeexample}
+	这里发生了什么？我们再次逐步套用规则：
+	\begin{enumerate}
+		\item 在最初的定义之后，记号列表为 |\expandafter\theimportantmacro\expandafter{\temp}|。
+		\item \TeX\ 展开 |\expandafter|，把 |\theimportantmacro| 用作 \meta{token}，把第二个 |\expandafter| 用作 \meta{next token}。
+		\item 根据规则，\TeX\ 把 \meta{next token} 展开一次。但是：\meta{next token} 又是一个宏，即 |\expandafter|！这会有区别吗？没有：
+			\begin{enumerate}
+				\item 第二个 |\expandafter| 之后的记号列表是 `|{\temp}|'（3 个记号）。
+				\item 因此 \meta{token} 是 `|{|'，\meta{next token} 是 `|\temp|'。
+				\item \meta{next token} 的展开结果是 `|xyz|'。
+				\item 第二个 |\expandafter| 重新插入它的 \meta{token} 和已展开的 \meta{next token}，即
+
+					`|{xyz|'.
+
+							注意，闭花括号 `|}|' 完全没有被触动，\TeX\ 到目前为止甚至还没看到它。
+			\end{enumerate}
+			我们从递归中返回。记住：\meta{token} 是 |\theimportantmacro|，而 \meta{next token} 的顶层展开结果——如我们上面所见——是 `|{xyz|'。
+		\item \TeX\ 把 \meta{token} 和 \meta{next token} 的展开结果重新插回输入记号列表，于是得到
+
+			`|\theimportantmacro{xyz}|'.
+
+			闭花括号 `|}|' 没有被触动，它就那样留在输入记号列表中。
+		\item \TeX\ 展开 |\theimportantmacro|。
+	\end{enumerate}
+
+	\meta{next token} 恰好被展开一次。我们已经看到，如果 \meta{next token} 是一个自身会做替换的宏，那么这些替换会递归地进行。但 ``一次'' 究竟是什么意思？我们需要用 |\meaning| 来检查（或用 |\tracingmacros| 工具），因为我们需要看清 \TeX\ 到底做了什么。
+\begin{codeexample}[]
+\def\macroone{This is macro one \macrotwo}
+\def\macrotwo{--2--}
+\def\macrothree#1{\def\macrofour{4[#1]}}
+\expandafter\macrothree\expandafter{\macroone}%
+So far, nothing has been typeset. But now: \macrofour.
+\message{We have macrofour = \meaning\macrofour}%
+\end{codeexample}
+	日志文件（和终端）现在将包含
+
+	`|We have macrofour = macro:->4[This is macro one \macrotwo ]|'.
+
+	发生了什么？我们可以像上一个例子那样来推演。在两次 |\expandafter| 展开之后，\TeX\ 看到的输入记号列表为
+
+	`|\macrothree{This is macro one \macrotwo}|'
+
+	它在执行之后把 |\macrofour| 定义为 `|This is macro one \macrotwo|'。|\macroone| 的顶层展开并没有展开其中嵌套的对 |\macrotwo| 的调用。
+
+
+	因此，|\expandafter| 是一个可以被展开的普通宏——甚至可以用另一个 |\expandafter| 来展开一个 |\expandafter|。
+\end{command}
+
+到目前为止我们看到的是
+\begin{enumerate}
+	\item |\def| 命令，它把\emph{未展开的}参数存放在一个宏变量中；以及
+	\item |\expandafter|，它允许控制宏的顶层展开（它只展开一次）。
+\end{enumerate}
+\TeX\ 还提供了另外两个用于展开控制的特性：|\edef| 宏和记号寄存器。
+
+\begin{command}{\edef\meta{\textbackslash macroname}\meta{argument pattern}\marg{replacement text}}
+	|\edef| 命令与 |\def| 相同之处在于它也定义一个新宏。不同之处在于，它会把 \marg{replacement text} 一直展开，直到只剩下不可展开的记号为止（|\edef| $=$ 展开的定义）。
+\begin{codeexample}[]
+\def\a{3}
+\def\b{2\a}
+\def\c{1\b}
+\def\d{value=\c}
+\message{Macro `d' is defined to be `\meaning\d'}
+\edef\d{value=\c}
+\message{Macro `d' is e-defined to be `\meaning\d'}
+\expandafter\def\expandafter\d\expandafter{\c}
+\message{Macro `d' is defined to be `\meaning\d' using expandafter}
+\end{codeexample}
+	这个列表产生的日志文件输出为
+
+	|Macro `d' is defined to be `macro:->value=\c '|
+
+	|Macro `d' is e-defined to be `macro:->value=123'|
+
+	|Macro `d' is defined to be `macro:->1\b ' using expandafter|
+
+	\noindent 因此，|\def| 完全不展开，|\edef| 一直展开直到不能再展开，而 |\expandafter| 结构把 |\c| 展开一次，并把 |\d| 定义为这次展开的结果。
+
+	虽然可以，但为 |\edef| 指定 \meta{argument pattern} 的情况可能并不常见，因为与 |\def| 不同，|\edef| 是立即展开的。不过它的工作方式相同：位置参数 |#1|、|#2|$,\dotsc,$ |#9| 会被替换为它们各自的实参。
+
+	\marg{replacement text} 的展开方式与 \TeX\ 主记号列表的展开方式相同。
+
+	那么，``一直展开直到只剩下不可展开的记号'' 究竟是什么意思？我们的例子表明，记号 |1|、|2|、|3| 是不可展开的，而宏 |\c|、|\b|、|\a| 是可以展开的。有一大类 \TeX\ 命令是不可展开的：任何赋值操作。例如
+\begin{codeexample}[]
+\edef\d{\count0=42}
+\message{Macro `d' is defined to be `\meaning\d'}
+\def\a{1234}
+\edef\d{\advance\count0 by\a}
+\message{Macro `d' is defined to be `\meaning\d'}
+\end{codeexample}
+\noindent 产生如下日志信息
+
+|Macro `d' is defined to be `macro:->\count 0=42'| and
+
+|Macro `d' is defined to be `macro:->\advance \count 0 by1234'|.
+
+因此，赋值和算术操作是\emph{不可}展开的，它们作为可执行记号保留在新定义的宏中。这同样适用于 |\let| 和其他赋值操作。
+
+	有趣的是，使用 |\if| $\dotsb$ |\fi| 的条件表达式\emph{是}可展开的，但这留待后面讲。
+
+	还有一种方法可以把一个宏临时转换为不可展开的记号：|\noexpand| 宏。
+\end{command}
+
+\begin{command}{\noexpand\meta{expandable token}}
+	|\noexpand| 命令只在 |\edef| 命令的 \marg{replacement text} 内部有用。当 |\edef| 一遇到 |\noexpand|，|\noexpand| 就会被移除，而 \meta{expandable token} 会被转换为不可展开的记号。因此，代码
+\begin{codeexample}[]
+\edef\d{Invoke \noexpand\a another macro}
+\message{Macro `d' is defined to be `\meaning\d'}
+\end{codeexample}
+\noindent 产生终端输出
+
+|Macro `d' is defined to be `macro:->Invoke \a another macro'|
+
+因为 |\noexpand\a| 产生记号 `|\a|'（未展开）\footnote{键 \texttt{\textbackslash noexpand} 实际上被用来实现 \LaTeX\ 命令 \texttt{\textbackslash protect}：\LaTeX\ 的可移动参数概念就是用 \texttt{\textbackslash edef} 实现的。}。
+\end{command}
+
+\subsubsection{记号寄存器}
+现在我们回到记号寄存器。正如我们在节~\ref{cmd:toks} 中已经看到的，记号寄存器存放一个记号列表。宏也在其 \marg{replacement text} 中存放一个记号列表，那么区别在哪里呢？有两点区别：
+\begin{enumerate}
+	\item 记号寄存器更快。
+	\item 记号寄存器的内容\emph{永远不会}被展开。
+\end{enumerate}
+第一点我给不出具体数字——我只是在~\cite{texbook} 中读到的。但第二点允许进行展开控制。|\edef| 允许 ``无限'' 展开，而记号寄存器只允许顶层展开，就像 |\expandafter| 一样。但它们可以用比 |\expandafter| 更灵活（而且往往更高效）的方式来使用。
+
+下面的例子演示了第二点。
+\begin{codeexample}[]
+\toks0={A \token list \a \b \count0=42 will never be expanded}
+\edef\d{\the\toks0 }% the space token is important!
+\message{Macro `d' is defined to be `\meaning\d'}
+\end{codeexample}
+\noindent 执行这段代码片段产生如下日志输出
+
+|Macro `d' is defined to be `macro:->A \token list \a \b \count 0=42 will never be expanded'|.
+
+因此，尽管我们用的是 |\edef|，|\toks0| 的内容仍被原样（未展开地）复制到了 |\d| 中。注意，|\the\toks0| 之后的空白记号确实很重要！\TeX\ 用它来界定整数 |0|。如果没有这个空白记号，它就会继续扫描，甚至越过 |\edef| 替换文本的边界（关于这种扫描的细节参见节~\ref{sec:variables}）。
+
+这个例子非常简单，我们也可以像前面那样用 |\expandafter| 完成同样的事。但我们来试一个更难的：我们想拼装一个由不同片段组成的新宏。每个片段存放在一个宏中，而且不管出于什么原因，我们只希望对各个片段做顶层展开。并且：这些片段彼此并不相邻。我们可以用下面的示例列表来拼装目标宏。
+
+\begin{codeexample}[]
+\def\piecea{\a{xyz}}
+\def\pieceb{\count0=42 }
+\def\piecec{string \b}
+\toks0=\expandafter{\piecea}
+\toks1=\expandafter{\pieceb}
+\toks2=\expandafter{\piecec}
+\edef\d{I have \the\toks0 and \the\toks1 and \the\toks2}
+\message{Macro `d' is defined to be `\meaning\d'}
+\end{codeexample}
+
+前三行定义了我们的片段。宏 |\piecea|、|\pieceb|、|\piecec| 各自包含一些在定义 |\d| 时不应被展开的记号。接下来三行把这些片段的顶层展开结果赋给记号寄存器。由于 |\toks0={\piecea}| 会把 `|\piecea|' 本身存进记号寄存器，所以这里需要用 |\expandafter|\footnote{我们本可以直接把一切写进记号寄存器，从而省去这些 \texttt{\textbackslash piece*} 宏。但我认为这个例子更贴近实际。}。然后，我们用 |\the\toks|\meta{number} 把一个记号列表的内容插入某处——在我们的例子中，就是插入宏 |\d| 已展开的替换文本中。因此，整个例子产生如下日志输出
+
+|Macro `d' is defined to be `macro:->I have \a {xyz}and \count 0=42 and string \b '|.
+
+\noindent 用（一大堆）|\expandafter| \emph{确实}也能得到完全相同的结果。不过别去试。
+
+
+\subsubsection{宏定义命令小结}
+除了 |\def| 和 |\edef| 之外，还有一些其他命令也可以用来定义宏（不过主要功能已由 |\def| 和 |\edef| 覆盖）。下面是其余的定义命令。
+\begin{command}{\def\meta{\textbackslash macroname}\meta{argument pattern}\marg{replacement text}}
+	定义一个名为 |\macroname| 的新宏，不展开 \marg{replacement text}，参见上文。
+\end{command}
+\begin{command}{\edef\meta{\textbackslash macroname}\meta{argument pattern}\marg{replacement text}}
+	定义一个名为 |\macroname| 的新宏，完全展开 \marg{replacement text}（参见上文）。
+\end{command}
+\begin{command}{\let\meta{\textbackslash newmacro}=\meta{token}}
+	定义或重新定义 |\newmacro|，使其等同于 \meta{token}。例如，|\let\a=\b| 会创建宏 |\b| 的一个新副本。该副本名为 |\a|，它将与 |\b| 具有完全相同的 \marg{replacement text} 和 \meta{argument pattern}。
+
+	\meta{token} 也可以不是宏，例如可以是一个具名寄存器或单个字符。
+\end{command}
+
+\begin{command}{\gdef\meta{\textbackslash macroname}\meta{argument pattern}\marg{replacement text}}
+	|\global\def| 的简写。它全局定义 |\macroname|，与当前作用域无关。
+
+	应当避免某个宏在全局命名空间和某个局部作用域中同时存在、却具有不同含义的情况。节~\ref{sec:scopes} 进一步解释了作用域。
+\end{command}
+\begin{command}{\xdef\meta{\textbackslash macroname}\meta{argument pattern}\marg{replacement text}}
+	|\global\edef| 的简写。它全局定义 |\macroname|，与当前作用域无关。
+
+	应当避免某个宏在全局命名空间和某个局部作用域中同时存在、却具有不同含义的情况。节~\ref{sec:scopes} 进一步解释了作用域。
+\end{command}
+
+\begin{command}{\csname\meta{expandable tokens}\textbackslash endcsname}
+	这个命令并不是定义宏，而是定义宏的\emph{名字}。``cs'' 表示 ``control sequence''（控制序列）。|\csname| 与 |\endcsname| 这一对用 \meta{expandable tokens} 来定义一个控制序列名（即宏名）。控制序列字符 `|\|' 会由 |\csname| 自动加在前面。\footnote{实际上，这里使用的是 \texttt{\textbackslash escapechar} 的内容。如果它的值为 -1，则不加任何字符。凡是 \TeX\ 命令会插入反斜杠的地方，都同样如此。}
+\begin{codeexample}[]
+\def\macro{Content}
+This here is normal usage: `\macro'.
+This here uses csname: `\csname macro\endcsname'.
+\end{codeexample}
+	\noindent 这个例子表明，|\csname|\meta{expandable tokens}|\endcsname| 实际上就等同于你直接写出 |\|\meta{expandable tokens}——但 |\csname| 结构允许在宏名中使用多得多的记号：
+\begin{codeexample}[]
+\expandafter\def\csname a01macro with.strange.chars\endcsname{Content}
+I use a strange macro. Here is it: `\csname a01macro with.strange.chars\endcsname'.
+\end{codeexample}
+	\noindent 这个例子用 |\expandafter| 把 |\csname| 展开一次。|\csname| 的顶层展开结果是一个记号，即那个控制序列名。然后，用 |\def| 以这个准备好的宏名来定义一个宏。
+
+	当 |\csname| 被展开时，它会解析直到下一个 |\endcsname| 之前的所有记号。这些记号会被一直展开，直到只剩下不可展开的记号（就像 |\edef| 那样）。得到的字符串将被用来定义一个宏名（前面自动加上控制序列字符 `|\|'）。由于 \meta{expandable tokens} 会被展开，这使得我们可以使用 ``间接的'' 宏名：
+\begin{codeexample}[]
+\def\macro{onetwothree}
+\expandafter\def\csname macro\macro\endcsname{Content}
+I have just defined \expandafter\string\csname macro\macro\endcsname
+with replacement text `\csname macro\macro\endcsname'.
+\end{codeexample}
+	\noindent 我想这个例子不言自明，除了下面要讲的 |\string| 命令之外。
+
+	正是由于这种灵活性，|\csname| 被用来实现 \TeX\ 中所有（？）现有的键值宏包。
+\end{command}
+
+\begin{command}{\string\meta{\textbackslash macro}}
+	这个命令并不定义宏。相反，它把一个宏的名字作为一系列独立记号返回，其中包括控制序列记号 `|\|'。
+\begin{codeexample}[]
+\def\macro{Content}
+I have just defined `\string\macro' using `\string\def'.
+\end{codeexample}
+
+	你也可以把 |\string| 用在其他记号上——例如字符。这没什么坏处，该字符会原样返回。
+\end{command}
+
+\subsubsection{调试工具——理解并追踪 \TeX\ 的所作所为}
+\begin{command}{\message\marg{tokens}}
+\end{command}
+\begin{command}{\meaning\meta{\textbackslash macro}}
+\end{command}
+\begin{command}{\tracingmacros=2}
+\end{command}
+\begin{command}{\tracingcommands=2}
+\end{command}
+\begin{command}{\tracingrestores=1}
+\end{command}
+
+\subsection{变量的作用域}
+\label{sec:scopes}
+每种编程语言都有作用域的概念：它限制变量或例程的生效范围。然而，\TeX\ 的作用域机制并不是为编程而设计的——\TeX\ 是一种排版语言。许多编程语言，如 |C|、|C++|、|java| 或众多脚本语言，是根据变量定义所在的位置来界定其作用域的。例如下面这段 |C| 代码
+\begin{codeexample}[code only]
+int i = 42;
+
+{
+	++i;
+	int i = 5;
+}
+\end{codeexample}
+\noindent 把外层 |i| 的值改为 |43|。内层 |i| 的值是 |5|，但一遇到闭花括号它就会被删除。甚至可以同时访问内层 |i| 变量和外层 |i| 变量的值。
+
+在 \TeX\ 中，花括号也用于界定作用域。但是：\TeX\ 不仅会在作用域结束时销毁该作用域内定义的任何变量（宏），还会\emph{撤销}在该作用域内施加的任何改动。
+\begin{codeexample}[]
+\def\i{42}
+{
+	\def\i{43}
+	\def\b{2}
+}
+The value of \textbackslash i is now \i.
+\end{codeexample}
+\noindent 上面的列表定义了 |\i|，进入一个局部作用域（一个 \TeX\ ``分组''）并修改了 |\i|。然而，根据 \TeX\ 的作用域规则，从局部分组返回后，旧的程序状态会被\emph{完全}恢复！对 |\i| 的改动和对 |\b| 的定义都不会保留。寄存器的改动或其他赋值也同样如此。
+
+\TeX\ 分组可以通过三种方式之一创建：使用花括号\footnote{或者其他具有正确类别的记号，参见~\cite{texbook}。}、使用 |\begingroup| 或使用 |\bgroup|。花括号很少用来界定 \TeX\ 分组，因为其他命令更灵活。如果使用花括号，它们必须配对——不允许出现不匹配的花括号。
+\begin{command}{\begingroup}
+	开始一个新的 \TeX\ 分组（一个局部作用域）。该作用域将一直有效，直到被 |\endgroup| 关闭。|\endgroup| 命令可以稍后出现在主记号列表中。
+\end{command}
+\begin{command}{\endgroup}
+	结束一个用 |\begingroup| 打开的 \TeX\ 分组。
+\end{command}
+\begin{command}{\bgroup}
+	|\begingroup| 的一种特殊变体，它也可以用来界定传给 |\hbox| 或 |\vbox| 的参数（也就是说，在这种场合下可以省去配对的花括号）。
+
+	|\bgroup| 宏还有一个用处：测试紧随其后的字符是否为开花括号（参见 |\futurelet|）。
+
+	如果只是需要打开一个 \TeX\ 分组，应当优先使用 |\begingroup|。
+\end{command}
+\begin{command}{\egroup}
+	关闭前面的 |\bgroup|。
+\end{command}
+
+\TeX\ 不知道如何写入外层作用域的宏——最顶层（全局）作用域除外。如果需要编写复杂结构，这一限制相当棘手：局部变量应当在局部分组内声明，但对结构的改动却应当写回外层分组。没有直接的办法做到这一点（全局变量除外）。
+
+\subsubsection{全局变量}
+\TeX\ 只知道 ``全局'' 变量和 ``局部'' 变量。局部变量在其所在分组结束时会被删除。所有局部赋的值也会在分组结束时恢复为旧值。
+
+而全局变量则在\emph{每个}作用域中都保持同一个值。通常，最顶层作用域就是用于全局变量的那个作用域：如果你在 \TeX\ 文档中定义任何东西，就是在全局作用域上添加命令。也可以显式地在全局作用域中进行赋值或定义。
+
+\begin{command}{\global\meta{definition or assignment}}
+	紧随 |\global| 之后的定义将在全局范围内进行。
+\begin{codeexample}[code only]
+{
+	\global\def\a{123}
+	\global\advance\count0 by3
+	\global\toks0={34}
+}
+\end{codeexample}
+\end{command}
+
+\begin{command}{\globaldefs=\mchoice{-1,0,1} (initially 0)}
+	我引用~\cite{texbook}：``如果在赋值时 |\globaldefs| 参数为正，则自动隐含 |\global| 前缀；但如果赋值时 |\globaldefs| 为负，则忽略 |\global| 前缀。如果 |\globaldefs| 为零（通常如此），则是否出现 |\global| 决定了是否进行全局赋值。''
+\end{command}
+
+
+\subsubsection{把改动传送到外层分组}
+有若干种方法可以把改动 ``传送'' 到外层作用域。有些是复制操作，有些则需要在作用域结束后重新施加这些改动。所有这些方法都可以借助展开控制来实现。
+
+我们从需要跨越分组结束而保留下来的宏定义讲起。我看到的方法有：
+\begin{itemize}
+	\item 把宏复制到一个全局临时变量（甚至记号寄存器）中，并在作用域结束后取回该值。
+\begin{codeexample}[code only]
+\def\initialvalue{0}
+{
+	% do something:
+	\def\initialvalue{42}
+	\global\let\myglobaltemporary=\initialvalue
+}
+\let\initialvalue=\myglobaltemporary
+\end{codeexample}
+	其思路是 |\myglobaltemporary| 只被临时使用；它的值始终是未定义的，可以随时被覆盖。这样就能使用局部变量 |\initialvalue| 了。
+
+	请注意，不要在全局和局部同时使用同一个变量。这会让 \TeX\ 感到困惑，并导致运行时变慢。
+
+	\item 把结果 ``偷偷运出'' 当前分组。我是从 Mark Wibrow 和 Till Tantau 编写的~\cite{tikz} 的实现中得知这一技巧的。其思路是使用若干个 |\expandafter| 和一个 |\def|，在分组结束后立刻重新定义该宏：
+\begin{codeexample}[code only]
+\def\smuggle#1\endgroup{%
+	\expandafter\endgroup\expandafter\def\expandafter#1\expandafter{#1}%
+}
+
+\begingroup
+	\def\variable{12}
+	\edef\variable{\variable34}
+	\edef\variable{\variable56}
+	\smuggle\variable
+\endgroup
+\end{codeexample}
+	这一技巧依赖于用 |\begingroup| 开始、|\endgroup| 结束的分组，因为 |\def| 不允许不配对的花括号。其效果是，在所有那些 |\expandafter| 之后，\TeX\ 遇到的记号列表为
+
+	|\endgroup\def\variable{123456}|
+
+	即在分组结束时。
+
+	\item 使用 aftergroup 栈。\TeX\ 有一个大小有限的特殊记号栈，可用于在分组结束后重新插入记号。不过，只有当需要传送的记号数量很小且固定时（比如至多三个），这种方法才高效。它的做法是在每个记号前加上 |\aftergroup|，细节参见~\cite{texbook}。
+\end{itemize}
+
+有时还需要把其他变量复制到作用域之外。当然，用临时全局变量的那招总是管用的。但也可以定义一个宏，其中包含施加所需改动的命令，然后把这个宏传送出作用域。
+
+\subsection{分支}
+\label{sec:branching}
+
+这里我们讨论 \TeX\ 的一些可用分支结构，重点放在涉及数字和记号的条件上。
+
+\begin{command}{ifnum\meta{count/integer number}=\meta{count/integer number}\meta{true-block}\textbackslash else\meta{false-block}\textbackslash fi}
+|\ifnum| 比较整数或整数寄存器（|\count| 寄存器），它包含两个分支：条件为真时执行一个，条件为假时执行另一个：
+\begin{codeexample}[]
+\ifnum1=2 % this space is important.
+This is shown if above were true.
+\else
+This is shown if above results to false.
+\fi
+\end{codeexample}
+
+	注意，|\else| 及其 \meta{false-block} 是可选的。
+\end{command}
+
+\begin{command}{ifdim\meta{dimen/fixed point number}=\meta{dimen/fixed point number}\meta{true-block}\textbackslash else\meta{false-block}\textbackslash fi}
+	与 |\ifnum| 类似，|\ifdim| 比较两个定点数或 |\dimen| 寄存器。数字必须带单位。
+\begin{codeexample}[]
+\ifdim1pt=2pt % this space is important.
+This is shown if above were true.
+\else
+This is shown if above results to false.
+\fi
+\end{codeexample}
+\end{command}
+
+\begin{command}{ifx\meta{token1}\meta{token2}\meta{true-block}\textbackslash else\meta{false-block}\textbackslash fi}
+|\ifx| 稍微复杂一些：它比较两个\emph{记号}，只比较到它们的第一层展开。
+\begin{codeexample}[]
+\def\empty{\empty}
+\ifx\empty\empty %
+This is shown if the two tokens have equal expansion.
+\else
+This is shown if the two tokens expand to something different.
+\fi
+\end{codeexample}
+
+这里，我们定义记号 |\empty| 作为 |\empty| 的替换，然后比较这两个记号在第一层展开下是否相等。注意，这个定义其实是没有意义的。如果 \TeX{} 真的把整个展开都走完——也就是说我们把 |\empty| 放到别处——它就会无限地展开下去。不过，|\ifx| 只做第一层展开并加以比较。因此该语句求值为真。
+
+请看下面的例子：
+\begin{codeexample}[]
+\def\empty{\relax}
+\ifx\empty\relax %
+This is shown if the two tokens have equal expansion.
+\else
+This is shown if the two tokens expand to something different.
+\fi
+\end{codeexample}
+
+乍一看，这应该求值为真：|\empty| 被定义为 |\relax| 的替换。但它并没有。为什么？
+
+|\empty| 被展开为 |\relax|，然而展开后的 |\relax| 含义不同，即 ``停止扫描''，而不再是 |\relax| 本身。因此它们不同，该语句为假！如果 |\ifx| 中的展开一直进行到最大程度，两者就会相等；但在只比较第一层展开的情况下并非如此。
+\end{command}
+
+\begin{command}{if\meta{token1}\meta{token2}\meta{true-block}\textbackslash else\meta{false-block}\textbackslash fi}
+	|\if| 比较与 |\ifx| 条件密切相关，但有一个主要区别：它会不断展开记号，直到找到接下来两个不可展开的记号。如果这两个记号相同，就展开为 \meta{true-block}，否则展开为 \meta{false-block}。
+
+	|\if| 条件应当小心使用，因为它可能产生不希望的效果。只有在你清楚自己在做什么时才使用它。
+
+	一个有用的例子是：当你\emph{确知}某个宏至多包含一个字符，而你想测试它是否为某个特定字符时：
+\begin{codeexample}[]
+\def\choice{a}
+\if b\choice
+  This is shown for the `b' choice.
+\else
+  This is shown for all other choices.
+\fi
+\end{codeexample}
+\end{command}
+
+\begin{command}{iftrue\meta{true-block}\textbackslash else\meta{false-block}\textbackslash fi}
+	一个 ``条件''，它总是执行 \meta{true-block}。
+\end{command}
+\begin{command}{iffalse\meta{true-block}\textbackslash else\meta{false-block}\textbackslash fi}
+	一个 ``条件''，它总是执行 \meta{false-block}。
+\end{command}
+
+\subsubsection{布尔变量}
+\begin{command}{\newif\meta{if-name}}
+	你可以借助 |\newif\ifsupermanmode| 声明一个新的 ``布尔变量'' |\ifsupermanmode|。之后，你可以用 |\supermanmodetrue| 和 |\supermanmodefalse| 这两个开关来给该布尔变量赋值，并用 |\ifsupermanmode| 来检查它。
+
+	\meta{if-name} 必须以 |\if| 开头（以便支持对嵌套的 |\if...\fi| 配对的扫描，参见下文）。
+\end{command}
+
+\subsubsection{条件语句的特殊情况}
+每当你使用 |\if|\ldots\ 及其同类命令时，应当了解以下特性：
+\begin{enumerate}
+	\item |\if...\else...\fi| 是可展开的（包括其中的每一个宏 |\if...|、|\else| 和 |\fi|），这意味着你甚至可以在 |\edef| 内部使用它：
+\begin{codeexample}[]
+\def\choice{a}
+\edef\temp{The choice is \if a\choice `a'\else not `a'\fi}
+We have now \texttt{\string temp=\meaning\temp}.
+\end{codeexample}
+
+\begin{codeexample}[]
+\def\shownexttoken#1{The next token is `\texttt{\string#1}'.}
+\def\mymacro{%
+ 	\ifnum1=1 %
+ 		\expandafter\shownexttoken%
+ 	\fi%
+}%
+\mymacro 23
+\end{codeexample}
+	这个例子有点棘手。如果没有 |\expandafter|，会发生什么呢？那样的话，|\shownexttoken| 会以 |#1=\fi| 被调用。这会导致错误，因为 |\fi| 会丢失；而且它还会破坏效果，因为我们并不希望 |\fi| 被看到——我们期望的是 |#1=2|。|\expandafter| 先展开 |\fi|（它只是把 |\fi| 移除，没有其他效果），这样在上面的例子中 |\shownexttoken| 就会看到记号 |2|。如果那里是一个 |\else| 分支而不是 |\fi|，这同样有效。
+
+	\item 一般来说，你应当确保与之配对的 |\else| 或 |\fi| 记号是 ``可直接到达的''，也就是无需经过记号展开。
+
+	其背景是：\TeX\ 工作在基于记号的层面上：每当它遇到一条 |\if|\ldots\ 语句，就对它求值并扫描记号，以找到配对的结束部分（一个 |\else| 记号或一个 |\fi| 记号）。但在这个扫描过程中它不会展开记号，不过它会计数嵌套的 |\if...\fi| 配对！因此，如果不小心，它可能会搞混，你的条件语句就会出错。
+\end{enumerate}
+
+\subsection{循环}
+\label{sec:loops}
+如你所见，在 \TeX{} 中我们对记号展开有着非常精细的控制。这使得甚至可以借助递归来构造循环。本质上，一个循环由以下几部分组成：
+\begin{itemize}
+ \item 计数器，或者更一般地说，条目列表
+ \item 递增器，或者更一般地说，下一条目选取器
+ \item 阈值，或者更一般地说，一个结束列表标记
+ \item 分别对阈值或结束标记进行检查
+\end{itemize}
+
+通览上面各节，我们会意识到这些要素其实都已具备：我们知道计数器，也知道分支。剩下要弄清楚的只是如何创建这些循环的具体细节。下面我们将详细展示两种情形：计数循环和对条目列表的循环。
+
+一般来说，对于通过递归实现的循环，我们需要两个定义：一个用于循环开始，另一个用于循环步进。
+
+\subsubsection{计数循环}
+\label{sec:counting:loops}
+对于计数循环，我们需要一个计数器 |\count0|、一个递增器 |\advance|、一个阈值 |3|，以及一个检查是否达到阈值的判断 |\ifnum\count=10|。
+
+
+\begin{codeexample}[]
+\long\def\countingloop#1 in #2:#3#4{%
+	#1=#2 %
+	\loopcounter{#1}{#3}{#4}%
+}
+
+\long\def\loopcounter#1#2#3{%
+	#3%
+	\ifnum#1=#2 %
+	\else%
+		\advance#1 by1 %
+		\loopcounter{#1}{#2}{#3}%
+	\fi%
+}
+\countingloop{\count0} in 0:{3}{%
+	The current value is `\the\count0'\par
+}
+\end{codeexample}
+
+上面这个例子有一些微妙之处：
+\begin{itemize}
+ \item 我们在例子中放了很多 \%。为什么？请注意，每当 \TeX{} 扫描一个数字时——例如在 |#1=#2| 的情形——它会逐个记号、也就是逐位数字地继续扫描，直到确信数字已经结束，即使越过空白也不停，甚至在宏本身可能不再表示数字时还会展开宏。因此，\% 告诉 \TeX{} 停止扫描。一般来说，放置 \% 来告诉 \TeX{} 停止扫描更多数字是个好习惯。不过也有一些例外：在 |\advance#1 by1| 的情形下，中间应保留一个空白，|\ifnum#1=#2| 的情形也是如此。
+ \item 我们在 |\countingloop{\count0} in 0:{3}| 中把阈值 |3| 放在花括号里。为什么？否则，如果给出的阈值是例如 |10|，\TeX{} 只会识别记号 |1|，然后被剩下的 ``多余'' 参数 |0| 绊住。这是因为对 \TeX{} 来说一个字母就是一个记号。因此两个字母就是两个记号，若不用分组括起来，就会变成两个参数。这里我们必须把阈值分组，以明确我们的意思。
+ \item 最后一点只有在开启调试时才会清楚：由于循环是通过递归实现的，也就是一次接一次地展开，直到达到某个阈值，所以在上面的情形中我们最后会留下一大堆 |\fi|。如果在调用 |\countingloop| 之前放置 |\tracingmacros=2 \tracingcommands=2| 并查看日志文件，这一点就会很明显。这很糟糕，因为 \TeX{} 会为每一个 |\if|\ldots|\fi| 序列保留一个打开的栈帧。如果现在要对一万个条目做循环……
+ \item 使用系统计数器之一（这里是 |\count0|）不是个好习惯，因为你永远无法确定它没有被用于别处或在别处被修改。例如，当页面排满时，\TeX{} 会中断当前的记号序列，去处理创建新页面和结束旧页面的事务，在此过程中会改变 |\count0|。因此，我们也应当创建自己的计数器。
+\end{itemize}
+
+因此，我们把例子修改如下：
+\begin{codeexample}[]
+\long\def\countingloop#1 in #2:#3#4{%
+	#1=#2 %
+	\loopcounter{#1}{#3}{#4}%
+}
+
+\long\def\loopcounter#1#2#3{%
+	#3%
+	\ifnum#1=#2 %
+		\let\next=\relax%
+	\else
+		\advance#1 by1 %
+		\def\next{\loopcounter{#1}{#2}{#3}}%
+	\fi
+	\next
+}
+\newcount\ourcounter
+
+\countingloop{\ourcounter} in 0:{3}{%
+	The current value is `\the\ourcounter'\par
+}
+\end{codeexample}
+
+原则上，输出没有任何变化。但是请注意，我们引入了宏 |\next|：它要么递归到下一层——但这是在 |\fi| 语句给出之后——要么干脆只包含 |\relax| 来结束递归。此外，我们还声明了一个名为 |\ourcounter| 的新计数器，它是安全无虞的。
+
+最后，我们简要地总结一下具体发生了什么：
+\begin{enumerate}
+ \item |\countingloop|\ldots 被展开为一个赋值 |#1=#2| 和另一个宏 |\loopcounter|\ldots。
+ \item 赋值完成：|\ourcounter| 被设为起始值 |0|。
+ \item\label{countingloop:loopstart} 实际的循环宏被展开为命令块——打印当前值——和一条 if 语句。
+ \item 打印当前值。
+ \item 把 |\ourcounter| 与阈值 |3| 比较，然后……
+ \begin{itemize}
+	 \item 为假，即该 if 语句被展开为一条 |\advance| 语句，随后把 |\next| 定义为对同一宏循环的又一次调用。
+	 \item 为真，即 |\next| 被设为 |\relax|。
+ \end{itemize}
+ \item 该语句仍为假：|\advance| 把 |\ourcounter| 加一，现在是 |1|。|\next| 被设为循环宏。
+ \item 循环宏再次展开，转到步骤~\ref{countingloop:loopstart}。|\ourcounter| 是……|2|……|\ourcounter| 是 |3|。
+ \item 现在该语句为真：|\next| 被展开为 |\relax|，什么也不发生。
+\end{enumerate}
+
+\subsubsection{对条目列表的循环}
+\label{sec:loops:over:list:of:items}
+对条目列表做循环非常类似，只是我们要用 |\ifx| 代替 |\ifnum|，并用某个结束标记代替阈值。不过，我们如何指定列表本身呢？我们来构造一个逗号分隔的列表，例如 |{a,b,c,d}|，并把结束标记称为 |\listingloopENDMARKER|。
+
+\begin{codeexample}[]
+\def\listingloopENDMARKER{\par \listingloopENDMARKER}
+\long\def\listingloop#1in#2#3{%
+	\looppicker{#1}{#3}#2,\listingloopENDMARKER,%
+}%
+\long\def\looppicker#1#2#3,{%
+	\def\tempitem{#3}%
+	\ifx\tempitem\listingloopENDMARKER
+		\let\next=\relax%
+	\else
+		\def#1{#3}%
+		#2%
+		\def\next{\looppicker{#1}{#2}}%
+	\fi
+	\next
+}%
+\listingloop\x in{a,b,c,,d,e}{%
+	The current item is `\x'
+}
+\end{codeexample}
+
+同样，我们来阐明其中包含的微妙之处：
+\begin{itemize}
+ \item 我们把 |\listingloopENDMARKER| 定义为替换其自身。这之所以可行，是因为 |\ifx| 只比较第一层展开，参见节~\ref{sec:branching}。
+ \item 我们似乎在 \ldots|#1in#2|\ldots 中少了一个空白。不过，记号总是以一个额外的空白结尾，因为 |\xin| 不等于 |\x in|。因此这里不需要空白，而且多于一个空白很可能会被吞掉。
+ \item 定义 |\looppicker#1#2#3,|\ldots 有三个参数，但递归调用 |\looppicker{#1}{#2}| 却只给出两个参数！？这正是让这种列表成为可能的奥妙所在！\TeX{} 实际上会越过所给记号的范围继续扫描，以取得第三个参数。实际上，我们是从给定的列表中一口一口、一个条目一个条目地咬下来。这全都是因为我们在 |\looppicker| 宏的定义中声明了一个额外的 |,|——逗号即条目分隔符。循环宏的展开总会从拼接到其末尾的列表中再多取一个条目，直到到达 |\ENDMARKER|。这个结束标记是在循环开始时加到列表最末尾的，循环就在那里停止。
+\end{itemize}
+
+\subsection{关于 \TeX 的更多内容}
+本文档远未完善。我建议阅读 \cite{schwartz}（德语，在线版）或 \cite{texbook}（实体书）中关于条件表达式的内容。关于循环的提示可在 \PGFPlots 的手册 \cite{pgfplots} 和 \PGF 的手册 \cite{tikz} 中找到。此外，\PGFPlots\ 和 \PGF\ 附带了大量实用函数，它们记录在源代码 |.code.tex| 文件中。
+
+\section{使用 \PGF\ 键的键值处理综述}
+
+对每个 \TeX\ 宏包而言，键值输入都是最重要的事情之一。~\cite{keyvalintro} 对各种键值宏包（其中包括 |xkeyval| 和 |pgfkeys|）做了很好的综述与概述。
+
+除了上面提到的论文以及~\cite{tikz} 中关于 |pdfkeys| 的详尽参考手册之外，我在这里对 |pgfkeys| 做一个简要综述。目标读者主要是宏包作者或宏程序员。本节应能让你为 \PGFPlots\ 和 \PGF\ 定义自己的用户界面和样式。它也应能增进对 |pgfkeys| 及其用法的理解。我还会讨论键过滤的话题，这主要对宏包作者有用。
+
+宏包 |pgfkeys| 可作为独立宏包使用：|\usepackage{pgfkeys}|。不过，我认为你永远不需要显式加载它，因为 \PGF\ 反正会被加载，而 \PGF\ 总是会加载 |pgfkeys|。
+
+它提供两套用户界面。我认为最佳做法是兼取两者之长；不过只用其中一套或许也足够。因此，我会分别讨论这两套，并在后面给出最佳实践的建议。
+
+\subsection{\PGF\ 键的底层（直接）\API}
+我们从 \PGF\ 键的底层 \API\ 讲起。它由若干宏组成，允许定义键、赋值以及取回键值。
+
+\begin{command}{\pgfkeyssetvalue\marg{/key path/key name}\marg{value}}
+	这个宏（重新）定义一个键。
+
+	它（几乎）等同于某种宏定义
+
+|\expandafter\def\csname key@|\meta{/key path/key name}|\endcsname|\marg{value};
+
+	也就是说，它把 \meta{value} 存进一个新宏，以便能在 \TeX\ 的哈希表中以常数时间查找该键。
+	请注意，与 |xkeyval| 等其他键值宏包不同，用于存储值的底层宏名\emph{并不}属于 \PGF Keys \API\footnote{注意，\texttt{key@} 与 \PGF Keys 无关。}——请使用 |\pgfkeysgetvalue| 及其同类命令来访问值。
+
+	可能的键的数量，其唯一限制是 \TeX\ 哈希表的大小（它非常大）。
+
+	你或许好奇斜杠 `|/|' 是什么意思。熟悉 \PGF/\PGFPlots\ 的用户知道，存在某种 ``键路径''，用来限定 \meta{key name}。\meta{key path} 的作用是提供一个命名空间，使得许许多多同名的键可以和平共处、互不干扰——只要使用了正确的 \meta{key path}。它可以看作一条（unix）文件路径：你可以有许多同名文件，只要这些文件位于不同的目录中（即具有不同的路径）。
+
+	你\emph{应当总是}提供键路径，而且强烈建议使用一个不同于仅仅 `|/|' 的键路径。
+
+	\meta{value} 可以是任何东西；它只是被原样存储。它甚至可以包含 |#|。
+\end{command}
+
+\begin{command}{\pgfkeysgetvalue\marg{/key path/key name}\marg{\textbackslash macro}}
+	正如你可能已经猜到的，这个宏允许取回某个键的值并存入 \meta{\textbackslash macro}。
+
+	既然我们已经了解了 |\pgfkeyssetvalue| 和 |\pgfkeysgetvalue|，也可以给出一个例子：
+\begin{codeexample}[]
+\pgfkeyssetvalue{/notes/key}{abc}
+
+\pgfkeysgetvalue{/notes/key}\temp
+
+The value of key \texttt{/notes/key} is `\temp'.
+\end{codeexample}
+
+	这两个键周围并没有多少奥妙；它就像是一次哈希表访问，只不过键有一些特殊的命名约定（源自键路径）。注意，既然 ``哈希表访问'' 正是 \TeX\ 处理宏时时刻在做的事，我们本可以用 |\def| 和合适的 |\let| 命令（也许再配上 |\csname...\endcsname|）来取代 |\pgfkeyssetvalue|/|\pgfkeysgetvalue| 这一对。而 \PGF Keys 的优势，要等到我们在下一节考察其高层用户界面时才真正显现出来。
+
+	请注意，由于 |\pgfkeyssetvalue| 本质上等同于一个合适的 |\def|，该赋值是当前 \TeX\ 分组局部的。换句话说：该赋值会被下一个闭花括号、或下一个 |\endgroup|、或下一个 |\end|\marg{environment} 撤销。
+\end{command}
+
+\begin{command}{\pgfkeyslet\marg{/key path/key name}\marg{\textbackslash macro}}
+	它本质上与 |\pgfkeyssetvalue| 相同，区别只在于键的值已经在 \meta{\textbackslash macro} 内部准备好了：
+
+\begin{codeexample}[]
+\def\something{abc}
+\pgfkeyslet{/notes/key}{\something}
+
+\pgfkeysgetvalue{/notes/key}\temp
+
+The value of key \texttt{/notes/key} is `\temp'.
+\end{codeexample}
+
+	正如 |\pgfkeyssetvalue| 归结为 |\def| 一样，|\pgfkeyslet| 归结为 |\let|。
+\end{command}
+
+\begin{command}{\pgfkeysvalueof\marg{/key path/key name}}
+	它本质上等同于 |\pgfkeysgetvalue|\marg{/key path/key name}\marg{\textbackslash macro} \meta{\textbackslash macro}；也就是说，它展开为存放在某个键中的值。
+\begin{codeexample}[]
+\pgfkeyssetvalue{/notes/key}{abc}
+
+The value of key \texttt{/notes/key} is `\pgfkeysvalueof{/notes/key}'.
+\end{codeexample}
+
+	不过，这个键有一个主要优点：它可以用在 |\edef| 内部（因为它是完全可展开的）：
+\begin{codeexample}[]
+\pgfkeyssetvalue{/notes/key}{abc}
+
+\edef\temp{--- \pgfkeysvalueof{/notes/key} ---}
+
+The value of key \texttt{/notes/key} along with dashes is \temp.
+\end{codeexample}
+
+	它归结为一个合适的 |\csname ... \endcsname|。因此，如果该键恰好未定义，它就展开为 |\relax|（参见下文的 |\pgfkeysifdefined|）。
+\end{command}
+
+\begin{command}{\pgfkeysdef\marg{/key path/key name}\marg{macro body}}
+	它是 |\pgfkeyssetvalue| 的一个变体。不过，它有一个实质性的区别，而只要我们还在讨论底层 \API，这个区别就显得没有来由。它定义一个所谓的 code-key（代码键）。
+
+	code-key 是可执行的宏。它们接受一个参数，并对它做些处理。给这样一个键 ``赋值''，就相当于以 ``合适的'' 方式调用 \meta{macro body}。
+
+	这个宏调用的结果是一个名为 \meta{/key path/key name/}|.@cmd| 的新键。而那个键又被存为可执行宏。该宏等价于下面这样的定义（当然名字除外）：
+
+	|\def\macro#1\pgfeov|\marg{macro body}.
+
+	这个宏（使用 |\pgfkeyslet|）被存放在 \meta{/key path/key name/}|.@cmd| 之下。
+
+	我们可以用 |\pgfkeysgetvalue| 和/或 |\pgfkeysvalueof| 来访问这个特殊的键\footnote{注意，后缀 |/.@cmd| 是 \PGF Keys 公开 \API\ 的一部分，所以使用它并不算什么 hack。}，尽管它的用处要到本文档后面才会更明显：
+
+\begin{codeexample}[]
+\pgfkeysdef{/notes/code key}{Expansion with value #1---X.}%
+
+We ``assign a value'' or ``execute the code key'' (which is equivalent):
+\pgfkeysvalueof{/notes/code key/.@cmd}abc\pgfeov
+\end{codeexample}
+	注意，在这种情况下我们\emph{必须}用 |\pgfeov| 来结束参数列表。我们本可以把参数放进花括号里，但仍必须提供 |\pgfeov|，正如我们必须加上后缀 |/.@cmd| 一样。
+
+\end{command}
+
+\begin{commandlist}{%
+	\pgfkeysifdefined\marg{/key path/key name}\marg{true case}\marg{false case},
+	\pgfkeysifassignable\marg{/key path/key name}\marg{true case}\marg{false case}}
+	这些键提供基于某个键是否存在或其类型的条件判断。细节请参阅~\cite{tikz} 中的参考手册。
+\end{commandlist}
+
+\subsection{\PGF Keys 的标准 \API}
+\begingroup
+\pgfkeys{
+	/codeexample/newline=,
+}
+既然我们已经看到如何在相当低的抽象层次上访问 \PGF Keys 所定义的东西，下面我们用更高的层次来重复同样的事情。本节解释 \PGF Keys 的标准 \API；这是轻松定义和维护键的方式，它同时也是最终用户界面。
+
+\PGF Keys 用其标准 API 解决若干使用场景：
+\begin{enumerate}
+	\item 简单的键值存储（即放入和取出），
+	\item 每当使用某个键时就能执行某些（复杂）操作的 code-key，
+	\item 对键值工具本身的配置和修改。
+\end{enumerate}
+所有这些都可以用同一个宏来完成：
+
+\begin{command}{\pgfkeys\marg{comma--separated key--value pairs}}
+	这个键构成 \PGF Keys 的公开 \API。它接受任意数量的键值对，以逗号分隔。
+\end{command}
+
+我们从一个例子开始：
+\begin{codeexample}[]
+% key definition:
+\pgfkeys{
+	/notes/key/.initial=abc,
+}
+
+The value of key \texttt{/notes/key} is `\pgfkeysvalueof{/notes/key}'.
+
+% key usage:
+\pgfkeys{
+	/notes/key =  efg  ,
+}
+
+The value of key \texttt{/notes/key} is `\pgfkeysvalueof{/notes/key}'.
+\end{codeexample}
+
+有几点看似不言自明，我这里简要确认一下确实如此：键名前后以及值前后的空白都会被去掉。此外，尾随逗号会被忽略。请注意，尾随逗号是一种最佳实践：总是加上尾随逗号。这会大大简化后续添加键的工作（我已经记不清有多少次加了一个键，却纳闷为什么它没被正确识别，直到发现少了那个逗号）。把加尾随逗号变成习惯就好。另一个好习惯是正确缩进代码，也就是每个新行都缩进一个制表位。每行只写一个键也是个好主意，不过这些都只是可选的。
+
+查看实际代码时，第一个让人觉得奇怪的地方是后缀 `|/.initial|'。这其实是 \PGF Keys 一套一致的新机制：这些后缀允许配置和修改它们所作用的键。它们被称为 ``键处理器''（key handler）。每当你看到 \meta{key path/key name} 后面跟着 `|/.|\meta{handler}'，就可以有把握地断定：\meta{key path/key name} 即将被重新配置或修改。
+
+掌握了键处理器，就掌握了对 \PGF Keys 的控制。下面我简要讨论最重要的几个处理器。
+
+\begin{handler}{{.initial}=\marg{value}}
+	键处理器 |/.initial| 定义一个新的 \meta{key}，并赋予其初始 \meta{value}。
+
+	就此而言，它等价于 |\pgfkeyssetvalue|\marg{key}\marg{value}。
+
+	通过 |/.initial| 定义的键，之后随时都可以用一个简单的赋值来设置（参见上面的例子）。
+
+	因此，第一次定义需要这个后缀，之后的所有赋值只需用赋值来设置值即可。
+\end{handler}
+
+\begin{handler}{{.code}=\marg{body}}
+	这个键处理器定义一个新的 code-key \meta{key}，以 \meta{body} 作为其结果。
+\begin{codeexample}[]
+\pgfkeys{
+	/notes/code key/.code={Expansion with value #1---X.},
+}%
+
+用简单 API 执行该键：
+\pgfkeysvalueof{/notes/code key/.@cmd}abc\pgfeov
+
+... 用标准 API 中的赋值来执行该键：
+\pgfkeys{/notes/code key=abc}
+\end{codeexample}
+	我们看到，给一个 code key 赋值就意味着执行 \meta{body}，其中 |#1| 被设为在 \API\ 中所赋的值。
+
+	通过 |/.code| 定义的键等价于通过 |\pgfkeysdef| 定义的键。
+
+	注意，参数 \meta{body} 可以用花括号括起来，但并非必须如此：
+\begin{codeexample}[code only]
+\pgfkeys{
+	/notes/code key/.code={Expansion with value #1---X.},
+	/notes/code key/.code=Expansion with value #1---X.,
+}%
+\end{codeexample}
+	这是 \PGF Keys 一个常见特性：任何形式的赋值都可以用花括号，但并非必须如此。只有当所赋参数（在我们这里即 \meta{body}）包含 \PGF Keys 的控制字符（即 |=| 或 |,|）时，才需要用花括号。
+\end{handler}
+
+\begin{handler}{{.style}=\marg{option list}}
+	这个键处理器定义一个新的 code-key \meta{key}，每当它被赋值（使用）时就设置 \meta{option list} 中的所有选项。
+
+	样式的定义方式很简单：它们只是用 \meta{option list} 调用 |\pgfkeys|（嗯，差不多——见下文）。不过，它们在任何应用中都极具表现力。
+
+\begin{codeexample}[]
+\pgfkeys{
+	/notes/A/.initial=,
+	/notes/B/.initial=,
+	/notes/my style/.style={
+		/notes/A={#1},
+		/notes/B={#1},
+	},
+}%
+
+定义已完成。现在给该样式赋值：
+\pgfkeys{
+	/notes/my style=42
+}
+OK. Value of A=\pgfkeysvalueof{/notes/A}, value of B=\pgfkeysvalueof{/notes/B}.
+\end{codeexample}
+	我们的例子是样式的一个非常简单的应用：它设置了一堆其他选项。
+
+	注意，\meta{option list} 可以依赖于 |#1|。
+
+	到目前为止，本文档总是提供完全限定的键路径。不过 |/.style| 明确支持 ``当前键路径'' 的概念：如果某个 ``当前键路径'' 正在生效，那么 \meta{option list} 将在一个同样使用该当前键路径的上下文中被设置。从技术上讲，这意味着 |/.style| 用 |\pgfkeysalso| 来设置 \meta{option list}，也就是说它并不像上面所说的那样使用 |\pgfkeys|。
+
+\end{handler}
+
+\begin{command}{\pgfkeysalso\marg{comma--separated key--value pairs}}
+	这个宏与 |\pgfkeys|\marg{comma--separated key--value pairs}\emph{几乎}相同。事实上，如果其参数中的任何赋值都使用完全限定路径（就像本文档到目前为止所做的那样），这两种调用就是等价的。
+
+	区别在于它们如何处理相对于某个当前键路径\emph{相对}的键，这个概念将在下一小节解释。
+
+	这两个宏的区别在于：|\pgfkeys| 在处理其参数之前会把当前键路径重置为 |/|，而 |\pgfkeysalso| 不改变当前键路径。因此，|\pgfkeysalso| 只在某个 code-key 的宏体内部（例如 |/.style|）才有用。
+\end{command}
+
+\subsubsection{当前键路径}
+待补充
+
+\subsubsection{键过滤}
+待补充
+
+\endgroup
+
+
+%\subsection{Conditional Expressions}
+
+%\subsection{Loops}
+
+%\subsection{The Problem of Macro--Append Runtime}
+
+%\section{Utility Functions of \PGF}
+
+%\section{Utility Function of \PGFPlots}
+
+\section{特殊技巧}
+
+\subsection{处理参数中的 \#}
+我不止一次遇到下面这个难题：我想收集一个含有井号 `|#|' 的参数。这本身并不特别困难，但当要处理得到的参数时，它却可能导致一大堆奇怪的错误信息！请看
+\begin{codeexample}[code only]
+\def\collectargument#1{%
+	\def\collectedcontent{#1}%
+	\ifx\collectedcontent\empty
+		It is empty.
+	\else
+		It is not empty, executing it: #1.
+	\fi
+}%
+
+\collectargument{}% works
+
+\collectargument{something}% works
+
+\collectargument{% does not work!
+	\def\something#1{which depends on #1}
+}%
+\end{codeexample}
+这个例子中的代码相当简单：|\collectargument| 宏接受一个参数，并检查它是否为空（使用 |\ifx|，这是一种常见而可靠的判空方法）。如果不为空，就执行它。|\collectargument| 宏在大多数情况下都管用。更确切地说：只要其参数中\emph{没有}井号，它就管用！在我们的例子中，第三次调用失败，报错 ``Illegal parameter number in definition of |\collectedcontent|.''，它发生在 |\def\collectedcontent{#1}| 这一行（由于参数展开的特殊含义，\TeX\ 给出这条信息是有原因的）。
+
+解决办法：用下面的方式重新定义 |\collectargument| 宏
+
+\begin{codeexample}[code only]
+\def\collectargument#1{%
+	\toks0={#1}%
+	\edef\collectedcontent{\the\toks0}%
+	\ifx\collectedcontent\empty
+		It is empty.
+	\else
+		It is not empty, executing it: #1.
+	\fi
+}%
+
+\end{codeexample}
+\noindent（你或许想为这个任务分配一个临时记号寄存器）。区别在哪里？是这样的：|\toks0={#1}| 这个赋值不会给井号 |#| 引入任何特殊含义，|\the\toks0| 也不会。不过请注意，这需要用 |\edef\collectedcontent| 而不是 |\def\collectedcontent|，因为 |\the| 语句需要被展开。一切都按预期工作。
+
+\printindex
+
+\bibliographystyle{abbrv} %gerapali} %gerabbrv} %gerunsrt.bst} %gerabbrv}% gerplain}
+\nocite{schwartz}
+\nocite{pgfplots}
+\bibliography{pgfplots}
+\end{document}

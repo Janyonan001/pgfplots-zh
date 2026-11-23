@@ -1,0 +1,36 @@
+% main=pgfplots.tex
+
+\chapter{循序渐进教程}
+{%
+\tikzset{external/figure name/.add={}{tutorials_}}%
+
+
+\section{简介}
+
+为了分析和传达研究成果、论文结果，或者仅仅是某种结果，数据可视化往往
+是必要且方便的。
+
+\PGFPlots{} 是一个可视化工具。设计 \PGFPlots{} 的动机在于：作为最终用户，你
+只需提供数据和描述作为输入，而 \PGFPlots{} 会处理其余一切，例如选择合适的
+缩放因子、缩放到指定的目标尺寸、选择合适的显示范围、分配刻度位置、绘制
+坐标轴并把描述文字放置在合适的位置。
+
+\PGFPlots{} 解决了 \LaTeX{} 中一个长期存在的可视化问题：它的
+描述文字使用与嵌入正文相同的字体，字号也完全相同。它直接嵌入 \LaTeX{}，
+使得尽可能方便地使用 \LaTeX{} 强大的数学模式：从各种坐标轴描述一直到
+用户自定义的标注。它提供文档级统一的线型、配色方案、标记\ldots{}
+所有这些共同保证了一致性。
+
+\PGFPlots{} 提供高质量的输出。同时，它是一种嵌入式解决方案：
+它在很大程度上独立于第三方工具，不过也提供导入功能，以利用现有的工具。
+
+它的主要目标是：你提供数据和描述——然后
+\PGFPlots{} 无需更多输入即可运行。如果你愿意，也可以按自己的喜好进行
+定制。
+
+
+\input{pgfplots.tutorial1.tex}
+\input{pgfplots.tutorial2.tex}
+\input{pgfplots.tutorial3.tex}
+\input{pgfplots.tutorial4.tex}
+}%

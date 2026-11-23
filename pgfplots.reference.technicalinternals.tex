@@ -1,0 +1,36 @@
+
+\section{技术内部}
+
+{
+\tikzset{external/figure name/.add={}{techinternals_}}
+
+本节描述通常由内部例程设置的键——通常不需要使用它们。然而，它们可能施加限制或影响性能。此类情况在本手册的其他章节中有明确记录。此处是相关内部机制的参考。
+
+\begin{pgfplotskey}{cell picture=\mchoice{true,false,if necessary} (initially true)}
+    此键由 \PGFPlots{} 在必要时自动设置（例如由 |set layers|）。
+
+    通常，\PGFPlots{} 创建一个所谓的“单元格图片”。单元格图片是一个单独的图片，它被排版到一个节点中。最后，该节点被移位以满足特殊的 |anchor| 要求。如果坐标轴的 |anchor| 仅在完整坐标轴绘制之后才知道，则需要单元格图片。
+
+    初始选项 \declaretext{true} 意味着 \PGFPlots{} 将为每个坐标轴创建单元格图片。这允许所有 |anchor|，但如果需要多个图形图层或想要 SVG 导出，则不适合。为了创建单元格图片，\PGFPlots{} 中断嵌入的 |tikzpicture|，绘制一个新的 |tikzpicture|，最后将结果排版到节点中。
+
+    选项 \declaretext{false} 告诉 \PGFPlots{} 将其路径直接绘制到嵌入的 |tikzpicture| 中。如果坐标轴应使用嵌入 |tikzpicture| 的图层，则需要这种方法。当且仅当可以在不实际绘制完整坐标轴的情况下确定 |anchor| 时，这才是可能的。如果是这样，\PGFPlots{} 将预先修改变换矩阵。请注意，具有 |cell picture=false| 的坐标轴将\emph{包含}所有常用锚点——唯一的区别是坐标轴本身只能使用以下锚点之一进行对齐：|north|、|north west|、|west|、|south west|、|south|、|south east|、|east|、|north east|、|north|、|center|、|origin|、|above origin|、|left of origin|、|right of origin|、|below origin|。
+
+    选项 \declaretext{if necessary} 将检查所选锚点是否为上述列表之一。如果是，它将使用 |cell picture=false|。否则，它将使用 |cell picture=true|。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{compat/show suggested version=\mchoice{true,false} (initially true)}
+    如果启用，\PGFPlots{} 将向你显示哪个 |compat=|\meta{version} 值产生最大的活动功能集和最高质量。
+
+    如果当前版本太旧以至于质量严重下降，此键将生成警告。
+
+    该通知将打印到你的 |.log| 文件（在 |\end{document}| 期间）。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{enable tick line clipping=\mchoice{true,false} (initially false)}
+    这是兼容性代码，用于确保由 |compat=1.10| 或更早版本生成的文件使用
+
+    |enable tick line clipping=true|.
+
+    无需修改此设置。请改为在导言区写 |compat=...|。
+\end{pgfplotskey}
+}

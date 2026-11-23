@@ -1,0 +1,281 @@
+\section{涉及散点图的用例}
+
+假设我们对前面几个教程的基础已经比较熟悉，现在想画一幅散点图。
+散点图是这样一种图：其中的标记表示重要信息。
+
+散点图有许多不同种类，本节介绍其中
+几种。
+
+\subsection{散点图用例 A}
+\label{sec:tut3:usecaseA}
+
+本小节讨论如下散点图用例：假设给定若干特殊的 $(x,y)$ 坐标，并且在
+每个顶点处都带有颜色数据。我们想在这些位置画出标记，并根据
+颜色数据为每个标记选择不同的颜色。
+
+
+\subsubsection{导入数据文件}
+
+我们假设输入数据是一张包含的列远多于所需列数的表。
+最前面几行如下：
+
+    \lstinputlisting[
+columns=fixed,
+        breaklines=false,
+        tabsize=15,
+        lastline=8,
+            ]{plotdata/concat_VV_together_grid.dat}
+
+我们需要的是第一列和第二列，分别得到 $x$ 坐标和 $y$ 坐标
+值，以及第三列 |f(x)| 来选择颜色值。这些颜色值非常小，
+且范围很大：既有量级为 $10^{-6}$ 的值，也有量级为 $1$ 的值。
+这种范围最好用对数刻度展示，因此我们将对该列的
+绝对值采用某种对数刻度。于是，一个需求就是能够在颜色数据列上
+接受一个（含对数的）数学表达式。
+
+注意，该数据文件（以及本手册中引用的所有其他文件）都随
+\PGFPlots{} 一起发布；你可以在子文件夹
+\texttt{doc/latex/pgfplots/plotdata} 中找到它们。
+
+我们已经学过如何从文件读取表数据，所以第一步
+相对直接。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot+ [only marks] table
+        {concat_VV_together_grid.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+这里，唯一不算平凡的变化是加号之后给出的选项 |only marks|。
+请记住，|\addplot+[|\meta{options}|]| 表示
+\PGFPlots{} 应把其 |cycle list| 的选项集与
+\meta{options} 组合起来。本例中，|only marks| 名副其实。
+|only marks| 绘图处理器是最简单的散点图：它对每个
+标记使用相同的颜色。
+
+注意，|\addplot table| 把第一列当作 |x|、第二列当作 |y|
+（这与我们的输入文件完全吻合）。
+
+
+\subsubsection{微调}
+
+我们一致认为，初次导入时的显示上下限不合适：有趣的
+绘图区域周围有太多空白。此外，标记
+太大，彼此重叠。我们可以这样修改外观：
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    enlargelimits=false,
+]
+    \addplot+ [only marks,mark size=0.6pt]
+        table {concat_VV_together_grid.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+和前面一样，我们假设在 |\begin{axis}| 之后添加更多选项。
+因此，我们引入了合适的缩进，并在
+选项之后加了尾随逗号。注意，|enlargelimits| 通常是激活的；它
+表示 \PGFPlots{} 默认把显示范围扩大 $10\%$。停用它
+会得到紧贴输入数据的紧凑上下限。
+
+第二个选项是 |mark size|——使用一个绝对尺寸（约为标记的半径或
+一半尺寸）。
+
+
+\subsubsection{按输入数据着色}
+
+我们离目标已经很近，只差颜色了。如前所述，我们的输入
+文件包含三列，第三列应当用于提供颜色
+信息。本例中，数据文件有一个名为 |f(x)| 的列。
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        enlargelimits=false,
+        colorbar,
+    ]
+        \addplot+ [
+            only marks,
+            scatter,
+            point meta={
+                ln(1e-6+abs(\thisrow{f(x)}))/ln(10)
+            },
+            mark size=0.6pt,
+        ] table {concat_VV_together_grid.dat};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+我们给示例加了几个选项：选项 |scatter|，以及
+|point meta|、|colorbar|。选项 |scatter| 的名字
+略有误导，因为在加这个选项之前我们就已经是散点图了。
+它激活带各自独立外观的散点图：若没有更多选项，它会
+为每个标记选择不同的颜色。这些“各自不同的颜色”基于
+\PGFPlots{} 中所谓的“|point meta|”。|point meta|
+通常是每个输入坐标的一个标量值。在默认
+配置下，它被解释为相应坐标的“颜色数据”。这也解释了另一个
+选项：|point meta=...| 告诉
+\PGFPlots{} 应使用哪些值来确定颜色。注意，
+|point meta| 的默认值是使用 $y$~坐标。本例中，我们
+有一个与输入文件相关的复杂数学表达式：它
+包含 |f(x)| 列中的小量，由于这些量在巨大范围内变化，
+故用对数刻度展示。由于对数不能
+取非正自变量，我们使用 $10^{-6} + \text{abs}(\dotsb)$ 作为
+表达式，以保证自变量绝不小于 |10^{-6}|，
+并且为正。除数 |/ln(10)| 表示我们使用
+以 $10$ 为底的对数。不过，整条复杂表达式的要点可以
+概括如下：
+%
+\begin{enumerate}
+    \item 我们可以用 |\thisrow|\marg{column name} 来引用表列。
+        这里，“this row”表示对“正从当前行读取的那个数据点”
+        求值表。
+    \item 我们可以把 |\thisrow| 与任何复杂的数学表达式
+        结合起来。
+\end{enumerate}
+%
+第三个新选项 |colorbar| 在右侧激活颜色条
+（正如你猜对的那样）。我们看到最小值是 $-6$，它
+对应于数学表达式中的值 |1e-6|。
+
+你也许会好奇一个标量值（|f(x)| 列中存的数）
+是如何变成一种颜色的。\PGFPlots{} 计算所有
+这些数的最小值和最大值。然后，它把每个数映射到一个
+|colormap|。一个 |colormap| 定义若干颜色，并在这些颜色之间
+线性插值。这意味着 |point meta| 的最小值被映射到
+|colormap| 的第一个颜色，而 |point meta| 的最大值被映射到
+|colormap| 的最后一个颜色。其余值被映射到
+介于其间的某个颜色。
+
+关于 |colormap| 和 |point meta| 的更多信息，可参见
+Section~\ref{sec:colormap:input:format} 和
+Section~\ref{sec:pgfplots:point:meta}。
+
+
+\subsection{散点图用例 B}
+
+如前所述，散点图有各种用例。
+|scatter| 键的默认配置是读取
+|point meta| 的数值，并通过把该值映射到当前
+|colormap| 来选择颜色。
+
+另一种应用是期待符号输入（某个字符串），并根据该输入
+符号选择不同的标记。
+
+假设给定一系列形如 $(x,y)$
+\meta{class label} 的输入坐标，并且你想根据
+\meta{class label} 选择标记选项。一个 \PGFPlots{} 的解决方案可以是
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [
+        scatter,
+        only marks,
+        point meta=explicit symbolic,
+        scatter/classes={
+            a={mark=square*,blue},
+            b={mark=triangle*,red},
+            c={mark=o,draw=black}% <-- don't add comma
+        },
+    ] table [meta=label] {
+        x      y        label
+        0.1    0.15     a
+        0.45   0.27     c
+        0.02   0.17     a
+        0.06   0.1      a
+        0.9    0.5      b
+        0.5    0.3      c
+        0.85   0.52     b
+        0.12   0.05     a
+        0.73   0.45     b
+        0.53   0.25     c
+        0.76   0.5      b
+        0.55   0.32     c
+    };
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+与 Section~\ref{sec:tut3:usecaseA} 中前面的用例一样，我们有
+选项 |scatter|、|only marks|，以及一个如何通过 |meta| 键
+获取 |point meta| 值的配置。一个新键是
+|point meta=explicit symbolic|：它告诉 \PGFPlots{}，遇到的任何
+|point meta| 值都应被解释为字符串符号。此外，它告诉
+\PGFPlots{}，每个输入坐标都带有一个显式值（例如区别于
+共用的数学表达式）。另一个不同的选项
+是 |scatter/classes|。正如你从清单中猜到的，它是一个从字符串
+符号到标记选项列表的映射。这让此类用例可以用简单的
+方式处理。
+
+这个示例其实是从 |scatter/classes| 的参考手册小节中
+复制过来的。
+
+
+\subsection{散点图用例 C}
+
+最后，本教程勾勒散点图的又一个用例：给定
+一系列带各自字符串标签的坐标 $(x,y)$，我们想在
+指定位置画出该字符串标签。
+
+这可以借助 \PGFPlots{} 的 |nodes near coords| 功能实现，
+而该功能其实基于 |scatter|：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    enlargelimits=0.2,
+]
+    \addplot+ [nodes near coords,only marks,
+point meta=explicit symbolic]
+    table [meta=label] {
+        x    y   label
+        0.5  0.2 1
+        0.2  0.1 t2
+        0.7  0.6 3
+        0.35 0.4 Y4
+        0.65 0.1 5
+    };
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+本例中，我们使用 |point meta=explicit symbolic|，用以表达
+我们的标签是文字形式这一事实（关于\emph{数值}标签的应用，
+参见 |nodes near coords| 的参考手册小节）。其余
+工作由 |nodes near coords| 的实现完成。注意，这里适当放大了
+坐标轴上下限，以便把文字节点包含在
+可见区域内。
+
+关于 |scatter| 图和 |nodes near coords|，可讲的还有很多。
+请把本小节看作对参考手册中
+Section~\ref{sec:pgfplots:scatter:2d} 的一个简要指引。
+
+
+\subsection{小结}
+
+我们学习了如何用 |only marks| 生成单色散点图，
+如何用 |scatter| 键生成标记各自着色的散点图，
+如何用 |scatter/classes| 根据某个类别标签生成带特定标记样式的
+散点图，以及如何用 |nodes near coords| 生成文字
+节点。
+
+此外，我们引入了“|point meta| 数据”的概念：一次作为
+（标量值的）颜色数据，一次作为符号类别标签，一次作为文字
+标签。
+
+可讲的还有很多，尤其是关于 |point meta|，它在
+Section~\ref{sec:pgfplots:point:meta} 中得到了完整而深入的
+介绍和解释。
+
+关于 |scatter| 图也还有更多内容，例如如何生成
+标记尺寸和/或颜色各自不同的散点图（借助
+|\pgfplotspointmetatransformed|，参见
+|visualization depends on| 的参考手册小节）。此外，|scatter| 图可以
+高度自定义，这在 Section~\ref{sec:pgfplots:scatter:2d} 中有
+说明。

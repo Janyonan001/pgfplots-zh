@@ -1,0 +1,181 @@
+
+\section{关于选项：预备知识}
+
+\PGFPlots{} 提供了大量键值选项，它们可以被（重新）定义以启用所需的功能，或被修改以进行某些微调。
+
+一个键通常带有一个值（例如一个数字、一个字符串，或者某些宏代码）。你可以在 \LaTeX{} 文档中的许多位置为键赋值（即“设置键”）。该值将一直有效，直到它被更改，或者直到当前 \TeX{} 作用域结束（作用域结束发生在遇到闭花括号 `|}|'、|\end|\marg{name} 之后，或者例如在 |\addplot| 之后）。
+
+\noindent 大多数键可以如下使用
+%
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+\begin{axis}[key=value,key2=value2] % axis-wide keys
+...
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 这会将更改应用于整个坐标轴。在此上下文中，|key| 可以是本手册中定义的任何选项，无论它带有 |/pgfplots/| 还是 |/tikz/| 键前缀。请注意，在几乎所有情况下都可以省略键前缀。
+
+通常，值可以不写花括号。例如，如果手册中有类似 `|xmin=|\marg{$x$-coordinate}' 的内容，你可以放心地省略花括号。当值包含会使键设置产生歧义的内容（例如等号 `|=|' 或逗号 `|,|'）时，花括号是必需的。
+
+有些键可以为每一张图单独修改：
+%
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+    \begin{axis}
+        % keys valid for single plots:
+        \addplot ... ;                          % uses the "cycle list" to determine keys
+        \addplot [key=value,key2=value2] ... ;  % uses the provided keys (not the "cycle list")
+        \addplot+ [key=value,key2=value2] ... ; % appends something to the "cycle list"
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+除了这两种方式之外，还可以使用文档级的键：
+%
+\begin{codeexample}[code only]
+\chapter{My Chapter}
+\pgfplotsset{
+    key=value,
+    key2=value2,
+}
+This chapter has a common key configuration:
+\begin{tikzpicture}
+    \begin{axis}% uses the key config from above
+    ...
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 在上面的例子中，|\pgfplotsset| 命令用于修改键。这些更改是永久性的，将一直有效，直到
+%
+\begin{itemize}
+    \item 你重新定义它们，或者
+    \item 当前环境（例如 |\end{figure}|）结束，或者
+    \item \TeX{} 遇到闭花括号 `|}|'。
+\end{itemize}
+%
+这包括文档全局导言区的配置，例如
+%
+\begin{codeexample}[code only]
+\documentclass{article}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+    xticklabel={$\mathsf{\pgfmathprintnumber{\tick}}$},
+    every axis/.append style={
+        font=\sffamily,
+    },
+}
+...
+\end{codeexample}
+
+管理键值对的基本引擎是 |pgfkeys|，它是 \pgfname{} 的一部分。该引擎总是带有一个键名和一个键“路径”，这有点类似于文件的文件名和目录。\PGFPlots{} 的公共“目录”（键路径）是 `|/pgfplots/|'。尽管下面的键定义提供了完整路径，但省略该前缀总是（好吧，几乎总是）安全的——\PGFPlots{} 会自动使用它。对于 \Tikz{} 绘图选项通用的前缀 `|/tikz/|'，以及用于 \pgfname{}（或多或少）底层命令的前缀 `|/pgf/|'，情况也是如此。所有这些前缀都可以省略。
+
+一个重要的概念是 \emph{样式} 的概念。样式是一个包含一个或多个其他键的键。它可以被重新定义或修改，直到被内部例程实际使用。\Tikz{} 和 \PGFPlots{} 的每一个单独组件都可以通过样式进行配置。
+
+例如，
+%
+\begin{codeexample}[code only]
+\pgfplotsset{legend style={line width=1pt}}
+\end{codeexample}
+%
+\noindent 通过向现有的图例样式追加 `|line width=1pt|'，将每个图例的线宽设置为 |1pt|。
+
+有些键，例如 |legend style|、|ticklabel style| 和 |label style|，允许修改预定义样式（在本例中分别是图例、刻度标签和坐标轴标签的样式）。它们通常等价于 \meta{style name}|/.append style={}| 命令（唯一的区别是 |/.append style| 这种写法稍微长一点）。还可以使用 |/.style={}| 来定义新样式（或覆盖已有的样式）。
+
+还有一些其他预定义样式可用于修改外观，参见 Section~\ref{sec:styles}。
+
+\begin{command}{\pgfplotsset\marg{key-value-list}}
+    定义或设置 \meta{key-value-list} 中的所有选项。\meta{key-value-list} 可以包含本手册中任何带有 |/pgfplots/| 前缀的选项（不过你不需要输入该前缀）。
+
+    在 \meta{key-value-list} 内部，本手册中常见的前缀 `|/pgfplots/|' 可以省略（它们会被自动检查）。
+
+    此命令可用于为整个文档或文档的某一部分定义默认选项。例如，
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    cycle list={
+        {red, mark=*},          {blue,mark=*},
+        {red, mark=x},          {blue,mark=x},
+        {red, mark=square*},    {blue,mark=square*},
+        {red, mark=triangle*},  {blue,mark=triangle*},
+        {red, mark=diamond*},   {blue,mark=diamond*},
+        {red, mark=pentagon*},  {blue,mark=pentagon*}
+    },
+    legend style={
+        at={(0.5,-0.2)},
+        anchor=north,
+        legend columns=2,
+        cells={anchor=west},
+        font=\footnotesize,
+        rounded corners=2pt,
+    },
+    xlabel=$x$,
+    ylabel=$f(x)$,
+}
+\end{codeexample}
+    %
+    可用于为整本文档设置线型规格、图例样式和坐标轴标签的文档级样式。这些设置将一直有效，直到当前环境（例如 |\end{figure}|）结束，或者你重新定义它们，或者遇到下一个闭花括号 `|}|'（以先到者为准）。
+
+    你还可以使用 |/.style| 和 |/.append style| 定义新样式（键值对的集合）。
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    My Style 1/.style={xlabel=$x$, legend entries={1,2,3} },
+    My Style 2/.style={xlabel=$X$, legend entries={4,5,6} }
+}
+\end{codeexample}
+    %
+    |/.style| 和 |/.append style| 这两个键处理器在 Section~\ref{sec:styles} 中有更详细的描述。
+\end{command}
+
+\begin{handler}{{.code}=\marg{\TeX{} code}}
+    有时，\PGFPlots{} 的用户界面会提供替换其部分例程的功能。这是通过所谓的“代码键”来实现的。其含义是用新的 \meta{\TeX{} 代码} 替换原来的键及其行为。在 \meta{\TeX{} 代码} 内部，可以使用任何命令。此外，|#1| 模式将是传递给该键的参数。
+
+\begin{codeexample}[]
+\pgfplotsset{
+    My Code/.code={I've been invoked with `#1'}}
+\pgfplotsset{My Code={this here}}
+\end{codeexample}
+    %
+    该例子定义了一个（新的）名为 |My Code| 的键。本质上，它不过是一个 |\newcommand|，被接入到了键值接口中。第二条语句“调用”了这个代码键。
+\end{handler}
+
+\begin{handler}{{.code 2 args}=\marg{\TeX{} code}}
+    与 |/.code| 类似，但此处理器定义的键接受两个参数。当使用这样定义的键时，这两个参数可通过 |#1| 和 |#2| 获取。
+\end{handler}
+
+\begin{handler}{{.cd}}
+    每个键都有一个带（长）前缀的完全限定名，例如 |/pgfplots/xmin|。然而，如果“当前目录”是 |/pgfplots|，那么只写 |xmin| 就足够了。|/.cd| 键处理器就是以这种方式更改“当前目录”的。
+
+    对于传递给 |\begin{axis}|\oarg{options} 或 |\addplot| 的任何参数，会自动检查前缀 |/tikz/| 和 |/pgfplots/|。因此，你无需担心它们，直接省略即可——如果宏包未能识别该选项，再仔细检查。
+\end{handler}
+
+
+\subsection{\textsc{PGFPlots} 与 \Tikz{} 选项}
+
+本节或多或少偏技术性，除非你确实想了解更多关于此主题的内容，否则可以跳过。
+
+\Tikz{} 选项和 \PGFPlots{} 选项可以在坐标轴参数中以及任何相关样式中混用。例如，
+%
+\begin{codeexample}[code only]
+\pgfplotsset{every axis legend/.append style={
+    legend columns=3,font=\Large},
+}
+\end{codeexample}
+%
+\noindent 同时指定了 `|legend columns|' 选项（一个 \PGFPlots{} 选项），并使用 `|font|' 来绘制图例（一个 \Tikz{} 选项）。关键在于：|legend columns| 需要在图例排版 \emph{之前} 就已知，而 |font| 则需要在图例排版时生效。\PGFPlots{} 会自动理清所有键之间的依赖关系：
+
+坐标轴环境会处理任何已知的 \PGFPlots{} 选项，并且所有 `|every|' 样式都会被解析以查找 \PGFPlots{} 选项。每个未知的选项都被假定为 \Tikz{} 选项，并会被转发给相应的 \Tikz{} 绘图命令。例如，上面的 `|font=\Large|' 将被用作图例矩阵的参数，而下面这段中的 `|font=\Large|' 参数
+%
+\begin{codeexample}[code only]
+\pgfplotsset{every axis label/.append style={
+    ylabel=Error,xlabel=Dof,font=\Large},
+}
+\end{codeexample}
+%
+将被用于坐标轴标签的节点中（但不会用于坐标轴标题，例如）。
+
+如果你给坐标轴标签指定了不兼容的选项，那将是一个错误，例如 `|xmin|' 和 `|xmax|' 不能在 `|every axis label|' 内部设置。

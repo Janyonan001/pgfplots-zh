@@ -1,0 +1,300 @@
+% main=manual.tex
+
+\section{安装与先决条件}
+
+\subsection{许可}
+
+本程序是自由软件：你可以按照自由软件基金会发布的 GNU 通用公共许可证
+（GNU General Public License）第 3 版，或（由你选择）任何更新版本的
+条款，重新分发和/或修改它。
+
+本程序的分发希望它会有用，但不提供任何担保；甚至不包含
+对适销性或特定用途适用性的默示担保。更多细节请参见 GNU 通用公共许可证。
+
+GNU 通用公共许可证的副本可在宏包文件
+%
+\begin{verbatim}
+doc/latex/pgfplots/gpl-3.0.txt
+\end{verbatim}
+%
+中找到。你也可以访问~\url{http://www.gnu.org/licenses}。
+
+
+\subsection{先决条件}
+
+\PGFPlots{} 需要 \PGF{}。一般来说，你应使用最新稳定
+版本的 \PGF{}。\PGFPlots{} 的使用方式是在
+%
+\input pgfplots.preliminaries.compatcurrent.tmp
+%
+\noindent 你的导言区中（关于如何在 Con\TeX{}t 和 plain \TeX{} 中使用，
+参见 Section~\ref{sec:tex:dialects}）。
+
+应当添加 |compat=|\meta{你的版本} 这一项以启用新功能，
+更多细节参见 |compat| 键的文档。
+
+
+%\subsection{Installation}
+
+有若干种方法可以告诉 \TeX{} 到哪里寻找这些文件。请选择
+最符合你需求的选项。
+
+
+\subsection{在 Windows 上安装}
+
+Windows 用户通常使用 MiK\TeX{}，它会自动下载最新稳定的宏包
+版本。在这里你无需手动安装任何东西。
+
+如果你想安装比 MiK\TeX{} 所附带版本更新的 \PGFPlots{}，
+可以按如下步骤进行。MiK\TeX{} 提供了在其自身的 \TeX{} 目录结构
+（TDS）中本地安装宏包的功能。基本思路是：把 \PGFPlots{} 解压到你选择的
+某个目录，并配置 MiK\TeX{} 宏包管理器，让它以高于默认路径的
+优先级使用这个特定目录。如果你想这样做，请通过“开始 $\gg$ 程序 $\gg$ MiK\TeX{} $\gg$
+Settings”启动 MiK\TeX{} 设置程序。在那里，使用“Roots”菜单页。
+它初始配置中包含 MiK\TeX{} 宏包目录。使用“Add”选择解压后的
+\PGFPlots{} 所在目录。然后，使用“Up”按钮把新添加的路径
+移到列表顶端。再按“Ok”。对于 MiK\TeX{}
+2.8，你可能需要取消勾选“Show MiK\TeX{}-maintained root directories”
+按钮，才能看到新安装的路径。
+
+如果所提供的目录不符合 TDS 规范（细节参见
+Section~\ref{pgfplots:tds}），MiK\TeX{} 会报错，所以你在这里不能提供错误的
+目录。这种方法对其他宏包同样有效，但有些宏包在被 MiK\TeX{}
+接受之前可能需要先做一些目录结构上的整理。
+
+
+\subsection{安装 Linux 宏包}
+
+通常，可以使用 \TeX{} 宏包管理器来安装 \PGFPlots{}。一个
+常见的发行版是 \TeX{}Live。在这种情况下，你可以输入
+%
+\begin{codeexample}[code only]
+sudo tlmgr install pgfplots
+\end{codeexample}
+%
+\noindent 来安装 \PGFPlots{}。
+
+
+\subsection{安装到任意目录——\texttt{TEXINPUTS} 变量}
+
+你可以简单地把 \PGFPlots{} 安装到硬盘上的任意位置，例如
+安装到
+%
+\begin{verbatim}
+/foo/bar/pgfplots.
+\end{verbatim}
+%
+然后，把 \texttt{TEXINPUTS} 变量设置为
+%
+\begin{verbatim}
+TEXINPUTS=/foo/bar/pgfplots/tex//:
+\end{verbatim}
+%
+末尾的~`\texttt{:}'告诉 \TeX{} 在 \lstinline!/foo/bar/pgfplots!
+之后再检查默认搜索路径。双斜杠~`\texttt{//}'告诉 \TeX{}
+搜索所有子目录。
+
+如果 \texttt{TEXINPUTS} 变量中已经有内容，你可以把
+上面这一行追加到现有的 \texttt{TEXINPUTS} 内容之后。
+
+此外，你还应当设置 |TEXDOCS|，
+%
+\begin{verbatim}
+TEXDOCS=/foo/bar/pgfplots/doc//:
+\end{verbatim}
+%
+以便 \TeX{} 文档系统能找到 |pgfplots.pdf| 和
+|pgfplotstable.pdf| 这两个文件（在某些系统上，之后只需使用
+|texdoc pgfplots| 即可）。
+
+从 \PGFPlots{} 1.12 开始，你可能还需要设置 \texttt{LUAINPUTS}：
+%
+\begin{verbatim}
+LUAINPUTS=/foo/bar/pgfplots//:
+\end{verbatim}
+%
+通常即可满足需要。
+
+关于如何设置环境变量，请参阅你操作系统的手册。
+
+
+\subsection{安装到本地符合 TDS 规范的 \texttt{texmf} 目录}
+\label{pgfplots:tds}
+
+\PGFPlots{} 采用符合“\TeX{} 目录结构”（TDS）的
+目录结构分发，因此你可以简单地把文件解压到一个会被
+\TeX{} 自动搜索的目录中。例如，在 Linux 系统上，这样的目录是
+|~/texmf|。
+
+把 \PGFPlots{} 复制到某个本地 \texttt{texmf} 目录，例如 \lstinline!~/texmf!。
+你至少需要 \PGFPlots{} 的 |tex/generic/pgfplots| 和
+|tex/latex/pgfplots| 目录。然后，运行 \lstinline!texhash!（或某个等效的、
+特定于你所用 \TeX{} 发行版的路径更新命令）。
+
+TDS 由若干个子目录构成，根据所请求内容的不同，它们会被
+分别搜索：子目录
+|doc/latex/|\meta{宏包} 用于（\LaTeX{}）文档，
+子目录 |doc/generic/|\meta{宏包} 用于同时适用于
+\LaTeX{} 和其他 \TeX{} 方言（例如 plain \TeX{} 和 Con\TeX{}t，它们也有
+各自对应的子目录）的文档。
+
+类似地，每当请求 \LaTeX{} 宏包时，会搜索
+|tex/latex/|\meta{宏包} 子目录。对于同时适用于 \LaTeX{} \emph{以及}
+其他 \TeX{} 方言的宏包，会搜索 |tex/generic/|\meta{宏包}
+子目录。
+
+别忘了运行 \lstinline!texhash!。
+
+\subsection{其他方法均失败时的安装\ldots}
+
+如果 \TeX{} 仍然找不到你的文件，你可以把所有 \lstinline!.sty! 和
+所有 |.code.tex| 文件（也许还包括所有 |.def| 文件）复制到你当前
+项目的工作目录中。实际上，你需要
+|tex/latex/pgfplots| 和 |tex/generic/pgfplots| 子目录中的
+全部内容。
+
+关于宏包安装的更多信息，请参阅 \url{http://www.ctan.org/installationadvice/}。
+
+
+\section{故障排查——错误信息}
+
+本节讨论使用 \PGFPlots{} 时可能出现的一些问题。
+部分错误信息列于索引中，请看本手册末尾
+（“Errors”一节）。
+
+
+\subsection{可用 Dimen 寄存器不足的问题}
+
+为避免 \PGF{} 和 \PGFPlots{} 所需的大量 \TeX{} 寄存器
+引发问题，你可能希望把
+%
+\begin{verbatim}
+\usepackage{etex}
+\end{verbatim}
+%
+作为第一个宏包引入。这在大多数情况下可以避免“no room for a new
+dimen”\index{Error Messages!No room for a new dimen} 问题。它应当
+适用于任何现代的 \TeX{} 安装（它会激活
+$\varepsilon$-\TeX{} 扩展）。
+
+
+\subsection{Dimension Too Large 错误}
+
+\PGF{} 的核心数学引擎依赖 \TeX{} 寄存器来执行
+快速算术运算。为计算 $50+299$，它实际上计算的是 |50pt+299pt|，然后
+去掉结果的 |pt| 后缀。由于 \TeX{} 寄存器只能容纳
+不超过 $\pm 16384$ 的数，一旦结果超出允许范围，就会出现像“Dimension too large”这样的
+溢出错误信息。正常情况下，这绝不应该
+发生——\PGFPlots{} 使用数据范围为 $\pm 10^{324}$ 的浮点单元，
+并自动完成所有映射。不过，在某些情况下这仍会
+失败。其中一些情况如下：
+%
+\begin{enumerate}
+    \item 坐标轴范围（例如 $x$ 的范围）变得\emph{相对}
+        很小。像 $[10^{-17},10^{-16}]$ 这样绝对很小的范围
+        没有问题。但如果你的坐标轴范围是
+        $[1.99999999,2]$，即需要大量有效数字，
+        这就可能出问题。
+
+        恐怕我在这里帮不上忙：你可能需要在
+        \PGFPlots{} 处理数据之前，先以某种方式整理好数据。
+    \item 如果你只查看数据范围中非常小的一部分，
+        也可能发生这种情况。
+
+        例如，当你的输入数据范围为 $x\in
+        [0,10^6]$，而你指定 |xmax=10| 时，就会发生这种情况。
+
+        在这种情况下，请考虑使用
+        |restrict x to domain*=|\meta{min}|:|\meta{max}
+        键，其中 \meta{min} 和 \meta{max} 应当
+        （比方说）为坐标轴上下限的四倍（细节参见
+        page~\pageref{key:restrict:x:to:domain}）。
+    \item 如果 $x$ 和 $y$ 的尺度相差非常悬殊，
+        |axis equal| 键会被弄糊涂。
+    \item 你可能发现了一个 bug——请联系开发者。
+\end{enumerate}
+
+
+\subsection{DVI 查看器与 \texttt{dvipdfm} 的限制}
+\label{sec:drivers}
+
+\PGF{} 兼容
+%
+\begin{itemize}
+    \item \lstinline!latex!/\lstinline!dvips!,
+    \item \lstinline!latex!/\lstinline!dvipdfm!,
+    \item \lstinline!pdflatex!,
+    \item $\vdots$
+\end{itemize}
+%
+不过，存在一些限制：我所知道的 DVI 查看器都无法
+查看 \PGF{} 的输出（因而也无法查看 \PGFPlots{} 的输出）。
+毕竟，DVI 从来就不是为绘制文字和水平/垂直直线
+以外的东西而设计的。你需要查看 postscript 文件或
+PDF 文件。
+
+其次，DVI/PDF 组合并不支持所有类型的着色
+（例如，|shader=interp| 仅适用于 |dvips|、|pdftex|、
+|dvipdfmx| 和 |xetex| 驱动）。
+
+此外，\PGF{} 需要知道一个\emph{驱动}，以便把 DVI 文件
+转换为期望的输出。根据你的系统，你需要以下
+选项：
+%
+\begin{itemize}
+    \item \lstinline!latex!/\lstinline!dvips! 不需要任何特殊设置，
+        因为 \lstinline!dvips! 是你调用
+        \lstinline!latex! 时的默认驱动。
+    \item \lstinline!pdflatex! 也可以直接使用，因为
+        \lstinline!pdflatex! 会被自动检测到。
+    \item \lstinline!lualatex! 同样会被自动检测到。
+    \item \lstinline!latex!/\lstinline!dvipdfm! 需要使用
+        %
+\begin{verbatim}
+\def\pgfsysdriver{pgfsys-dvipdfm.def}
+%\def\pgfsysdriver{pgfsys-pdftex.def}
+%\def\pgfsysdriver{pgfsys-dvips.def}
+%\def\pgfsysdriver{pgfsys-dvipdfmx.def}
+%\def\pgfsysdriver{pgfsys-xetex.def}
+%\def\pgfsysdriver{pgfsys-luatex.def}
+\usepackage{pgfplots}.
+\end{verbatim}
+        %
+        被注释掉的命令可用于显式设置其他驱动。
+\end{itemize}
+%
+如果你还有进一步的问题，请阅读~\cite[Sections~7.2.1 and 7.2.2]{tikz}
+中相应的章节。这些章节也包含特定驱动的
+局限性。
+
+完全不会产生任何问题的选择是 |pdflatex|。
+
+
+\subsection{\TeX{} 内存容量不足的问题}
+
+\PGFPlots{} 可以处理从小到中等规模的图。不过，\TeX{}
+从来就不是为数据图而设计的——你最终会遇到
+内存容量不足的问题。如何扩大内存，参见
+Section~\ref{sec:pgfplots:optimization}。
+
+
+\subsection{语言设置与活动字符的问题}
+
+\PGF{} 和 \PGFPlots{} 都使用大量活动字符——这可能会
+与其他定义活动字符的宏包产生
+不兼容。兼容性比早期版本有所改善，但仍可能
+是个问题。本手册分别使用英文和法文的 |babel| 宏包编译，
+|german| 宏包同样可行。如果你遇到任何问题，请告诉我。
+有时，临时禁用活动字符可能会奏效（|babel|
+提供了这样的命令）。
+
+
+\subsection{其他问题}
+
+请查阅 \url{https://github.com/pgf-tikz/pgfplots/issues} 上的 issue 列表
+或邮件列表 \url{https://tug.org/mailman/listinfo/pgf-tikz}。也许
+之前也有人遇到过你的问题，并且他可能已经想出了
+一个解决办法。
+
+如果你遇到的是一个不同的问题，请新开一个 issue。Matrix 网络上还有一个聊天室，
+地址是 \href{https://matrix.to/#/#pgf-tikz:matrix.org}{\texttt{\#pgf-tikz:matrix.org}}。

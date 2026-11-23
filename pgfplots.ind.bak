@@ -1,0 +1,1937 @@
+
+ \begin{theindex} 
+ \makeatletter\scan@allowedfalse
+{\bfseries\hfil Symbols\hfil}\nopagebreak
+
+  \item \textcolor {gray}{\texttt {plot}}\texttt { ({\normalfont  \meta  {$x$ expression}},{\normalfont  \meta  {$y$ expression}})}\pfill 
+		57
+  \item \texttt {({\normalfont  \meta  {$x$ expression}},{\normalfont  \meta  {$y$ expression}},{\normalfont  \meta  {$z$ expression}})}\pfill 
+		141
+  \item \texttt {--} path operation\pfill 628
+  \item \texttt {.clear} key\pfill 127
+  \item \texttt {.code} key\pfill 570
+  \item \texttt {.condition} key\pfill 127
+  \item \texttt {.define} key\pfill 253
+  \item \texttt {.from} key\pfill 127
+  \item \texttt {.style} key\pfill 524, 527
+  \item /data point/x\pfill 456
+  \item \textcolor {gray}{\texttt {plot}}\texttt { {\normalfont  {\ttfamily  \char `\{}{\normalfont  \meta  {math expression}}{\ttfamily  \char `\}}}}\pfill 
+		55
+  \item \texttt {{\normalfont  {\ttfamily  \char `\{}{\normalfont  \meta  {math expression}}{\ttfamily  \char `\}}}}\pfill 
+		140
+  \item \texttt {3d box} key\pfill 357
+  \item \texttt {3d box foreground style} key\pfill 420
+  \item 3d view\efill 
+ \subitem Assign rotation angles\pfill 352
+    \subitem Assign unit vectors\pfill 336
+  \item 3d: line or mesh\pfill 136
+
+  \indexspace
+{\bfseries\hfil A\hfil}\nopagebreak
+
+  \item Accuracy\efill 
+ \subitem Data Transformation\pfill 461
+    \subitem Floating Point in \PGFPlots\pfill 44
+    \subitem High Precision for Plot Expression\pfill 56
+  \item \myprintocmmand {addlegendentry}\pfill 289
+  \item \myprintocmmand {addlegendentryexpanded}\pfill 290
+  \item \myprintocmmand {addlegendimage}\pfill 307
+  \item \myprintocmmand {addplot}\pfill 43
+  \item \texttt {\textbackslash addplot+}\pfill 45
+  \item \texttt {\textbackslash addplot3}\pfill 136
+  \item \texttt {after arrow} key\pfill 99
+  \item \texttt {after end axis} key\pfill 465
+  \item Alignment\efill 
+ \subitem Array\pfill 432
+    \subitem Subplots\pfill 432
+  \item allow reversal of rel axis cs\pfill 632
+  \item \texttt {allow reversal of rel axis cs} key\pfill 408
+  \item \texttt {allow upside down} key\pfill 285, 411
+  \item \texttt {anchor} key\pfill 426
+  \item Anchors\efill 
+ \subitem \texttt {near ticklabel}\pfill 280
+    \subitem \texttt {near ticklabel opposite}\pfill 281
+    \subitem \texttt {near xticklabel}\pfill 280
+    \subitem \texttt {near xticklabel opposite}\pfill 281
+    \subitem \texttt {near yticklabel}\pfill 280
+    \subitem \texttt {near yticklabel opposite}\pfill 281
+    \subitem \texttt {near zticklabel}\pfill 280
+    \subitem \texttt {near zticklabel opposite}\pfill 281
+  \item \texttt {annot/}\efill 
+ \subitem \texttt {collected plots}\pfill 485
+    \subitem \texttt {font}\pfill 483
+    \subitem \texttt {height}\pfill 485
+    \subitem \texttt {js fillColor}\pfill 483
+    \subitem \texttt {jsname}\pfill 485
+    \subitem \texttt {point format}\pfill 483
+    \subitem \texttt {point format 3d}\pfill 483
+    \subitem \texttt {popup size}\pfill 484
+    \subitem \texttt {popup size generic}\pfill 484
+    \subitem \texttt {popup size snap}\pfill 484
+    \subitem \texttt {printable}\pfill 483
+    \subitem \texttt {richtext}\pfill 484
+    \subitem \texttt {slope format}\pfill 483
+    \subitem \texttt {snap dist}\pfill 484
+    \subitem \texttt {textSize}\pfill 484
+    \subitem \texttt {width}\pfill 484
+    \subitem \texttt {xmax}\pfill 485
+    \subitem \texttt {xmin}\pfill 485
+    \subitem \texttt {ymax}\pfill 485
+    \subitem \texttt {ymin}\pfill 485
+  \item \texttt {.append style} handler\pfill 416
+  \item \texttt {area cycle list} key\pfill 107
+  \item \texttt {area legend} key\pfill 299
+  \item \texttt {area style} key\pfill 107
+  \item array\efill 
+ \subitem Array Alignment\pfill 432
+  \item \texttt {at} key\pfill 426
+  \item \texttt {at position} key\pfill 286
+  \item \myprintocmmand {autoplotspeclist}\pfill 627
+  \item \texttt {autumn} key\pfill 490
+  \item \texttt {aux in dpth} key\pfill 620
+  \item \texttt {average} key\pfill 571, 580
+  \item \texttt {axis} environment\pfill 41
+  \item \texttt {axis background} key\pfill 261
+  \item \texttt {axis base prefix} key\pfill 604
+  \item \texttt {axis cs} coordinate system\pfill 404
+  \item \texttt {axis description cs} coordinate system\pfill 272
+  \item \texttt {axis direction cs} coordinate system\pfill 405
+  \item \texttt {axis equal} key\pfill 340
+  \item \texttt {axis equal image} key\pfill 341
+  \item \texttt {axis line shift} key\pfill 313
+  \item \texttt {axis line style} key\pfill 312, 420
+  \item \texttt {axis lines} key\pfill 309
+  \item \texttt {axis lines*} key\pfill 309
+  \item \texttt {axis on top} key\pfill 465, 471
+  \item \texttt {axis x discontinuity} key\pfill 317
+  \item \texttt {axis x line} key\pfill 309
+  \item \texttt {axis x line shift} key\pfill 313
+  \item \texttt {axis x line*} key\pfill 309
+  \item \texttt {axis y discontinuity} key\pfill 317
+  \item \texttt {axis y line} key\pfill 309
+  \item \texttt {axis y line shift} key\pfill 313
+  \item \texttt {axis y line*} key\pfill 309
+  \item \texttt {axis z discontinuity} key\pfill 317
+  \item \texttt {axis z line} key\pfill 309
+  \item \texttt {axis z line shift} key\pfill 313
+  \item \texttt {axis z line*} key\pfill 309
+  \item \myprintocmmand {axisdefaultheight}\pfill 336
+  \item \myprintocmmand {axisdefaultwidth}\pfill 335
+  \item \texttt {az} key\pfill 353
+
+  \indexspace
+{\bfseries\hfil B\hfil}\nopagebreak
+
+  \item \texttt {bar cycle list} key\pfill 90
+  \item \texttt {bar direction} key\pfill 91
+  \item \texttt {bar nodes} key\pfill 7
+  \item Bar Plots\efill 
+ \subitem Skewed axes problems\pfill 339
+  \item \texttt {bar shift} key\pfill 91
+  \item \texttt {bar shift auto} key\pfill 87
+  \item \texttt {bar width} key\pfill 90
+  \item \texttt {bar width by units} key\pfill 7
+  \item \texttt {baseline} key\pfill 429
+  \item \texttt {BB} key\pfill 7
+  \item \texttt {before arrow} key\pfill 99
+  \item \texttt {before end axis} key\pfill 464
+  \item Behavior Options\pfill 43
+  \item \texttt {bins} key\pfill 583
+  \item \texttt {blackwhite} key\pfill 224
+  \item \texttt {bled} key\pfill 490
+  \item \texttt {bluered} key\pfill 224
+  \item \texttt {bone} key\pfill 491
+  \item Bounding Box Control\pfill 438
+    \subitem clip\pfill 439
+    \subitem Disable \protect\emph{data} bounding box modifications\pfill 
+		379
+    \subitem Excluding Image Parts\pfill 437
+    \subitem hide axis\pfill 319, 436
+    \subitem Image Externalization Problems\pfill 618
+    \subitem pgfinterruptboundingbox\pfill 438
+  \item \texttt {box} key\pfill 580
+  \item \texttt {box extend} key\pfill 574
+  \item \texttt {boxplot/}\efill 
+ \subitem \texttt {average}\pfill 571
+    \subitem \texttt {box extend}\pfill 574
+    \subitem \texttt {data}\pfill 570
+    \subitem \texttt {data filter/}\efill 
+ \subsubitem \texttt {.code}\pfill 570
+    \subitem \texttt {draw/}\efill 
+ \subsubitem \texttt {average}\pfill 580
+      \subsubitem \texttt {box}\pfill 580
+      \subsubitem \texttt {lower whisker}\pfill 579
+      \subsubitem \texttt {median}\pfill 580
+      \subsubitem \texttt {upper whisker}\pfill 579
+      \subsubitem \texttt {whisker}\pfill 579
+    \subitem \texttt {draw direction}\pfill 572
+    \subitem \texttt {draw position}\pfill 567
+    \subitem \texttt {draw relative anchor}\pfill 575
+    \subitem \texttt {estimator}\pfill 576
+    \subitem \texttt {every average}\pfill 577
+    \subitem \texttt {every box}\pfill 577
+    \subitem \texttt {every boxplot}\pfill 577
+    \subitem \texttt {every median}\pfill 577
+    \subitem \texttt {every whisker}\pfill 577
+    \subitem \texttt {lower quartile}\pfill 571
+    \subitem \texttt {lower whisker}\pfill 571
+    \subitem \texttt {median}\pfill 571
+    \subitem \texttt {sample size}\pfill 573
+    \subitem \texttt {sample size max}\pfill 574
+    \subitem \texttt {sample size min}\pfill 574
+    \subitem \texttt {upper quartile}\pfill 571
+    \subitem \texttt {upper whisker}\pfill 571
+    \subitem \texttt {variable width}\pfill 572
+    \subitem \texttt {variable width expr}\pfill 574
+    \subitem \texttt {variable width min target}\pfill 574
+    \subitem \texttt {whisker extend}\pfill 575
+    \subitem \texttt {whisker range}\pfill 576
+  \item \texttt {boxplot} key\pfill 575
+  \item \texttt {boxplot box} coordinate system\pfill 577
+  \item \texttt {boxplot prepared} key\pfill 566
+  \item \texttt {boxplot whisker} coordinate system\pfill 578
+  \item \myprintocmmand {boxplotvalue}\pfill 577
+  \item \texttt {bright} key\pfill 491
+
+  \indexspace
+{\bfseries\hfil C\hfil}\nopagebreak
+
+  \item \texttt {cartesian cs} coordinate system\pfill 597
+  \item \texttt {.cd} handler\pfill 80
+  \item \texttt {cell picture} key\pfill 475
+  \item \texttt {change x base} key\pfill 603
+  \item \texttt {change y base} key\pfill 603
+  \item \texttt {change z base} key\pfill 603
+  \item \texttt {check} key\pfill 150
+  \item \texttt {classes} key\pfill 121
+  \item \texttt {clickable} key\pfill 482
+  \item \texttt {clickable} library\pfill 477
+  \item \texttt {clickable coords} key\pfill 478
+  \item \texttt {clickable coords code} key\pfill 481
+  \item \texttt {clickable coords size} key\pfill 481
+  \item \texttt {clip} key\pfill 439
+  \item \texttt {clip bounding box} key\pfill 440
+  \item \texttt {clip limits} key\pfill 376
+  \item \texttt {clip marker paths} key\pfill 440
+  \item \texttt {clip mode} key\pfill 440
+  \item \texttt {clip xlimits} key\pfill 376
+  \item \texttt {clip ylimits} key\pfill 376
+  \item \texttt {clip zlimits} key\pfill 376
+  \item closedcycle\efill 
+ \subitem Mesh or patch plots\pfill 532
+  \item \myprintocmmand {closedcycle}\pfill 115
+  \item \texttt {cmd} key\pfill 182
+  \item \texttt {.code} handler\pfill 80
+  \item \texttt {.code 2 args} handler\pfill 80
+  \item \texttt {col sep} key\pfill 53
+  \item \texttt {cold} key\pfill 491
+  \item \texttt {collected plots} key\pfill 485
+  \item \texttt {color} key\pfill 219
+  \item color burning\pfill 165
+  \item \texttt {color input} key\pfill 159
+  \item Color maps\efill 
+ \subitem Non uniform\pfill 222, 240
+    \subitem Non uniform, compatibility constraints\pfill 220
+  \item color of colormap\pfill 270
+    \subitem In colormap specification\pfill 230
+  \item \texttt {color of colormap} key\pfill 230, 241
+  \item \texttt {colorbar/}\efill 
+ \subitem \texttt {draw}\pfill 329
+    \subitem \texttt {width}\pfill 328
+  \item \texttt {colorbar} key\pfill 320
+  \item \texttt {colorbar as legend} key\pfill 331
+  \item \texttt {colorbar as palette} key\pfill 269
+  \item \texttt {colorbar horizontal} key\pfill 324
+  \item \texttt {colorbar left} key\pfill 323
+  \item \texttt {colorbar right} key\pfill 322
+  \item \texttt {colorbar sampled} key\pfill 329
+  \item \texttt {colorbar sampled line} key\pfill 330
+  \item \texttt {colorbar sampled line style} key\pfill 420
+  \item \texttt {colorbar shift} key\pfill 329
+  \item \texttt {colorbar source} key\pfill 326
+  \item \texttt {colorbar style} key\pfill 328, 419
+  \item \texttt {colorbar to name} key\pfill 333
+  \item \texttt {colorbrewer} library\pfill 485, 490
+  \item \texttt {colored} key\pfill 98
+  \item Colormap\efill 
+ \subitem Convert into Cycle list\pfill 250
+  \item \texttt {colormap/}\efill 
+ \subitem \texttt {autumn}\pfill 490
+    \subitem \texttt {blackwhite}\pfill 224
+    \subitem \texttt {bled}\pfill 490
+    \subitem \texttt {bluered}\pfill 224
+    \subitem \texttt {bone}\pfill 491
+    \subitem \texttt {bright}\pfill 491
+    \subitem \texttt {cold}\pfill 491
+    \subitem \texttt {cool}\pfill 225
+    \subitem \texttt {copper}\pfill 491
+    \subitem \texttt {copper2}\pfill 492
+    \subitem \texttt {earth}\pfill 492
+    \subitem \texttt {gray}\pfill 492
+    \subitem \texttt {greenyellow}\pfill 225
+    \subitem \texttt {hot}\pfill 223
+    \subitem \texttt {hot2}\pfill 223, 492
+    \subitem \texttt {hsv}\pfill 493
+    \subitem \texttt {hsv2}\pfill 493
+    \subitem \texttt {jet}\pfill 224, 493
+    \subitem \texttt {pastel}\pfill 493
+    \subitem \texttt {pink}\pfill 494
+    \subitem \texttt {plasma high res}\pfill 496
+    \subitem \texttt {redyellow}\pfill 225
+    \subitem \texttt {sepia}\pfill 494
+    \subitem \texttt {spring}\pfill 494
+    \subitem \texttt {summer}\pfill 494
+    \subitem \texttt {temp}\pfill 494
+    \subitem \texttt {thermal}\pfill 495
+    \subitem \texttt {violet}\pfill 225
+    \subitem \texttt {viridis}\pfill 223
+    \subitem \texttt {viridis high res}\pfill 495
+    \subitem \texttt {winter}\pfill 495
+  \item \texttt {colormap} key\pfill 220
+  \item \texttt {colormap access/}\efill 
+ \subitem \texttt {extra interval width}\pfill 238
+  \item \texttt {colormap access} key\pfill 234, 268
+  \item \texttt {colormap default colorspace} key\pfill 222
+  \item \texttt {colormap name} key\pfill 220
+  \item \texttt {colormaps} library\pfill 490
+  \item colors of colormap\efill 
+ \subitem In colormap specification\pfill 230
+  \item \texttt {colorspace explicit color input} key\pfill 162
+  \item \texttt {colorspace explicit color output} key\pfill 162
+  \item \texttt {cols} key\pfill 138
+  \item \texttt {columns} key\pfill 524
+  \item \texttt {comment chars} key\pfill 54
+  \item \texttt {compat/}\efill 
+ \subitem \texttt {bar nodes}\pfill 7
+    \subitem \texttt {bar width by units}\pfill 7
+    \subitem \texttt {BB}\pfill 7
+    \subitem \texttt {empty line}\pfill 7
+    \subitem \texttt {general}\pfill 7
+    \subitem \texttt {labels}\pfill 6
+    \subitem \texttt {path replacement}\pfill 6
+    \subitem \texttt {pgfpoint substitution}\pfill 7
+    \subitem \texttt {plot3graphics}\pfill 7
+    \subitem \texttt {scale mode}\pfill 6
+    \subitem \texttt {scaling}\pfill 6
+    \subitem \texttt {show suggested version}\pfill 475
+  \item \texttt {compat} key\pfill 6, 287
+  \item const color of colormap\pfill 272
+    \subitem In colormap specification\pfill 237
+  \item \texttt {const color of colormap} key\pfill 238, 242
+  \item const colors of colormap\efill 
+ \subitem In colormap specification\pfill 238
+  \item \texttt {const plot} key\pfill 82
+  \item \texttt {const plot mark left} key\pfill 83
+  \item \texttt {const plot mark mid} key\pfill 84
+  \item \texttt {const plot mark right} key\pfill 83
+  \item \texttt {contour/}\efill 
+ \subitem \texttt {contour dir}\pfill 171
+    \subitem \texttt {contour label style}\pfill 180
+    \subitem \texttt {draw color}\pfill 178
+    \subitem \texttt {every contour label}\pfill 179
+    \subitem \texttt {every contour plot}\pfill 179
+    \subitem \texttt {handler}\pfill 181
+    \subitem \texttt {label distance}\pfill 179
+    \subitem \texttt {label node code}\pfill 181
+    \subitem \texttt {labels}\pfill 178
+    \subitem \texttt {labels over line}\pfill 180
+    \subitem \texttt {levels}\pfill 170
+    \subitem \texttt {levels from colormap}\pfill 185
+    \subitem \texttt {number}\pfill 170
+  \item \texttt {contour dir} key\pfill 171
+  \item \texttt {contour external/}\efill 
+ \subitem \texttt {cmd}\pfill 182
+    \subitem \texttt {file}\pfill 181
+    \subitem \texttt {output point meta}\pfill 182
+    \subitem \texttt {scanline marks}\pfill 181
+    \subitem \texttt {script}\pfill 182
+    \subitem \texttt {script extension}\pfill 182
+    \subitem \texttt {script input format}\pfill 182
+    \subitem \texttt {script type}\pfill 182
+  \item \texttt {contour external} key\pfill 181
+  \item \texttt {contour filled} key\pfill 183
+  \item \texttt {contour gnuplot} key\pfill 174, 183
+  \item \texttt {contour label style} key\pfill 180
+  \item \texttt {contour lua/}\efill 
+ \subitem \texttt {corners}\pfill 178
+  \item \texttt {contour lua} key\pfill 167
+  \item \texttt {contour prepared} key\pfill 175
+  \item \texttt {contour prepared format} key\pfill 175
+  \item \texttt {cool} key\pfill 225
+  \item coordinate style\pfill 409
+  \item \texttt {coordinate style/}\efill 
+ \subitem \texttt {.clear}\pfill 127
+    \subitem \texttt {.condition}\pfill 127
+    \subitem \texttt {.from}\pfill 127
+  \item Coordinate systems\efill 
+ \subitem \texttt {axis cs}\pfill 404
+    \subitem \texttt {axis description cs}\pfill 272
+    \subitem \texttt {axis direction cs}\pfill 405
+    \subitem \texttt {boxplot box}\pfill 577
+    \subitem \texttt {boxplot whisker}\pfill 578
+    \subitem \texttt {cartesian cs}\pfill 597
+    \subitem \texttt {rel axis cs}\pfill 407
+    \subitem \texttt {ticklabel cs}\pfill 275
+    \subitem \texttt {ticklabel* cs}\pfill 275
+    \subitem \texttt {xticklabel cs}\pfill 275
+    \subitem \texttt {xticklabel* cs}\pfill 275
+    \subitem \texttt {yticklabel cs}\pfill 275
+    \subitem \texttt {yticklabel* cs}\pfill 275
+    \subitem \texttt {zticklabel cs}\pfill 275
+    \subitem \texttt {zticklabel* cs}\pfill 275
+  \item \textcolor {gray}{\texttt {plot}}\texttt { coordinates}\pfill 
+		46
+  \item \texttt {coordinates}\pfill 136
+  \item \myprintocmmand {coordindex}\pfill 61, 628
+  \item \texttt {copper} key\pfill 491
+  \item \texttt {copper2} key\pfill 492
+  \item \texttt {corners} key\pfill 178
+  \item crossref file suffix\pfill 305
+  \item \texttt {cube/}\efill 
+ \subitem \texttt {size x}\pfill 210
+    \subitem \texttt {size y}\pfill 210
+    \subitem \texttt {size z}\pfill 210
+  \item \texttt {cumulative} key\pfill 583
+  \item \texttt {current axis} node\pfill 436
+  \item \texttt {current colorbar axis} node\pfill 329
+  \item \texttt {current plot begin} node\pfill 408
+  \item \texttt {current plot end} node\pfill 408
+  \item \texttt {curve style} key\pfill 601
+  \item \texttt {cycle from colormap manual style} key\pfill 253
+  \item \texttt {cycle list/}\efill 
+ \subitem \texttt {.define}\pfill 253
+  \item \texttt {cycle list} key\pfill 243
+  \item \texttt {cycle list name} key\pfill 243
+  \item \texttt {cycle list shift} key\pfill 250
+  \item \texttt {cycle multi list} key\pfill 254
+  \item \texttt {cycle multiindex list} key\pfill 257
+  \item \texttt {cycle multiindex* list} key\pfill 259
+
+  \indexspace
+{\bfseries\hfil D\hfil}\nopagebreak
+
+  \item \texttt {dashdotdotted} key\pfill 214
+  \item \texttt {dashdotted} key\pfill 214
+  \item \texttt {dashed} key\pfill 214
+  \item \texttt {data} key\pfill 570, 583
+  \item \texttt {data coord inv trafo} key\pfill 587
+  \item \texttt {data coord trafo} key\pfill 587
+  \item data cs\pfill 456
+  \item \texttt {data cs} key\pfill 454
+  \item \texttt {data filter} key\pfill 587
+  \item \texttt {data max} key\pfill 583
+  \item \texttt {data min} key\pfill 583
+  \item \texttt {/data point/}\efill 
+ \subitem \texttt {x}\pfill 412
+    \subitem \texttt {y}\pfill 412
+    \subitem \texttt {z}\pfill 412
+  \item \texttt {date coordinates in} key\pfill 445
+  \item \texttt {date ZERO} key\pfill 447
+  \item \texttt {dateplot} library\pfill 445, 496
+  \item \texttt {debug} key\pfill 77
+  \item \texttt {declare function} key\pfill 626
+  \item \texttt {decorations.softclip} library\pfill 496
+  \item \texttt {default} key\pfill 102
+  \item \texttt {default smithchart xtick} key\pfill 560
+  \item \texttt {default smithchart xytick} key\pfill 560
+  \item \texttt {default smithchart ytick} key\pfill 560
+  \item \texttt {default typeset ticklabel} key\pfill 395
+  \item \texttt {.define layer set} handler\pfill 473
+  \item \texttt {dense smithchart ticks} key\pfill 558
+  \item \texttt {densely dashdotdotted} key\pfill 214
+  \item \texttt {densely dashdotted} key\pfill 214
+  \item \texttt {densely dashed} key\pfill 214
+  \item \texttt {densely dotted} key\pfill 214
+  \item \texttt {density} key\pfill 584
+  \item \texttt {disabledatascaling} key\pfill 461
+  \item \texttt {disablelogfilter} key\pfill 461
+  \item \texttt {domain} key\pfill 57
+  \item \texttt {domain y} key\pfill 57
+  \item \texttt {dotted} key\pfill 214
+  \item Downsampling\pfill 452
+  \item \myprintocmmand {draw}\pfill 628
+  \item \texttt {draw} key\pfill 219, 329
+  \item \texttt {draw color} key\pfill 178
+  \item \texttt {draw direction} key\pfill 572
+  \item \texttt {draw error bar} key\pfill 363
+  \item \texttt {draw position} key\pfill 567
+  \item \texttt {draw relative anchor} key\pfill 575
+
+  \indexspace
+{\bfseries\hfil E\hfil}\nopagebreak
+
+  \item \texttt {each nth point} key\pfill 452
+  \item \texttt {each nth tie} key\pfill 599
+  \item \texttt {earth} key\pfill 492
+  \item \texttt {el} key\pfill 354
+  \item \texttt {empty legend} key\pfill 299
+  \item \texttt {empty line} key\pfill 7, 45
+  \item \texttt {enable tick line clipping} key\pfill 476
+  \item \myprintocmmand {endpgfonlayer}\pfill 637
+  \item \myprintocmmand {endpgfplotsonlayer}\pfill 637
+  \item \texttt {enlarge x limits} key\pfill 376
+  \item \texttt {enlarge y limits} key\pfill 376
+  \item \texttt {enlarge z limits} key\pfill 376
+  \item \texttt {enlargelimits} key\pfill 376
+  \item \texttt {enlargelimits respects figure size} key\pfill 379
+  \item Environments\efill 
+ \subitem \texttt {axis}\pfill 41
+    \subitem \texttt {groupplot}\pfill 521
+    \subitem \texttt {loglogaxis}\pfill 41
+    \subitem \texttt {pgfinterruptboundingbox}\pfill 438
+    \subitem \texttt {pgfplotsinterruptdatabb}\pfill 379
+    \subitem \texttt {polaraxis}\pfill 547
+    \subitem \texttt {semilogxaxis}\pfill 41
+    \subitem \texttt {semilogyaxis}\pfill 41
+    \subitem \texttt {smithchart}\pfill 554
+    \subitem \texttt {ternaryaxis}\pfill 588
+    \subitem \texttt {tikzpicture}\pfill 41
+  \item \texttt {error bar style} key\pfill 363, 425
+  \item \texttt {error bars/}\efill 
+ \subitem \texttt {draw error bar}\pfill 363
+    \subitem \texttt {error bar style}\pfill 363, 425
+    \subitem \texttt {error mark}\pfill 362
+    \subitem \texttt {error mark options}\pfill 363
+    \subitem \texttt {x dir}\pfill 361
+    \subitem \texttt {x explicit}\pfill 362
+    \subitem \texttt {x explicit relative}\pfill 362
+    \subitem \texttt {x fixed}\pfill 361
+    \subitem \texttt {x fixed relative}\pfill 361
+    \subitem \texttt {y dir}\pfill 361
+    \subitem \texttt {y explicit}\pfill 362
+    \subitem \texttt {y explicit relative}\pfill 362
+    \subitem \texttt {y fixed}\pfill 361
+    \subitem \texttt {y fixed relative}\pfill 361
+    \subitem \texttt {z dir}\pfill 361
+    \subitem \texttt {z explicit}\pfill 362
+    \subitem \texttt {z explicit relative}\pfill 362
+    \subitem \texttt {z fixed}\pfill 361
+    \subitem \texttt {z fixed relative}\pfill 361
+  \item \texttt {error mark} key\pfill 362
+  \item \texttt {error mark options} key\pfill 363
+  \item Error Messages\efill 
+ \subitem No room for a new dimen\pfill 10
+  \item \texttt {errorbars} key\pfill 102
+  \item Errors\efill 
+ \subitem dimension too large\pfill 56, 461
+    \subitem enlargelimits respects figure size=true: could not respect the prescribed width/height\pfill 
+		378, 379
+    \subitem Patch Input and Memory Problems\pfill 204
+    \subitem Skewed axes and bar plots\pfill 339
+  \item \texttt {estimator} key\pfill 576
+  \item \texttt {every 3d box foreground} key\pfill 420
+  \item \texttt {every 3d description} key\pfill 355
+  \item \texttt {every 3d view {\ttfamily  \char `\{}\meta  {h}{\ttfamily  \char `\}}{\ttfamily  \char `\{}\meta  {v}{\ttfamily  \char `\}}} key\pfill 
+		355
+  \item \texttt {every arrow} key\pfill 98
+  \item \texttt {every average} key\pfill 577
+  \item \texttt {every axis} key\pfill 416
+  \item \texttt {every axis grid} key\pfill 424
+  \item \texttt {every axis label} key\pfill 418
+  \item \texttt {every axis legend} key\pfill 292, 418
+  \item \texttt {every axis plot} key\pfill 417
+  \item \texttt {every axis plot no \#} key\pfill 417
+  \item \texttt {every axis plot post} key\pfill 213, 417
+  \item \texttt {every axis post} key\pfill 416
+  \item \texttt {every axis title} key\pfill 418
+  \item \texttt {every axis title shift} key\pfill 418
+  \item \texttt {every axis x grid} key\pfill 424
+  \item \texttt {every axis x label} key\pfill 418
+  \item \texttt {every axis y grid} key\pfill 424
+  \item \texttt {every axis y label} key\pfill 418
+  \item \texttt {every axis z grid} key\pfill 424
+  \item \texttt {every axis z label} key\pfill 418
+  \item \texttt {every box} key\pfill 577
+  \item \texttt {every boxed x axis} key\pfill 312
+  \item \texttt {every boxed y axis} key\pfill 312
+  \item \texttt {every boxed z axis} key\pfill 312
+  \item \texttt {every boxplot} key\pfill 577
+  \item \texttt {every colorbar} key\pfill 326, 419
+  \item \texttt {every colorbar sampled line} key\pfill 331, 420
+  \item \texttt {every colorbar to name picture} key\pfill 334
+  \item \texttt {every contour label} key\pfill 179
+  \item \texttt {every contour plot} key\pfill 179
+  \item \texttt {every crossref picture} key\pfill 305
+  \item \texttt {every error bar} key\pfill 425
+  \item \texttt {every even segment} key\pfill 506
+  \item \texttt {every extra x tick} key\pfill 423
+  \item \texttt {every extra y tick} key\pfill 423
+  \item \texttt {every extra z tick} key\pfill 423
+  \item \texttt {every fill between plot} key\pfill 507
+  \item \texttt {every forget plot} key\pfill 417
+  \item \texttt {every inner x axis line} key\pfill 311, 420
+  \item \texttt {every inner y axis line} key\pfill 311, 420
+  \item \texttt {every inner z axis line} key\pfill 311, 420
+  \item \texttt {every last segment} key\pfill 507
+  \item \texttt {every legend image post} key\pfill 297, 419
+  \item \texttt {every legend to name picture} key\pfill 307, 419
+  \item \texttt {every linear axis} key\pfill 417
+  \item \texttt {every loglog axis} key\pfill 417
+  \item \texttt {every major grid} key\pfill 424
+  \item \texttt {every major tick} key\pfill 421
+  \item \texttt {every major x grid} key\pfill 425
+  \item \texttt {every major x tick} key\pfill 423
+  \item \texttt {every major y grid} key\pfill 425
+  \item \texttt {every major y tick} key\pfill 423
+  \item \texttt {every major z grid} key\pfill 425
+  \item \texttt {every major z tick} key\pfill 423
+  \item \texttt {every mark} key\pfill 210
+  \item \texttt {every median} key\pfill 577
+  \item \texttt {every minor grid} key\pfill 424
+  \item \texttt {every minor tick} key\pfill 420
+  \item \texttt {every minor x grid} key\pfill 425
+  \item \texttt {every minor x tick} key\pfill 422
+  \item \texttt {every minor y grid} key\pfill 425
+  \item \texttt {every minor y tick} key\pfill 422
+  \item \texttt {every minor z grid} key\pfill 425
+  \item \texttt {every minor z tick} key\pfill 422
+  \item \texttt {every node near coord} key\pfill 126
+  \item \texttt {every non boxed x axis} key\pfill 312
+  \item \texttt {every non boxed y axis} key\pfill 312
+  \item \texttt {every non boxed z axis} key\pfill 312
+  \item \texttt {every odd segment} key\pfill 506
+  \item \texttt {every outer x axis line} key\pfill 311, 419
+  \item \texttt {every outer y axis line} key\pfill 311, 419
+  \item \texttt {every outer z axis line} key\pfill 311, 419
+  \item \texttt {every patch} key\pfill 207
+  \item \texttt {every segment} key\pfill 506
+  \item \texttt {every segment no \meta  {index}} key\pfill 506
+  \item \texttt {every semilogx axis} key\pfill 417
+  \item \texttt {every semilogy axis} key\pfill 417
+  \item \texttt {every smithchart axis} key\pfill 563
+  \item \texttt {every soft clipped path} key\pfill 497
+  \item \texttt {every ternary axis} key\pfill 598
+  \item \texttt {every tick} key\pfill 420
+  \item \texttt {every tick label} key\pfill 421
+  \item \texttt {every whisker} key\pfill 577
+  \item \texttt {every x tick} key\pfill 422
+  \item \texttt {every x tick label} key\pfill 421
+  \item \texttt {every x tick scale label} key\pfill 421
+  \item \texttt {every y tick} key\pfill 422
+  \item \texttt {every y tick label} key\pfill 421
+  \item \texttt {every y tick scale label} key\pfill 421
+  \item \texttt {every z tick} key\pfill 422
+  \item \texttt {every z tick label} key\pfill 421
+  \item \texttt {every z tick scale label} key\pfill 421
+  \item \texttt {execute at begin axis} key\pfill 462
+  \item \texttt {execute at begin plot} key\pfill 462
+  \item \texttt {execute at begin plot visualization} key\pfill 462
+  \item \texttt {execute at end axis} key\pfill 462
+  \item \texttt {execute at end plot} key\pfill 462
+  \item \texttt {execute at end plot visualization} key\pfill 463
+  \item \texttt {execute for upside down} key\pfill 286
+  \item \textcolor {gray}{\texttt {plot}}\texttt { expression}\pfill 57
+  \item \texttt {expression}\pfill 141
+  \item \texttt {external} library\pfill 497, 612
+  \item External Graphics\efill 
+ \subitem Bounding Box Issues\pfill 618
+  \item \texttt {extra description} key\pfill 289
+  \item \texttt {extra interval width} key\pfill 238
+  \item \texttt {extra tick style} key\pfill 424
+  \item \texttt {extra x tick label} key\pfill 391
+  \item \texttt {extra x tick labels} key\pfill 391
+  \item \texttt {extra x tick style} key\pfill 423
+  \item \texttt {extra x ticks} key\pfill 384
+  \item \texttt {extra y tick label} key\pfill 391
+  \item \texttt {extra y tick labels} key\pfill 391
+  \item \texttt {extra y tick style} key\pfill 424
+  \item \texttt {extra y ticks} key\pfill 384
+  \item \texttt {extra z tick label} key\pfill 391
+  \item \texttt {extra z tick labels} key\pfill 391
+  \item \texttt {extra z tick style} key\pfill 424
+  \item \texttt {extra z ticks} key\pfill 384
+
+  \indexspace
+{\bfseries\hfil F\hfil}\nopagebreak
+
+  \item \texttt {faceted color} key\pfill 156
+  \item \texttt {few smithchart ticks} key\pfill 556
+  \item \texttt {figure name} key\pfill 614
+  \item \textcolor {gray}{\texttt {plot}}\texttt { file}\pfill 77
+  \item \texttt {file}\pfill 137
+  \item \texttt {file} key\pfill 181
+  \item \myprintocmmand {fill}\pfill 628
+  \item \texttt {fill} key\pfill 219
+  \item \textcolor {gray}{\texttt {plot}}\texttt { fill between}\pfill 
+		498
+  \item \texttt {fillbetween} library\pfill 497
+  \item \texttt {filter discard warning} key\pfill 454
+  \item filter point\pfill 456
+  \item \texttt {filter point} key\pfill 449
+  \item Floating Point Unit\pfill 56
+  \item \texttt {font} key\pfill 215, 346, 483
+  \item \texttt {footnotesize} key\pfill 348
+  \item \myprintocmmand {foreach}\pfill 624
+  \item \texttt {forget plot} key\pfill 463
+  \item \texttt {forget plot style} key\pfill 417
+  \item \texttt {fpu} key\pfill 467
+  \item \textcolor {gray}{\texttt {plot}}\texttt { function}\pfill 63
+
+  \indexspace
+{\bfseries\hfil G\hfil}\nopagebreak
+
+  \item \texttt {general} key\pfill 7
+  \item \textcolor {gray}{\texttt {plot}}\texttt { gnuplot}\pfill 61
+  \item \textcolor {gray}{\texttt {plot}}\texttt { graphics}\pfill 65
+  \item \texttt {gray} key\pfill 492
+  \item \texttt {greenyellow} key\pfill 225
+  \item \texttt {grid} key\pfill 402
+  \item \texttt {grid style} key\pfill 424
+  \item \texttt {group/}\efill 
+ \subitem \texttt {columns}\pfill 524
+    \subitem \texttt {empty plot/}\efill 
+ \subsubitem \texttt {.style}\pfill 527
+    \subitem \texttt {every plot/}\efill 
+ \subsubitem \texttt {.style}\pfill 524
+    \subitem \texttt {group name}\pfill 526
+    \subitem \texttt {group size}\pfill 524
+    \subitem \texttt {horizontal sep}\pfill 524
+    \subitem \texttt {rows}\pfill 524
+    \subitem \texttt {vertical sep}\pfill 524
+    \subitem \texttt {x descriptions at}\pfill 525
+    \subitem \texttt {xlabels at}\pfill 524
+    \subitem \texttt {xticklabels at}\pfill 525
+    \subitem \texttt {y descriptions at}\pfill 525
+    \subitem \texttt {ylabels at}\pfill 524
+    \subitem \texttt {yticklabels at}\pfill 525
+  \item Group library\efill 
+ \subitem Subplots\pfill 521
+  \item \texttt {group name} key\pfill 526
+  \item \texttt {group size} key\pfill 524
+  \item \texttt {group style} key\pfill 524
+  \item \texttt {groupplot} environment\pfill 521
+  \item \texttt {groupplots} library\pfill 521
+
+  \indexspace
+{\bfseries\hfil H\hfil}\nopagebreak
+
+  \item \texttt {h} key\pfill 353
+  \item \texttt {handler} key\pfill 181, 585
+  \item \texttt {header} key\pfill 51
+  \item \texttt {height} key\pfill 335, 485
+  \item \texttt {hide axis} key\pfill 319
+  \item \texttt {hide obscured x ticks} key\pfill 401
+  \item \texttt {hide obscured y ticks} key\pfill 401
+  \item \texttt {hide obscured z ticks} key\pfill 401
+  \item \texttt {hide x axis} key\pfill 319
+  \item \texttt {hide y axis} key\pfill 319
+  \item \texttt {hide z axis} key\pfill 319
+  \item \texttt {hist/}\efill 
+ \subitem \texttt {bins}\pfill 583
+    \subitem \texttt {cumulative}\pfill 583
+    \subitem \texttt {data}\pfill 583
+    \subitem \texttt {data coord inv trafo}\pfill 587
+    \subitem \texttt {data coord trafo}\pfill 587
+    \subitem \texttt {data filter}\pfill 587
+    \subitem \texttt {data max}\pfill 583
+    \subitem \texttt {data min}\pfill 583
+    \subitem \texttt {density}\pfill 584
+    \subitem \texttt {handler}\pfill 585
+    \subitem \texttt {intervals}\pfill 583
+    \subitem \texttt {symbolic coords}\pfill 587
+  \item \texttt {hist} key\pfill 581
+  \item \texttt {horizontal sep} key\pfill 524
+  \item \texttt {hot} key\pfill 223
+  \item \texttt {hot2} key\pfill 223, 492
+  \item \texttt {hsv} key\pfill 493
+  \item \texttt {hsv2} key\pfill 493
+
+  \indexspace
+{\bfseries\hfil I\hfil}\nopagebreak
+
+  \item \texttt {id} key\pfill 63, 64
+  \item ifpgfplotsthreedim\pfill 633
+  \item \texttt {ignore chars} key\pfill 54
+  \item \texttt {ignore first} key\pfill 78
+  \item \texttt {imagesc} key\pfill 199
+  \item \texttt {imagesc*} key\pfill 199
+  \item \texttt {implicit .} key\pfill 54
+  \item \texttt {includegraphics} key\pfill 68
+  \item \texttt {includegraphics cmd} key\pfill 69
+  \item index of colormap\pfill 268
+    \subitem In colormap specification\pfill 229
+  \item \texttt {index of colormap} key\pfill 229, 242
+  \item indices of colormap\efill 
+ \subitem In colormap specification\pfill 229
+  \item \texttt {inner axis line style} key\pfill 312, 420
+  \item \texttt {inner moveto} key\pfill 510
+  \item \texttt {interior colormap} key\pfill 156
+  \item \texttt {interior colormap name} key\pfill 156
+  \item \texttt {interior colormap thresh} key\pfill 158
+  \item Interrupted Plots\pfill 131
+  \item \texttt {intersection segments} key\pfill 512
+  \item \texttt {intervals} key\pfill 583
+  \item \texttt {invoke after crossref tikzpicture} key\pfill 305
+  \item \texttt {invoke before crossref tikzpicture} key\pfill 305
+  \item \texttt {is smithchart cs} key\pfill 561
+
+  \indexspace
+{\bfseries\hfil J\hfil}\nopagebreak
+
+  \item \texttt {jet} key\pfill 224, 493
+  \item \texttt {js fillColor} key\pfill 483
+  \item \texttt {jsname} key\pfill 485
+  \item \texttt {jump mark left} key\pfill 84
+  \item \texttt {jump mark mid} key\pfill 84
+  \item \texttt {jump mark right} key\pfill 84
+
+  \indexspace
+{\bfseries\hfil K\hfil}\nopagebreak
+
+  \item Key handlers\efill 
+ \subitem \texttt {.append style}\pfill 416
+    \subitem \texttt {.cd}\pfill 80
+    \subitem \texttt {.code}\pfill 80
+    \subitem \texttt {.code 2 args}\pfill 80
+    \subitem \texttt {.define layer set}\pfill 473
+    \subitem \texttt {.style}\pfill 416
+
+  \indexspace
+{\bfseries\hfil L\hfil}\nopagebreak
+
+  \item \myprintocmmand {label}\pfill 304
+  \item \texttt {label distance} key\pfill 179
+  \item \texttt {label node code} key\pfill 181
+  \item \texttt {label shift} key\pfill 287
+  \item \texttt {label style} key\pfill 418
+  \item \texttt {labels} key\pfill 6, 178
+  \item \texttt {labels over line} key\pfill 180
+  \item \texttt {layers/}\efill 
+ \subitem \texttt {axis on top}\pfill 471
+    \subitem \texttt {standard}\pfill 471
+  \item \myprintocmmand {legend}\pfill 290
+  \item \texttt {legend cell align} key\pfill 296
+  \item \texttt {legend columns} key\pfill 297
+  \item \texttt {legend entries} key\pfill 291
+  \item \texttt {legend image code} key\pfill 298
+  \item \texttt {legend image post style} key\pfill 298, 419
+  \item \texttt {legend plot pos} key\pfill 297
+  \item \texttt {legend pos} key\pfill 295
+  \item \texttt {legend reversed} key\pfill 302
+  \item \texttt {legend style} key\pfill 295, 419
+  \item \texttt {legend to name} key\pfill 305
+  \item \texttt {legend transposed} key\pfill 302
+  \item \texttt {levels} key\pfill 170
+  \item \texttt {levels from colormap} key\pfill 185
+  \item Libraries\efill 
+ \subitem \texttt {clickable}\pfill 477
+    \subitem \texttt {colorbrewer}\pfill 485, 490
+    \subitem \texttt {colormaps}\pfill 490
+    \subitem \texttt {dateplot}\pfill 445, 496
+    \subitem \texttt {decorations.softclip}\pfill 496
+    \subitem \texttt {external}\pfill 497, 612
+    \subitem \texttt {fillbetween}\pfill 497
+    \subitem \texttt {groupplots}\pfill 521
+    \subitem \texttt {patchplots}\pfill 528
+    \subitem \texttt {polar}\pfill 547
+    \subitem \texttt {smithchart}\pfill 553
+    \subitem \texttt {statistics}\pfill 566
+    \subitem \texttt {ternary}\pfill 588
+    \subitem \texttt {units}\pfill 601
+  \item \texttt {line cap} key\pfill 215
+  \item \texttt {line join} key\pfill 215
+  \item \texttt {line legend} key\pfill 298
+  \item \texttt {line width} key\pfill 216
+  \item \texttt {linear regression} key\pfill 457
+  \item \myprintocmmand {lineno}\pfill 61
+  \item \texttt {log base 10 number format code} key\pfill 372
+  \item \texttt {log basis x} key\pfill 400
+  \item \texttt {log basis y} key\pfill 400
+  \item \texttt {log basis z} key\pfill 400
+  \item \texttt {log identify minor tick positions} key\pfill 370
+  \item \texttt {log number format basis} key\pfill 372
+  \item \texttt {log number format code} key\pfill 372
+  \item \texttt {log origin} key\pfill 379
+  \item \texttt {log origin x} key\pfill 379
+  \item \texttt {log origin y} key\pfill 379
+  \item \texttt {log origin z} key\pfill 379
+  \item \texttt {log plot exponent style} key\pfill 369
+  \item \texttt {log ticks with fixed point} key\pfill 368
+  \item \texttt {loglogaxis} environment\pfill 41
+  \item \myprintocmmand {logten}\pfill 628
+  \item \texttt {loosely dashdotdotted} key\pfill 214
+  \item \texttt {loosely dashdotted} key\pfill 214
+  \item \texttt {loosely dashed} key\pfill 214
+  \item \texttt {loosely dotted} key\pfill 214
+  \item \texttt {lower quartile} key\pfill 571
+  \item \texttt {lower whisker} key\pfill 571, 579
+  \item \texttt {lowlevel draw} key\pfill 69
+  \item \texttt {lua backend} key\pfill 608
+  \item lua backend required\pfill 576
+  \item \texttt {lua debug} key\pfill 610
+
+  \indexspace
+{\bfseries\hfil M\hfil}\nopagebreak
+
+  \item \texttt {major grid style} key\pfill 424
+  \item \texttt {major tick length} key\pfill 400
+  \item \texttt {major tick style} key\pfill 421
+  \item \texttt {major x grid style} key\pfill 425
+  \item \texttt {major x tick style} key\pfill 423
+  \item \texttt {major y grid style} key\pfill 425
+  \item \texttt {major y tick style} key\pfill 423
+  \item \texttt {major z grid style} key\pfill 425
+  \item \texttt {major z tick style} key\pfill 423
+  \item \texttt {many smithchart ticks} key\pfill 556
+  \item \texttt {mark color} key\pfill 212
+  \item \texttt {mark indices} key\pfill 212
+  \item \texttt {mark layer} key\pfill 475
+  \item \texttt {mark list fill} key\pfill 248
+  \item \texttt {mark options} key\pfill 212
+  \item \texttt {mark phase} key\pfill 211
+  \item \texttt {mark repeat} key\pfill 211
+  \item \texttt {mark size} key\pfill 210, 346
+  \item \texttt {markers} key\pfill 102
+  \item \texttt {math parser} key\pfill 48
+  \item \myprintocmmand {matrix}\pfill 628
+  \item matrix plot\efill 
+ \subitem Limits inaccurate warning\pfill 196
+  \item \texttt {matrix plot} key\pfill 194
+  \item \texttt {matrix plot*} key\pfill 198
+  \item \texttt {max} key\pfill 373
+  \item \texttt {max space between ticks} key\pfill 346, 400
+  \item \texttt {median} key\pfill 571, 580
+  \item mesh\efill 
+ \subitem closedcycle\pfill 532
+    \subitem Coordinate filtering\pfill 133, 451
+    \subitem patch type=line\pfill 173
+    \subitem point meta=none and global paths\pfill 532
+    \subitem scanlinewise\pfill 173
+  \item \texttt {mesh/}\efill 
+ \subitem \texttt {check}\pfill 150
+    \subitem \texttt {color input}\pfill 159
+    \subitem \texttt {colorspace explicit color input}\pfill 162
+    \subitem \texttt {colorspace explicit color output}\pfill 162
+    \subitem \texttt {cols}\pfill 138
+    \subitem \texttt {interior colormap}\pfill 156
+    \subitem \texttt {interior colormap name}\pfill 156
+    \subitem \texttt {interior colormap thresh}\pfill 158
+    \subitem \texttt {ordering}\pfill 139
+    \subitem \texttt {rows}\pfill 138
+    \subitem \texttt {scanline verbose}\pfill 139
+  \item \texttt {mesh} key\pfill 130, 147
+  \item mesh input\pfill 199
+  \item \texttt {mesh input} key\pfill 205
+  \item \texttt {mesh legend} key\pfill 301
+  \item \texttt {meta} key\pfill 53
+  \item \texttt {meta expr} key\pfill 53
+  \item \texttt {meta index} key\pfill 53
+  \item \texttt {min} key\pfill 373
+  \item \texttt {minor grid style} key\pfill 424
+  \item \texttt {minor tick} key\pfill 383
+  \item \texttt {minor tick length} key\pfill 400
+  \item \texttt {minor tick num} key\pfill 382
+  \item \texttt {minor tick style} key\pfill 420
+  \item \texttt {minor x grid style} key\pfill 425
+  \item \texttt {minor x tick num} key\pfill 382
+  \item \texttt {minor x tick style} key\pfill 422
+  \item \texttt {minor xtick} key\pfill 383
+  \item \texttt {minor y grid style} key\pfill 425
+  \item \texttt {minor y tick num} key\pfill 382
+  \item \texttt {minor y tick style} key\pfill 422
+  \item \texttt {minor ytick} key\pfill 383
+  \item \texttt {minor z grid style} key\pfill 425
+  \item \texttt {minor z tick num} key\pfill 382
+  \item \texttt {minor z tick style} key\pfill 422
+  \item \texttt {minor ztick} key\pfill 383
+  \item \texttt {miter limit} key\pfill 215
+  \item \texttt {mode} key\pfill 617
+
+  \indexspace
+{\bfseries\hfil N\hfil}\nopagebreak
+
+  \item \texttt {name path} key\pfill 507
+  \item name path global\pfill 507
+  \item \texttt {near ticklabel} anchor\pfill 280
+  \item \texttt {near ticklabel align} key\pfill 283
+  \item \texttt {near ticklabel at} key\pfill 285
+  \item \texttt {near ticklabel opposite} anchor\pfill 281
+  \item \texttt {near xticklabel} anchor\pfill 280
+  \item \texttt {near xticklabel opposite} anchor\pfill 281
+  \item \texttt {near yticklabel} anchor\pfill 280
+  \item \texttt {near yticklabel opposite} anchor\pfill 281
+  \item \texttt {near zticklabel} anchor\pfill 280
+  \item \texttt {near zticklabel opposite} anchor\pfill 281
+  \item \myprintocmmand {nextgroupplot}\pfill 522
+  \item \texttt {no markers} key\pfill 211
+  \item \myprintocmmand {node}\pfill 628
+  \item \texttt {node} key\pfill 69
+  \item \texttt {node near coord style} key\pfill 126
+  \item \texttt {node near coords style} key\pfill 126
+  \item \texttt {nodes near coords} key\pfill 124
+  \item \texttt {nodes near coords align} key\pfill 126
+  \item \texttt {nodes near coords style} key\pfill 126
+  \item \texttt {nodes near coords*} key\pfill 124
+  \item \texttt {normalsize} key\pfill 346
+  \item \texttt {number} key\pfill 170
+  \item \myprintocmmand {numplots}\pfill 628
+  \item \myprintocmmand {numplotsofactualtype}\pfill 628
+
+  \indexspace
+{\bfseries\hfil O\hfil}\nopagebreak
+
+  \item \texttt {of} key\pfill 507, 512
+  \item \texttt {of colormap/}\efill 
+ \subitem \texttt {colormap access}\pfill 234
+    \subitem \texttt {sample for}\pfill 232
+    \subitem \texttt {source range}\pfill 234
+    \subitem \texttt {target pos}\pfill 232
+    \subitem \texttt {target pos max}\pfill 235
+    \subitem \texttt {target pos max*}\pfill 235
+    \subitem \texttt {target pos min}\pfill 235
+    \subitem \texttt {target pos min*}\pfill 235
+  \item \texttt {on layer} key\pfill 474, 509
+  \item \texttt {only marks} key\pfill 116
+  \item Options\efill 
+ \subitem Distinction Behavior, Style Options\pfill 43
+  \item \texttt {ordering} key\pfill 139
+  \item \texttt {outer axis line style} key\pfill 312, 420
+  \item \texttt {output each nth} key\pfill 226
+  \item \texttt {output format} key\pfill 227
+  \item \texttt {output point meta} key\pfill 182
+  \item \texttt {overlay} key\pfill 437
+
+  \indexspace
+{\bfseries\hfil P\hfil}\nopagebreak
+
+  \item \texttt {parametric/}\efill 
+ \subitem \texttt {var 1d}\pfill 63
+    \subitem \texttt {var 2d}\pfill 63
+  \item \texttt {parametric} key\pfill 63
+  \item \texttt {parent axis} node\pfill 326
+  \item \texttt {parent axis height} key\pfill 327
+  \item \texttt {parent axis width} key\pfill 327
+  \item \texttt {pastel} key\pfill 493
+  \item patch\efill 
+ \subitem closedcycle\pfill 532
+    \subitem point meta=none and global paths\pfill 532
+  \item \texttt {patch} key\pfill 199
+  \item Patch plots\efill 
+ \subitem Bounding Box\pfill 537
+  \item \texttt {patch refines} key\pfill 541
+  \item \texttt {patch table} key\pfill 201
+  \item \texttt {patch table with individual point meta} key\pfill 201
+  \item \texttt {patch table with point meta} key\pfill 201
+  \item \texttt {patch to triangles} key\pfill 542
+  \item \texttt {patch type} key\pfill 206, 528
+  \item \texttt {patch type sampling} key\pfill 530
+  \item \texttt {patchplots} library\pfill 528
+  \item \myprintocmmand {path}\pfill 628
+  \item Path operations\efill 
+ \subitem \texttt {--}\pfill 628
+  \item \texttt {path replacement} key\pfill 6
+  \item \texttt {/pgf/}\efill 
+ \subitem \texttt {bar shift}\pfill 91
+    \subitem \texttt {bar width}\pfill 90
+    \subitem \texttt {declare function}\pfill 626
+    \subitem \texttt {decoration/}\efill 
+ \subsubitem \texttt {every soft clipped path}\pfill 497
+      \subsubitem \texttt {soft clip path}\pfill 497
+    \subitem \texttt {fpu}\pfill 467
+    \subitem \texttt {images/}\efill 
+ \subsubitem \texttt {aux in dpth}\pfill 620
+    \subitem \texttt {mark color}\pfill 212
+    \subitem \texttt {text mark}\pfill 212
+    \subitem \texttt {text mark as node}\pfill 213
+    \subitem \texttt {text mark style}\pfill 213
+    \subitem \texttt {trig format}\pfill 59
+  \item \myprintocmmand {pgfaddpath}\pfill 519
+  \item \myprintocmmand {pgfaddpathandBB}\pfill 519
+  \item \myprintocmmand {pgfcomputeintersectionsegments}\pfill 516
+  \item \myprintocmmand {pgfcomputereversepath}\pfill 519
+  \item \myprintocmmand {pgfdeclareplotmark}\pfill 213
+  \item \myprintocmmand {pgfeov}\pfill 627
+  \item \myprintocmmand {pgfgetintersectionsegmentpath}\pfill 518
+  \item \myprintocmmand {pgfgetpath}\pfill 519
+  \item \texttt {pgfinterruptboundingbox} environment\pfill 438
+  \item \myprintocmmand {pgfintersectionofpaths}\pfill 520
+  \item \myprintocmmand {pgfkeys}\pfill 627
+  \item \myprintocmmand {pgfkeysgetvalue}\pfill 627
+  \item \myprintocmmand {pgfkeysvalueof}\pfill 627
+  \item \myprintocmmand {pgfmathparse}\pfill 626
+  \item \myprintocmmand {pgfmathprintnumber}\pfill 367, 628
+  \item \myprintocmmand {pgfonlayer}\pfill 637
+  \item \myprintocmmand {pgfpathcomputesoftclippath}\pfill 520
+  \item \myprintocmmand {pgfpathreplacefirstmoveto}\pfill 520
+  \item \myprintocmmand {pgfplotbarshift}\pfill 91
+  \item \myprintocmmand {pgfplotbarwidth}\pfill 91
+  \item \myprintocmmand {pgfplotsaxistransformcs}\pfill 455
+  \item \myprintocmmand {pgfplotsboxplotvalue}\pfill 577
+  \item \myprintocmmand {pgfplotsclickablecreate}\pfill 484
+  \item \myprintocmmand {pgfplotscolorbardrawstandalone}\pfill 226
+  \item \myprintocmmand {pgfplotscolorbarfromname}\pfill 334
+  \item \myprintocmmand {pgfplotscolormaplastindexof}\pfill 242
+  \item \myprintocmmand {pgfplotscolormapsizeof}\pfill 242
+  \item \myprintocmmand {pgfplotscolormaptodatafile}\pfill 226
+  \item \myprintocmmand {pgfplotscolormaptoshadingspec}\pfill 225
+  \item \myprintocmmand {pgfplotscreateplotcyclelist}\pfill 249
+  \item \myprintocmmand {pgfplotsdefinecstransform}\pfill 456
+  \item \myprintocmmand {pgfplotsextra}\pfill 629
+  \item \myprintocmmand {pgfplotsforeachungrouped}\pfill 624
+  \item \myprintocmmand {pgfplotsiffileexists}\pfill 627
+  \item \texttt {pgfplotsinterruptdatabb} environment\pfill 379
+  \item \myprintocmmand {pgfplotsinvokeforeach}\pfill 625
+  \item \myprintocmmand {pgfplotslegendfromname}\pfill 307
+  \item \myprintocmmand {pgfplotsmarklistfill}\pfill 248
+  \item \myprintocmmand {pgfplotsmathfloatviewdepthxyz}\pfill 633
+  \item \myprintocmmand {pgfplotsmathviewdepthxyz}\pfill 633
+  \item \myprintocmmand {pgfplotsonlayer}\pfill 637
+  \item \myprintocmmand {pgfplotspathaxisoutline}\pfill 629
+  \item \myprintocmmand {pgfplotspointaxisdirectionxy}\pfill 629
+  \item \myprintocmmand {pgfplotspointaxisdirectionxyz}\pfill 629
+  \item \myprintocmmand {pgfplotspointaxisorigin}\pfill 630
+  \item \myprintocmmand {pgfplotspointaxisxy}\pfill 629
+  \item \myprintocmmand {pgfplotspointaxisxyz}\pfill 629
+  \item \myprintocmmand {pgfplotspointdescriptionxy}\pfill 630
+  \item \myprintocmmand {pgfplotspointgetcoordinates}\pfill 633
+  \item \myprintocmmand {pgfplotspointgetnormalizedcoordinates}\pfill 
+		636
+  \item \myprintocmmand {pgfplotspointouternormalvectorofaxis}\pfill 
+		632
+  \item \myprintocmmand {pgfplotspointplotattime}\pfill 412
+  \item \myprintocmmand {pgfplotspointrelaxisxy}\pfill 630
+  \item \myprintocmmand {pgfplotspointrelaxisxyz}\pfill 630
+  \item \myprintocmmand {pgfplotspointunitx}\pfill 631
+  \item \myprintocmmand {pgfplotspointunity}\pfill 631
+  \item \myprintocmmand {pgfplotspointunitz}\pfill 631
+  \item \myprintocmmand {pgfplotsqpointdescriptionxy}\pfill 630
+  \item \myprintocmmand {pgfplotsqpointoutsideofaxis}\pfill 632
+  \item \myprintocmmand {pgfplotsqpointoutsideofaxisrel}\pfill 632
+  \item \myprintocmmand {pgfplotsset}\pfill 79
+  \item \myprintocmmand {pgfplotssetlayers}\pfill 473
+  \item \myprintocmmand {pgfplotstableread}\pfill 627
+  \item \myprintocmmand {pgfplotstabletypeset}\pfill 627
+  \item \myprintocmmand {pgfplotsticklabelaxisspec}\pfill 633
+  \item \myprintocmmand {pgfplotstransformcoordinatex}\pfill 630
+  \item \myprintocmmand {pgfplotstransformcoordinatey}\pfill 631
+  \item \myprintocmmand {pgfplotstransformcoordinatez}\pfill 631
+  \item \myprintocmmand {pgfplotstransformdirectionx}\pfill 631
+  \item \myprintocmmand {pgfplotstransformdirectiony}\pfill 631
+  \item \myprintocmmand {pgfplotstransformdirectionz}\pfill 631
+  \item \myprintocmmand {pgfplotsunitxinvlength}\pfill 632
+  \item \myprintocmmand {pgfplotsunitxlength}\pfill 632
+  \item \myprintocmmand {pgfplotsunityinvlength}\pfill 632
+  \item \myprintocmmand {pgfplotsunitylength}\pfill 632
+  \item \myprintocmmand {pgfplotsunitzinvlength}\pfill 632
+  \item \myprintocmmand {pgfplotsunitzlength}\pfill 632
+  \item \myprintocmmand {pgfplotsutilifstringequal}\pfill 627
+  \item \myprintocmmand {pgfplotsvalueoflargesttickdimen}\pfill 633
+  \item \texttt {pgfpoint substitution} key\pfill 7
+  \item \myprintocmmand {pgfresetboundingbox}\pfill 437
+  \item \myprintocmmand {pgfsetlayers}\pfill 637
+  \item \myprintocmmand {pgfsetpath}\pfill 519
+  \item \myprintocmmand {pgfsetpathandBB}\pfill 519
+  \item \texttt {pink} key\pfill 494
+  \item \texttt {plasma high res} key\pfill 496
+  \item \texttt {plot box ratio} key\pfill 356
+  \item \texttt {plot coordinates/}\efill 
+ \subitem \texttt {math parser}\pfill 48
+  \item \texttt {plot file/}\efill 
+ \subitem \texttt {ignore first}\pfill 78
+    \subitem \texttt {skip first}\pfill 78
+  \item \texttt {plot graphics/}\efill 
+ \subitem \texttt {debug}\pfill 77
+    \subitem \texttt {includegraphics}\pfill 68
+    \subitem \texttt {includegraphics cmd}\pfill 69
+    \subitem \texttt {lowlevel draw}\pfill 69
+    \subitem \texttt {node}\pfill 69
+    \subitem \texttt {points}\pfill 68
+    \subitem \texttt {xmax}\pfill 68
+    \subitem \texttt {xmin}\pfill 68
+    \subitem \texttt {ymax}\pfill 68
+    \subitem \texttt {ymin}\pfill 68
+    \subitem \texttt {zmax}\pfill 68
+    \subitem \texttt {zmin}\pfill 68
+  \item \texttt {plot graphics} key\pfill 69
+  \item Plot operations\efill 
+ \subitem \texttt {({\normalfont  \meta  {$x$ expression}},{\normalfont  \meta  {$y$ expression}},{\normalfont  \meta  {$z$ expression}})}\pfill 
+		141
+    \subitem \texttt {coordinates}\pfill 136
+    \subitem \texttt {expression}\pfill 141
+    \subitem \texttt {file}\pfill 137
+    \subitem \texttt {table}\pfill 137
+    \subitem \texttt {{\normalfont  {\ttfamily  \char `\{}{\normalfont  \meta  {math expression}}{\ttfamily  \char `\}}}}\pfill 
+		140
+    \subitem \texttt {plot ({\normalfont  \meta  {$x$ expression}},{\normalfont  \meta  {$y$ expression}})}\pfill 
+		57
+    \subitem \texttt {plot coordinates}\pfill 46
+    \subitem \texttt {plot expression}\pfill 57
+    \subitem \texttt {plot file}\pfill 77
+    \subitem \texttt {plot fill between}\pfill 498
+    \subitem \texttt {plot function}\pfill 63
+    \subitem \texttt {plot gnuplot}\pfill 61
+    \subitem \texttt {plot graphics}\pfill 65
+    \subitem \texttt {plot shell}\pfill 64
+    \subitem \texttt {plot table}\pfill 48, 59
+    \subitem \texttt {plot {\normalfont  {\ttfamily  \char `\{}{\normalfont  \meta  {math expression}}{\ttfamily  \char `\}}}}\pfill 
+		55
+  \item \texttt {plot3graphics} key\pfill 7
+  \item \myprintocmmand {plotnum}\pfill 628
+  \item \myprintocmmand {plotnumofactualtype}\pfill 628
+  \item \texttt {point format} key\pfill 483
+  \item \texttt {point format 3d} key\pfill 483
+  \item point meta\efill 
+ \subitem point meta=none for smooth patch plots\pfill 532
+  \item \texttt {point meta} key\pfill 263
+  \item \texttt {point meta max} key\pfill 267, 326
+  \item \texttt {point meta min} key\pfill 267, 326
+  \item \texttt {point meta rel} key\pfill 266
+  \item \texttt {points} key\pfill 68
+  \item \texttt {polar} library\pfill 547
+  \item \texttt {polar comb} key\pfill 551
+  \item \texttt {polaraxis} environment\pfill 547
+  \item \texttt {popup size} key\pfill 484
+  \item \texttt {popup size generic} key\pfill 484
+  \item \texttt {popup size snap} key\pfill 484
+  \item \texttt {pos} key\pfill 409
+  \item \texttt {pos segment} key\pfill 411
+  \item \texttt {position} key\pfill 129
+  \item pre filter\pfill 456
+  \item \texttt {pre filter} key\pfill 451
+  \item Precision\pfill 56, 467
+  \item \texttt {precision} key\pfill 158
+  \item Predefined node\efill 
+ \subitem \texttt {current axis}\pfill 436
+    \subitem \texttt {current colorbar axis}\pfill 329
+    \subitem \texttt {current plot begin}\pfill 408
+    \subitem \texttt {current plot end}\pfill 408
+    \subitem \texttt {parent axis}\pfill 326
+  \item \texttt {prefix} key\pfill 63, 64, 613
+  \item prefixes\efill 
+ \subitem unit\pfill 603
+  \item \texttt {printable} key\pfill 483
+
+  \indexspace
+{\bfseries\hfil Q\hfil}\nopagebreak
+
+  \item \texttt {quiver/}\efill 
+ \subitem \texttt {after arrow}\pfill 99
+    \subitem \texttt {before arrow}\pfill 99
+    \subitem \texttt {colored}\pfill 98
+    \subitem \texttt {every arrow}\pfill 98
+    \subitem \texttt {quiver legend}\pfill 99
+    \subitem \texttt {scale arrows}\pfill 98
+    \subitem \texttt {u}\pfill 97
+    \subitem \texttt {u value}\pfill 98
+    \subitem \texttt {update limits}\pfill 98
+    \subitem \texttt {v}\pfill 97
+    \subitem \texttt {v value}\pfill 98
+    \subitem \texttt {w}\pfill 97
+    \subitem \texttt {w value}\pfill 98
+  \item \texttt {quiver} key\pfill 95
+  \item \texttt {quiver legend} key\pfill 99
+
+  \indexspace
+{\bfseries\hfil R\hfil}\nopagebreak
+
+  \item \texttt {raw gnuplot} key\pfill 63
+  \item rawx\pfill 456
+  \item rawy\pfill 456
+  \item rawz\pfill 456
+  \item \texttt {read completely} key\pfill 53
+  \item \texttt {redyellow} key\pfill 225
+  \item \myprintocmmand {ref}\pfill 304
+  \item \texttt {refstyle} key\pfill 305
+  \item \texttt {rel axis cs} coordinate system\pfill 407
+  \item \texttt {reset nontranslations} key\pfill 286
+  \item \texttt {restrict expr to domain} key\pfill 453
+  \item \texttt {restrict expr to domain*} key\pfill 453
+  \item \texttt {restrict x to domain} key\pfill 452
+  \item \texttt {restrict x to domain*} key\pfill 452
+  \item \texttt {restrict y to domain} key\pfill 452
+  \item \texttt {restrict y to domain*} key\pfill 452
+  \item \texttt {restrict z to domain} key\pfill 452
+  \item \texttt {restrict z to domain*} key\pfill 452
+  \item \texttt {reverse} key\pfill 508, 514
+  \item \texttt {reverse legend} key\pfill 302
+  \item \texttt {reverse stacked plots} key\pfill 102
+  \item \texttt {richtext} key\pfill 484
+  \item \texttt {row sep} key\pfill 53
+  \item \texttt {rows} key\pfill 138, 524
+
+  \indexspace
+{\bfseries\hfil S\hfil}\nopagebreak
+
+  \item \texttt {sample for} key\pfill 232
+  \item \texttt {sample size} key\pfill 573
+  \item \texttt {sample size max} key\pfill 574
+  \item \texttt {sample size min} key\pfill 574
+  \item \texttt {samples} key\pfill 58
+  \item \texttt {samples at} key\pfill 58
+  \item samples of colormap\efill 
+ \subitem In colormap specification\pfill 227
+  \item \texttt {samples y} key\pfill 58
+  \item \texttt {scale} key\pfill 344
+  \item \texttt {scale arrows} key\pfill 98
+  \item \texttt {scale mode} key\pfill 6, 350
+  \item \texttt {scale only axis} key\pfill 336
+  \item \texttt {scale ticks above exponent} key\pfill 400
+  \item \texttt {scale ticks below exponent} key\pfill 399
+  \item \texttt {scale uniformly strategy} key\pfill 350
+  \item \texttt {scaled ticks} key\pfill 396
+  \item \texttt {scaled x ticks} key\pfill 396
+  \item \texttt {scaled y ticks} key\pfill 396
+  \item \texttt {scaled z ticks} key\pfill 396
+  \item \texttt {scaling} key\pfill 6
+  \item \texttt {scanline marks} key\pfill 181
+  \item \texttt {scanline verbose} key\pfill 139
+  \item \texttt {scatter/}\efill 
+ \subitem \texttt {classes}\pfill 121
+    \subitem \texttt {position}\pfill 129
+    \subitem \texttt {use mapped color}\pfill 119
+  \item \texttt {scatter} key\pfill 117
+  \item \texttt {scatter src} key\pfill 118
+  \item \texttt {script} key\pfill 182
+  \item \texttt {script extension} key\pfill 182
+  \item \texttt {script input format} key\pfill 182
+  \item \texttt {script type} key\pfill 182
+  \item \texttt {search path} key\pfill 54
+  \item \texttt {semilogxaxis} environment\pfill 41
+  \item \texttt {semilogyaxis} environment\pfill 41
+  \item \texttt {semithick} key\pfill 216
+  \item separate axis lines\efill 
+ \subitem Combined with axis line shift\pfill 315
+  \item \texttt {separate axis lines} key\pfill 313
+  \item \texttt {sepia} key\pfill 494
+  \item \texttt {sequence} key\pfill 512
+  \item \texttt {set layers} key\pfill 471
+  \item \texttt {set point meta if empty} key\pfill 266
+  \item \texttt {shader} key\pfill 153
+  \item \texttt {sharp plot} key\pfill 81
+  \item \textcolor {gray}{\texttt {plot}}\texttt { shell}\pfill 64
+  \item \texttt {shell escape} key\pfill 616
+  \item \texttt {show origin} key\pfill 561
+  \item \texttt {show origin code} key\pfill 561
+  \item \texttt {show suggested version} key\pfill 475
+  \item \texttt {single xbar legend} key\pfill 300
+  \item \texttt {single ybar legend} key\pfill 300
+  \item \texttt {single zbar legend} key\pfill 300
+  \item \texttt {size x} key\pfill 210
+  \item \texttt {size y} key\pfill 210
+  \item \texttt {size z} key\pfill 210
+  \item \texttt {skip coords between index} key\pfill 451
+  \item \texttt {skip first} key\pfill 78
+  \item \texttt {skip first n} key\pfill 54
+  \item \texttt {slope format} key\pfill 483
+  \item \texttt {sloped/}\efill 
+ \subitem \texttt {allow upside down}\pfill 285
+    \subitem \texttt {at position}\pfill 286
+    \subitem \texttt {execute for upside down}\pfill 286
+    \subitem \texttt {reset nontranslations}\pfill 286
+  \item \texttt {sloped} key\pfill 410
+  \item \texttt {sloped like x axis} key\pfill 285
+  \item \texttt {sloped like y axis} key\pfill 285
+  \item \texttt {sloped like z axis} key\pfill 285
+  \item sloped Polar labels\pfill 550
+  \item \texttt {small} key\pfill 347
+  \item \texttt {smithchart} environment\pfill 554
+  \item \texttt {smithchart} library\pfill 553
+  \item \texttt {smithchart mirrored} key\pfill 554
+  \item \texttt {smooth} key\pfill 82
+  \item \texttt {snap dist} key\pfill 484
+  \item \texttt {soft clip} key\pfill 503
+  \item \texttt {soft clip first} key\pfill 503
+  \item \texttt {soft clip path} key\pfill 497
+  \item \texttt {soft clip second} key\pfill 503
+  \item \texttt {solid} key\pfill 213
+  \item \texttt {source range} key\pfill 234
+  \item \texttt {split} key\pfill 500
+  \item \texttt {spring} key\pfill 494
+  \item \texttt {stack dir} key\pfill 102
+  \item \texttt {stack negative} key\pfill 104
+  \item stack plots\pfill 456
+  \item \texttt {stack plots} key\pfill 100
+  \item \texttt {stacked ignores zero/}\efill 
+ \subitem \texttt {default}\pfill 102
+    \subitem \texttt {errorbars}\pfill 102
+    \subitem \texttt {markers}\pfill 102
+  \item \texttt {stacked ignores zero} key\pfill 102
+  \item \texttt {standard} key\pfill 471
+  \item \texttt {statistics} library\pfill 566
+  \item \texttt {.style} handler\pfill 416
+  \item Subplots\pfill 432
+  \item \texttt {subtickwidth} key\pfill 400
+  \item \texttt {summer} key\pfill 494
+  \item surf\efill 
+ \subitem Coordinate filtering\pfill 133, 451
+    \subitem point meta=none and global paths\pfill 532
+  \item \texttt {surf} key\pfill 150
+  \item \texttt {surf shading/}\efill 
+ \subitem \texttt {precision}\pfill 158
+  \item Symbolic coords\efill 
+ \subitem [normalized]\pfill 444
+  \item \texttt {symbolic coords} key\pfill 587
+  \item \texttt {symbolic x coords} key\pfill 442
+  \item \texttt {symbolic y coords} key\pfill 442
+  \item \texttt {symbolic z coords} key\pfill 442
+  \item \texttt {system call} key\pfill 616
+
+  \indexspace
+{\bfseries\hfil T\hfil}\nopagebreak
+
+  \item \textcolor {gray}{\texttt {plot}}\texttt { table}\pfill 48, 59
+    \subitem Unbalanced Columns\pfill 51
+  \item \texttt {table/}\efill 
+ \subitem \texttt {col sep}\pfill 53
+    \subitem \texttt {comment chars}\pfill 54
+    \subitem \texttt {create col/}\efill 
+ \subsubitem \texttt {linear regression}\pfill 457
+    \subitem \texttt {header}\pfill 51
+    \subitem \texttt {ignore chars}\pfill 54
+    \subitem \texttt {meta}\pfill 53
+    \subitem \texttt {meta expr}\pfill 53
+    \subitem \texttt {meta index}\pfill 53
+    \subitem \texttt {read completely}\pfill 53
+    \subitem \texttt {row sep}\pfill 53
+    \subitem \texttt {search path/}\efill 
+ \subsubitem \texttt {implicit .}\pfill 54
+    \subitem \texttt {search path}\pfill 54
+    \subitem \texttt {skip first n}\pfill 54
+    \subitem \texttt {tie end x}\pfill 599
+    \subitem \texttt {tie end x index}\pfill 599
+    \subitem \texttt {tie end y}\pfill 599
+    \subitem \texttt {tie end y index}\pfill 599
+    \subitem \texttt {tie end z}\pfill 599
+    \subitem \texttt {tie end z index}\pfill 599
+    \subitem \texttt {white space chars}\pfill 54
+    \subitem \texttt {x}\pfill 51
+    \subitem \texttt {x error}\pfill 52, 364
+    \subitem \texttt {x error expr}\pfill 52, 364
+    \subitem \texttt {x error index}\pfill 52, 364
+    \subitem \texttt {x error minus}\pfill 52, 365
+    \subitem \texttt {x error minus expr}\pfill 52, 365
+    \subitem \texttt {x error minus index}\pfill 52, 365
+    \subitem \texttt {x error plus}\pfill 52, 365
+    \subitem \texttt {x error plus expr}\pfill 52, 365
+    \subitem \texttt {x error plus index}\pfill 52, 365
+    \subitem \texttt {x expr}\pfill 51
+    \subitem \texttt {x index}\pfill 51
+    \subitem \texttt {y}\pfill 51
+    \subitem \texttt {y error}\pfill 52, 364
+    \subitem \texttt {y error expr}\pfill 52, 364
+    \subitem \texttt {y error index}\pfill 52, 364
+    \subitem \texttt {y error minus}\pfill 52, 365
+    \subitem \texttt {y error minus expr}\pfill 52, 365
+    \subitem \texttt {y error minus index}\pfill 52, 365
+    \subitem \texttt {y error plus}\pfill 52, 365
+    \subitem \texttt {y error plus expr}\pfill 52, 365
+    \subitem \texttt {y error plus index}\pfill 52, 365
+    \subitem \texttt {y expr}\pfill 51
+    \subitem \texttt {y index}\pfill 51
+    \subitem \texttt {z}\pfill 51
+    \subitem \texttt {z error}\pfill 52, 364
+    \subitem \texttt {z error expr}\pfill 52, 364
+    \subitem \texttt {z error index}\pfill 52, 364
+    \subitem \texttt {z error minus}\pfill 52, 365
+    \subitem \texttt {z error minus expr}\pfill 52, 365
+    \subitem \texttt {z error minus index}\pfill 52, 365
+    \subitem \texttt {z error plus}\pfill 52, 365
+    \subitem \texttt {z error plus expr}\pfill 52, 365
+    \subitem \texttt {z error plus index}\pfill 52, 365
+    \subitem \texttt {z expr}\pfill 51
+    \subitem \texttt {z index}\pfill 51
+  \item \texttt {table}\pfill 137
+  \item \texttt {table} key\pfill 458
+  \item \texttt {target pos} key\pfill 232
+  \item \texttt {target pos max} key\pfill 235
+  \item \texttt {target pos max*} key\pfill 235
+  \item \texttt {target pos min} key\pfill 235
+  \item \texttt {target pos min*} key\pfill 235
+  \item \texttt {temp} key\pfill 494
+  \item \texttt {tension} key\pfill 82
+  \item \texttt {ternary} library\pfill 588
+  \item \texttt {ternary limits relative} key\pfill 594
+  \item \texttt {ternary relative limits} key\pfill 594
+  \item \texttt {ternaryaxis} environment\pfill 588
+  \item \texttt {text mark} key\pfill 212
+  \item \texttt {text mark as node} key\pfill 213
+  \item \texttt {text mark style} key\pfill 213
+  \item \texttt {textSize} key\pfill 484
+  \item \texttt {thermal} key\pfill 495
+  \item \texttt {thick} key\pfill 216
+  \item \texttt {thin} key\pfill 216
+  \item \myprintocmmand {thisrow}\pfill 60
+  \item \myprintocmmand {thisrowno}\pfill 61
+  \item \texttt {tick align} key\pfill 394
+  \item \texttt {tick label style} key\pfill 421
+  \item Tick Labels\efill 
+ \subitem Configure texts by command: xticklabel\pfill 388
+    \subitem Different Depths\pfill 395
+    \subitem Distances: xtick with foreach\pfill 381
+    \subitem Placement of log tick labels: xtickten\pfill 386
+    \subitem Positions: xtick\pfill 381
+    \subitem Read from table\pfill 391
+    \subitem Shift along normal vector: ticklabel shift\pfill 395
+    \subitem strut\pfill 395
+    \subitem Texts as list: xticklabels\pfill 387
+    \subitem Units (km, m, etc)\pfill 601
+  \item \texttt {tick pos} key\pfill 393
+  \item \texttt {tick scale binop} key\pfill 399
+  \item \texttt {tick scale label code} key\pfill 399
+  \item \texttt {tick style} key\pfill 420
+  \item \texttt {ticklabel cs} coordinate system\pfill 275
+  \item \texttt {ticklabel pos} key\pfill 393
+  \item \texttt {ticklabel shift} key\pfill 395
+  \item \texttt {ticklabel style} key\pfill 421
+  \item \texttt {ticklabel* cs} coordinate system\pfill 275
+  \item \texttt {ticks} key\pfill 392
+  \item \texttt {tickwidth} key\pfill 400
+  \item \texttt {tie end x} key\pfill 599
+  \item \texttt {tie end x index} key\pfill 599
+  \item \texttt {tie end y} key\pfill 599
+  \item \texttt {tie end y index} key\pfill 599
+  \item \texttt {tie end z} key\pfill 599
+  \item \texttt {tie end z index} key\pfill 599
+  \item \texttt {tieline/}\efill 
+ \subitem \texttt {curve style}\pfill 601
+    \subitem \texttt {each nth tie}\pfill 599
+    \subitem \texttt {tieline style}\pfill 600
+  \item \texttt {tieline} key\pfill 598
+  \item \texttt {tieline style} key\pfill 600
+  \item \texttt {/tikz/}\efill 
+ \subitem \texttt {allow upside down}\pfill 411
+    \subitem \texttt {baseline}\pfill 429
+    \subitem \texttt {color}\pfill 219
+    \subitem \texttt {const plot}\pfill 82
+    \subitem \texttt {const plot mark left}\pfill 83
+    \subitem \texttt {const plot mark mid}\pfill 84
+    \subitem \texttt {const plot mark right}\pfill 83
+    \subitem \texttt {dashdotdotted}\pfill 214
+    \subitem \texttt {dashdotted}\pfill 214
+    \subitem \texttt {dashed}\pfill 214
+    \subitem \texttt {densely dashdotdotted}\pfill 214
+    \subitem \texttt {densely dashdotted}\pfill 214
+    \subitem \texttt {densely dashed}\pfill 214
+    \subitem \texttt {densely dotted}\pfill 214
+    \subitem \texttt {dotted}\pfill 214
+    \subitem \texttt {draw}\pfill 219
+    \subitem \texttt {every mark}\pfill 210
+    \subitem \texttt {external/}\efill 
+ \subsubitem \texttt {figure name}\pfill 614
+      \subsubitem \texttt {mode}\pfill 617
+      \subsubitem \texttt {prefix}\pfill 613
+      \subsubitem \texttt {shell escape}\pfill 616
+      \subsubitem \texttt {system call}\pfill 616
+    \subitem \texttt {fill}\pfill 219
+    \subitem \texttt {fill between/}\efill 
+ \subsubitem \texttt {every even segment}\pfill 506
+      \subsubitem \texttt {every last segment}\pfill 507
+      \subsubitem \texttt {every odd segment}\pfill 506
+      \subsubitem \texttt {every segment}\pfill 506
+      \subsubitem \texttt {every segment no \meta  {index}}\pfill 506
+      \subsubitem \texttt {inner moveto}\pfill 510
+      \subsubitem \texttt {of}\pfill 507
+      \subsubitem \texttt {on layer}\pfill 509
+      \subsubitem \texttt {reverse}\pfill 508
+      \subsubitem \texttt {soft clip}\pfill 503
+      \subsubitem \texttt {soft clip first}\pfill 503
+      \subsubitem \texttt {soft clip second}\pfill 503
+      \subsubitem \texttt {split}\pfill 500
+    \subitem \texttt {font}\pfill 215, 346
+    \subitem \texttt {id}\pfill 63, 64
+    \subitem \texttt {imagesc}\pfill 199
+    \subitem \texttt {imagesc*}\pfill 199
+    \subitem \texttt {intersection segments}\pfill 512
+    \subitem \texttt {jump mark left}\pfill 84
+    \subitem \texttt {jump mark mid}\pfill 84
+    \subitem \texttt {jump mark right}\pfill 84
+    \subitem \texttt {line cap}\pfill 215
+    \subitem \texttt {line join}\pfill 215
+    \subitem \texttt {line width}\pfill 216
+    \subitem \texttt {loosely dashdotdotted}\pfill 214
+    \subitem \texttt {loosely dashdotted}\pfill 214
+    \subitem \texttt {loosely dashed}\pfill 214
+    \subitem \texttt {loosely dotted}\pfill 214
+    \subitem \texttt {mark indices}\pfill 212
+    \subitem \texttt {mark options}\pfill 212
+    \subitem \texttt {mark phase}\pfill 211
+    \subitem \texttt {mark repeat}\pfill 211
+    \subitem \texttt {mark size}\pfill 210, 346
+    \subitem \texttt {matrix plot*}\pfill 198
+    \subitem \texttt {miter limit}\pfill 215
+    \subitem \texttt {name path}\pfill 507
+    \subitem \texttt {only marks}\pfill 116
+    \subitem \texttt {overlay}\pfill 437
+    \subitem \texttt {polar comb}\pfill 551
+    \subitem \texttt {pos}\pfill 409
+    \subitem \texttt {pos segment}\pfill 411
+    \subitem \texttt {prefix}\pfill 63, 64
+    \subitem \texttt {raw gnuplot}\pfill 63
+    \subitem \texttt {segments/}\efill 
+ \subsubitem \texttt {of}\pfill 512
+      \subsubitem \texttt {reverse}\pfill 514
+      \subsubitem \texttt {sequence}\pfill 512
+    \subitem \texttt {semithick}\pfill 216
+    \subitem \texttt {sharp plot}\pfill 81
+    \subitem \texttt {sloped}\pfill 410
+    \subitem \texttt {sloped like x axis}\pfill 285
+    \subitem \texttt {sloped like y axis}\pfill 285
+    \subitem \texttt {sloped like z axis}\pfill 285
+    \subitem \texttt {smooth}\pfill 82
+    \subitem \texttt {solid}\pfill 213
+    \subitem \texttt {tension}\pfill 82
+    \subitem \texttt {thick}\pfill 216
+    \subitem \texttt {thin}\pfill 216
+    \subitem \texttt {tieline}\pfill 598
+    \subitem \texttt {trim axis group left}\pfill 439
+    \subitem \texttt {trim axis group right}\pfill 439
+    \subitem \texttt {trim axis left}\pfill 439
+    \subitem \texttt {trim axis right}\pfill 439
+    \subitem \texttt {trim left}\pfill 439
+    \subitem \texttt {trim right}\pfill 439
+    \subitem \texttt {ultra thick}\pfill 216
+    \subitem \texttt {ultra thin}\pfill 216
+    \subitem \texttt {very thick}\pfill 216
+    \subitem \texttt {very thin}\pfill 216
+    \subitem \texttt {xbar}\pfill 85
+    \subitem \texttt {xbar interval}\pfill 93
+    \subitem \texttt {xcomb}\pfill 94
+    \subitem \texttt {xshift}\pfill 629
+    \subitem \texttt {ybar}\pfill 87
+    \subitem \texttt {ybar interval}\pfill 92
+    \subitem \texttt {ycomb}\pfill 95
+    \subitem \texttt {yshift}\pfill 629
+  \item \myprintocmmand {tikzappendtofigurename}\pfill 616
+  \item \myprintocmmand {tikzfillbetween}\pfill 515
+  \item \myprintocmmand {tikzgetnamedpath}\pfill 519
+  \item \myprintocmmand {tikznamecurrentpath}\pfill 519
+  \item \myprintocmmand {tikzpathintersectionsegments}\pfill 520
+  \item \texttt {tikzpicture} environment\pfill 41
+  \item \myprintocmmand {tikzsegmentindex}\pfill 507
+  \item \myprintocmmand {tikzsetexternalprefix}\pfill 613
+  \item \myprintocmmand {tikzsetfigurename}\pfill 614
+  \item \myprintocmmand {tikzsetnextfilename}\pfill 614
+  \item \texttt {tiny} key\pfill 349
+  \item \texttt {title} key\pfill 288
+  \item \texttt {title style} key\pfill 418
+  \item \texttt {translate gnuplot} key\pfill 63
+  \item \texttt {transpose legend} key\pfill 302
+  \item \texttt {trig format} key\pfill 59
+  \item \texttt {trig format plots} key\pfill 58
+  \item \texttt {trim axis group left} key\pfill 439
+  \item \texttt {trim axis group right} key\pfill 439
+  \item \texttt {trim axis left} key\pfill 439
+  \item \texttt {trim axis right} key\pfill 439
+  \item \texttt {trim left} key\pfill 439
+  \item \texttt {trim right} key\pfill 439
+  \item \texttt {try min ticks} key\pfill 346, 400
+  \item \texttt {try min ticks log} key\pfill 400
+  \item \texttt {typeset ticklabels with strut} key\pfill 395
+
+  \indexspace
+{\bfseries\hfil U\hfil}\nopagebreak
+
+  \item \texttt {u} key\pfill 97
+  \item \texttt {u value} key\pfill 98
+  \item \texttt {ultra thick} key\pfill 216
+  \item \texttt {ultra thin} key\pfill 216
+  \item Unbalanced Columns\pfill 51
+  \item \texttt {unbounded coords} key\pfill 132
+  \item \texttt {unit code} key\pfill 602
+  \item \texttt {unit marking post} key\pfill 602
+  \item \texttt {unit marking pre} key\pfill 602
+  \item \texttt {unit markings} key\pfill 602
+  \item \texttt {unit rescale keep size} key\pfill 342, 352
+  \item Unit vector\efill 
+ \subitem Assign\pfill 336
+  \item \texttt {unit vector ratio} key\pfill 342
+  \item \texttt {unit vector ratio*} key\pfill 342
+  \item \texttt {units} library\pfill 601
+  \item \texttt {update limits} key\pfill 98, 379
+  \item \texttt {upper quartile} key\pfill 571
+  \item \texttt {upper whisker} key\pfill 571, 579
+  \item \texttt {use fpu} key\pfill 626
+  \item \texttt {use mapped color} key\pfill 119
+  \item \texttt {use units} key\pfill 601
+
+  \indexspace
+{\bfseries\hfil V\hfil}\nopagebreak
+
+  \item \texttt {v} key\pfill 97, 355
+  \item \texttt {v value} key\pfill 98
+  \item \texttt {var 1d} key\pfill 63
+  \item \texttt {var 2d} key\pfill 63
+  \item \texttt {variable} key\pfill 58
+  \item \texttt {variable width} key\pfill 572
+  \item \texttt {variable width expr} key\pfill 574
+  \item \texttt {variable width min target} key\pfill 574
+  \item \texttt {variable y} key\pfill 58
+  \item \texttt {variance} key\pfill 459
+  \item \texttt {variance format} key\pfill 460
+  \item \texttt {variance list} key\pfill 459
+  \item \texttt {variance src} key\pfill 460
+  \item \texttt {vertex count} key\pfill 540
+  \item \texttt {vertical sep} key\pfill 524
+  \item \texttt {very thick} key\pfill 216
+  \item \texttt {very thin} key\pfill 216
+  \item View\efill 
+ \subitem Assign rotation angles\pfill 352
+    \subitem Assign unit vectors\pfill 336
+  \item \texttt {view/}\efill 
+ \subitem \texttt {az}\pfill 353
+    \subitem \texttt {el}\pfill 354
+    \subitem \texttt {h}\pfill 353
+    \subitem \texttt {v}\pfill 355
+  \item \texttt {view} key\pfill 352
+  \item \texttt {violet} key\pfill 225
+  \item \texttt {viridis} key\pfill 223
+  \item \texttt {viridis high res} key\pfill 495
+  \item \texttt {visualization depends on} key\pfill 466
+
+  \indexspace
+{\bfseries\hfil W\hfil}\nopagebreak
+
+  \item \texttt {w} key\pfill 97
+  \item \texttt {w value} key\pfill 98
+  \item waterfall chart\pfill 105
+  \item \texttt {whisker} key\pfill 579
+  \item \texttt {whisker extend} key\pfill 575
+  \item \texttt {whisker range} key\pfill 576
+  \item \texttt {white space chars} key\pfill 54
+  \item \texttt {width} key\pfill 328, 334, 484
+  \item \texttt {winter} key\pfill 495
+
+  \indexspace
+{\bfseries\hfil X\hfil}\nopagebreak
+
+  \item x\efill 
+ \subitem Assign unit vector\pfill 336
+  \item \texttt {x} key\pfill 51, 336, 412, 458
+  \item \texttt{\textbackslash x} In Coordinate Expressions\pfill 56
+  \item \texttt {x axis line style} key\pfill 312, 420
+  \item \texttt {x coord inv trafo} key\pfill 441
+  \item x coord trafo\pfill 456
+  \item \texttt {x coord trafo} key\pfill 441
+  \item \texttt {x descriptions at} key\pfill 525
+  \item \texttt {x dir} key\pfill 339, 361, 375
+  \item \texttt {x error} key\pfill 52, 364
+  \item \texttt {x error expr} key\pfill 52, 364
+  \item \texttt {x error index} key\pfill 52, 364
+  \item \texttt {x error minus} key\pfill 52, 365
+  \item \texttt {x error minus expr} key\pfill 52, 365
+  \item \texttt {x error minus index} key\pfill 52, 365
+  \item \texttt {x error plus} key\pfill 52, 365
+  \item \texttt {x error plus expr} key\pfill 52, 365
+  \item \texttt {x error plus index} key\pfill 52, 365
+  \item \texttt {x explicit} key\pfill 362
+  \item \texttt {x explicit relative} key\pfill 362
+  \item \texttt {x expr} key\pfill 51
+  \item \texttt {x filter} key\pfill 447--449
+  \item \texttt {x fixed} key\pfill 361
+  \item \texttt {x fixed relative} key\pfill 361
+  \item \texttt {x grid style} key\pfill 424
+  \item \texttt {x index} key\pfill 51
+  \item \texttt {x label style} key\pfill 418
+  \item \texttt {x post scale} key\pfill 344
+  \item \texttt {x SI prefix} key\pfill 603
+  \item \texttt {x tick label as interval} key\pfill 392
+  \item \texttt {x tick label style} key\pfill 421
+  \item \texttt {x tick scale label style} key\pfill 422
+  \item \texttt {x unit} key\pfill 601
+  \item \texttt {x unit prefix} key\pfill 601
+  \item \texttt {xbar} key\pfill 85, 87
+  \item \texttt {xbar interval} key\pfill 93, 94
+  \item \texttt {xbar interval legend} key\pfill 299
+  \item \texttt {xbar interval stacked} key\pfill 103
+  \item \texttt {xbar legend} key\pfill 299
+  \item \texttt {xbar stacked} key\pfill 101
+  \item \texttt {xcomb} key\pfill 94
+  \item \texttt {xgrid each nth passes y} key\pfill 564
+  \item \texttt {xgrid each nth passes y start} key\pfill 565
+  \item \texttt {xgrid stop at y} key\pfill 565
+  \item xlabel\efill 
+ \subitem Line break\pfill 286
+    \subitem Multiline\pfill 286
+  \item \texttt {xlabel} key\pfill 286
+  \item \texttt {xlabel absolute} key\pfill 287
+  \item \texttt {xlabel near ticks} key\pfill 287
+  \item \texttt {xlabel shift} key\pfill 286
+  \item \texttt {xlabel style} key\pfill 418
+  \item \texttt {xlabels at} key\pfill 524
+  \item \texttt {xmajorgrids} key\pfill 402
+  \item \texttt {xmajorticks} key\pfill 392
+  \item \texttt {xmax} key\pfill 68, 373, 380, 485
+  \item \texttt {xmin} key\pfill 68, 373, 380, 485
+  \item \texttt {xminorgrids} key\pfill 402
+  \item \texttt {xminorticks} key\pfill 392
+  \item \texttt {xmode} key\pfill 339, 375, 459
+  \item \texttt {xshift} key\pfill 629
+  \item \texttt {xtick} key\pfill 381
+  \item \texttt {xtick align} key\pfill 393
+  \item \texttt {xtick distance} key\pfill 380
+  \item \texttt {xtick placement tolerance} key\pfill 400
+  \item \texttt {xtick pos} key\pfill 393
+  \item \texttt {xtick scale label code} key\pfill 398
+  \item \texttt {xtick style} key\pfill 422
+  \item \texttt {xticklabel} key\pfill 388
+  \item \texttt {xticklabel cs} coordinate system\pfill 275
+  \item \texttt {xticklabel interval boundaries} key\pfill 94
+  \item \texttt {xticklabel pos} key\pfill 393
+  \item \texttt {xticklabel shift} key\pfill 394
+  \item \texttt {xticklabel style} key\pfill 421
+  \item \texttt {xticklabel* cs} coordinate system\pfill 275
+  \item \texttt {xticklabels} key\pfill 387
+  \item \texttt {xticklabels at} key\pfill 525
+  \item \texttt {xticklabels from table} key\pfill 391
+  \item \texttt {xtickmax} key\pfill 318, 393
+  \item \texttt {xtickmin} key\pfill 318, 393
+  \item \texttt {xtickten} key\pfill 386
+
+  \indexspace
+{\bfseries\hfil Y\hfil}\nopagebreak
+
+  \item y\efill 
+ \subitem Assign unit vector\pfill 336
+  \item \texttt {y} key\pfill 51, 336, 412, 458
+  \item \texttt {y axis line style} key\pfill 312, 420
+  \item \texttt {y coord inv trafo} key\pfill 441
+  \item y coord trafo\pfill 456
+  \item \texttt {y coord trafo} key\pfill 441
+  \item \texttt {y descriptions at} key\pfill 525
+  \item \texttt {y dir} key\pfill 339, 361, 375
+  \item \texttt {y domain} key\pfill 57
+  \item \texttt {y error} key\pfill 52, 364
+  \item \texttt {y error expr} key\pfill 52, 364
+  \item \texttt {y error index} key\pfill 52, 364
+  \item \texttt {y error minus} key\pfill 52, 365
+  \item \texttt {y error minus expr} key\pfill 52, 365
+  \item \texttt {y error minus index} key\pfill 52, 365
+  \item \texttt {y error plus} key\pfill 52, 365
+  \item \texttt {y error plus expr} key\pfill 52, 365
+  \item \texttt {y error plus index} key\pfill 52, 365
+  \item \texttt {y explicit} key\pfill 362
+  \item \texttt {y explicit relative} key\pfill 362
+  \item \texttt {y expr} key\pfill 51
+  \item \texttt {y filter} key\pfill 447--449
+  \item \texttt {y fixed} key\pfill 361
+  \item \texttt {y fixed relative} key\pfill 361
+  \item \texttt {y grid style} key\pfill 424
+  \item \texttt {y index} key\pfill 51
+  \item \texttt {y label style} key\pfill 418
+  \item \texttt {y post scale} key\pfill 344
+  \item \texttt {y SI prefix} key\pfill 603
+  \item \texttt {y tick label as interval} key\pfill 392
+  \item \texttt {y tick label style} key\pfill 421
+  \item \texttt {y tick scale label style} key\pfill 422
+  \item \texttt {y unit} key\pfill 601
+  \item \texttt {y unit prefix} key\pfill 601
+  \item \texttt {ybar} key\pfill 87, 90
+  \item \texttt {ybar interval} key\pfill 92, 93
+  \item \texttt {ybar interval legend} key\pfill 299
+  \item \texttt {ybar interval stacked} key\pfill 103
+  \item \texttt {ybar legend} key\pfill 299
+  \item \texttt {ybar stacked} key\pfill 100
+  \item \texttt {ycomb} key\pfill 95
+  \item \texttt {ygrid each nth passes x} key\pfill 565
+  \item \texttt {ygrid each nth passes x start} key\pfill 565
+  \item \texttt {ygrid stop at x} key\pfill 565
+  \item \texttt {ylabel} key\pfill 286
+  \item \texttt {ylabel absolute} key\pfill 287
+  \item \texttt {ylabel near ticks} key\pfill 287
+  \item \texttt {ylabel shift} key\pfill 286
+  \item \texttt {ylabel style} key\pfill 418
+  \item \texttt {ylabels at} key\pfill 524
+  \item \texttt {ymajorgrids} key\pfill 402
+  \item \texttt {ymajorticks} key\pfill 392
+  \item \texttt {ymax} key\pfill 68, 373, 380, 485
+  \item \texttt {ymin} key\pfill 68, 373, 380, 485
+  \item \texttt {yminorgrids} key\pfill 402
+  \item \texttt {yminorticks} key\pfill 392
+  \item \texttt {ymode} key\pfill 339, 375, 459
+  \item \texttt {yshift} key\pfill 629
+  \item \texttt {ytick} key\pfill 381
+  \item \texttt {ytick align} key\pfill 393
+  \item \texttt {ytick distance} key\pfill 380
+  \item \texttt {ytick placement tolerance} key\pfill 400
+  \item \texttt {ytick pos} key\pfill 393
+  \item \texttt {ytick scale label code} key\pfill 398
+  \item \texttt {ytick style} key\pfill 422
+  \item \texttt {yticklabel} key\pfill 388
+  \item \texttt {yticklabel around circle} key\pfill 562
+  \item \texttt {yticklabel around circle*} key\pfill 563
+  \item \texttt {yticklabel cs} coordinate system\pfill 275
+  \item \texttt {yticklabel in circle} key\pfill 562
+  \item \texttt {yticklabel interval boundaries} key\pfill 94
+  \item \texttt {yticklabel pos} key\pfill 393
+  \item \texttt {yticklabel shift} key\pfill 395
+  \item \texttt {yticklabel style} key\pfill 421
+  \item \texttt {yticklabel* cs} coordinate system\pfill 275
+  \item \texttt {yticklabels} key\pfill 387
+  \item \texttt {yticklabels at} key\pfill 525
+  \item \texttt {yticklabels from table} key\pfill 391
+  \item \texttt {ytickmax} key\pfill 318, 393
+  \item \texttt {ytickmin} key\pfill 318, 393
+  \item \texttt {ytickten} key\pfill 386
+
+  \indexspace
+{\bfseries\hfil Z\hfil}\nopagebreak
+
+  \item z\efill 
+ \subitem Assign unit vector\pfill 336
+  \item \texttt {z} key\pfill 51, 336, 412
+  \item \texttt {z axis line style} key\pfill 312, 420
+  \item \texttt {z buffer} key\pfill 150
+  \item \texttt {z coord inv trafo} key\pfill 441
+  \item z coord trafo\pfill 456
+  \item \texttt {z coord trafo} key\pfill 441
+  \item \texttt {z dir} key\pfill 339, 361, 375
+  \item \texttt {z error} key\pfill 52, 364
+  \item \texttt {z error expr} key\pfill 52, 364
+  \item \texttt {z error index} key\pfill 52, 364
+  \item \texttt {z error minus} key\pfill 52, 365
+  \item \texttt {z error minus expr} key\pfill 52, 365
+  \item \texttt {z error minus index} key\pfill 52, 365
+  \item \texttt {z error plus} key\pfill 52, 365
+  \item \texttt {z error plus expr} key\pfill 52, 365
+  \item \texttt {z error plus index} key\pfill 52, 365
+  \item \texttt {z explicit} key\pfill 362
+  \item \texttt {z explicit relative} key\pfill 362
+  \item \texttt {z expr} key\pfill 51
+  \item \texttt {z filter} key\pfill 447--449
+  \item \texttt {z fixed} key\pfill 361
+  \item \texttt {z fixed relative} key\pfill 361
+  \item \texttt {z grid style} key\pfill 424
+  \item \texttt {z index} key\pfill 51
+  \item \texttt {z label style} key\pfill 418
+  \item \texttt {z post scale} key\pfill 344
+  \item \texttt {z SI prefix} key\pfill 603
+  \item \texttt {z tick label as interval} key\pfill 392
+  \item \texttt {z tick label style} key\pfill 421
+  \item \texttt {z tick scale label style} key\pfill 422
+  \item \texttt {z unit} key\pfill 601
+  \item \texttt {z unit prefix} key\pfill 601
+  \item \texttt {zbar interval legend} key\pfill 300
+  \item \texttt {zbar legend} key\pfill 299
+  \item \texttt {zlabel} key\pfill 286
+  \item \texttt {zlabel absolute} key\pfill 287
+  \item \texttt {zlabel near ticks} key\pfill 287
+  \item \texttt {zlabel shift} key\pfill 286
+  \item \texttt {zlabel style} key\pfill 418
+  \item \texttt {zmajorgrids} key\pfill 402
+  \item \texttt {zmajorticks} key\pfill 392
+  \item \texttt {zmax} key\pfill 68, 373, 380
+  \item \texttt {zmin} key\pfill 68, 373, 380
+  \item \texttt {zminorgrids} key\pfill 402
+  \item \texttt {zminorticks} key\pfill 392
+  \item \texttt {zmode} key\pfill 339, 375
+  \item \texttt {ztick} key\pfill 381
+  \item \texttt {ztick align} key\pfill 393
+  \item \texttt {ztick distance} key\pfill 380
+  \item \texttt {ztick placement tolerance} key\pfill 400
+  \item \texttt {ztick pos} key\pfill 393
+  \item \texttt {ztick scale label code} key\pfill 398
+  \item \texttt {ztick style} key\pfill 422
+  \item \texttt {zticklabel} key\pfill 388
+  \item \texttt {zticklabel cs} coordinate system\pfill 275
+  \item \texttt {zticklabel interval boundaries} key\pfill 94
+  \item \texttt {zticklabel pos} key\pfill 393
+  \item \texttt {zticklabel shift} key\pfill 395
+  \item \texttt {zticklabel style} key\pfill 421
+  \item \texttt {zticklabel* cs} coordinate system\pfill 275
+  \item \texttt {zticklabels} key\pfill 387
+  \item \texttt {zticklabels from table} key\pfill 391
+  \item \texttt {ztickmax} key\pfill 318, 393
+  \item \texttt {ztickmin} key\pfill 318, 393
+  \item \texttt {ztickten} key\pfill 386
+
+ \end{theindex}

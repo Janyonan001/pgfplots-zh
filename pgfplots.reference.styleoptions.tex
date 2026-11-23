@@ -1,0 +1,408 @@
+
+\section{样式选项}
+\label{sec:styles}
+
+
+\subsection{所有支持的样式}
+
+\PGFPlots{} 提供许多样式来自定义其外观和行为。它们可以在任何允许使用键的地方定义和更改。此外，自定义样式也很容易定义。
+
+\begin{handler}{{.style}=\marg{key-value-list}}
+    定义或重新定义样式 \meta{key}。样式是一个普通的键，当它被设置时会设置 \meta{key-value-list} 中的所有选项。
+
+    使用 |\pgfplotsset{|\meta{key}|/.style={|\meta{key-value-list}|}}| 在命名空间 |/pgfplots| 中（重新）定义样式 \meta{key}。
+\end{handler}
+
+\begin{handler}{{.append style}=\marg{key-value-list}}
+    将 \meta{key-value-list} 追加到已存在的样式 \meta{key}。这是更改预定义样式的首选方法：如果你只追加，就能保持与未来版本的兼容性。
+
+    使用 |\pgfplotsset{|\meta{key}|/.append style={|\meta{key-value-list}|}}| 将 \meta{key-value-list} 追加到样式 \meta{key}。这将假定前缀为 |/pgfplots|。
+\end{handler}
+
+
+\subsection*{为线性/对数坐标轴安装的样式}
+
+\begin{stylekey}{/pgfplots/every axis (initially empty)}
+    在每个坐标轴的开头安装。其内部的 \Tikz{} 选项将用于坐标轴矩形内部的任何内容以及任何坐标轴描述。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every axis post (initially empty)}
+   一个在提供给坐标轴的参数被处理\emph{之后}立即应用的样式。
+
+   在下面的示例中，这样的样式用于覆盖作为参数提供给 |\begin{axis}[...]| 的 |xmin| 和 |xmax| 选项：
+   %
+\begin{codeexample}[code only]
+\begin{tikzpicture}
+    \pgfplotsset{
+        every axis post/.style={
+            xmin=0,xmax=1,
+        },
+    }
+    \begin{axis}[
+        xmin=-1,xmax=2,
+        ymin=0,ymax=1,
+    ]
+        ...
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    它在 |\begin{axis}| 的参数之后立即处理，但在 |yticklabel style| 等样式被求值之前。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every semilogx axis (initially empty)}
+    在每个具有对数 $x$ 轴和线性 $y$ 轴的图的开头安装，但在 `|every axis|' 之后。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every semilogy axis (initially empty)}
+    类似，但 $x$ 和 $y$ 的角色互换。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every loglog axis (initially empty)}
+    在每个双对数图的开头安装。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every linear axis (initially empty)}
+    在每个具有正常坐标轴缩放的图的开头安装。
+\end{stylekey}
+
+
+\subsection*{为单个图安装的样式}
+
+\begin{stylekey}{/pgfplots/every axis plot (initially empty)}
+    为每个图安装。此样式可以包含如 samples、gnuplot 参数、误差棒等选项，也可以包含影响最终绘图命令的选项。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every axis plot post (initially empty)}
+    此样式与 |every axis plot| 类似，因为它应用于 |\addplot| 中的任何绘图命令。然而，它在任何用户定义的样式或 |cycle list| 选项\emph{之后}设置。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\pgfplotsset{
+    every axis plot post/.append style={mark=none},
+}
+\begin{axis}[
+    legend pos=north west,
+    domain=0:1,
+]
+    \addplot {x^2};
+    \addplot {exp(x)};
+    \legend{$x^2$,$e^x$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every axis plot no \# (initially empty)}
+    用于第 \# 个图，其中 $\#=0,1,2,3,4,\dotsc$。
+
+    此样式在 |\addplot|\meta{options} 的参数列表之前安装，即 \meta{options} 优先。请注意，这也意味着 |cycle list| 中的任何项具有更高优先级。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every forget plot (initially empty)}
+    用于每个激活了 |forget plot| 的图。
+\end{stylekey}
+
+\pgfplotsshortstylekey forget plot style=every forget plot\pgfeov
+
+
+\subsection*{坐标轴描述的样式}
+
+\begin{stylekey}{/pgfplots/every axis label (initially empty)}
+    用于所有坐标轴标签（如 |xlabel| 和 |ylabel|）。
+\end{stylekey}
+
+\pgfplotsshortstylekey label style=every axis label\pgfeov
+
+\begin{xystylekey}{/pgfplots/every axis \x\ label}
+    分别仅用于 $x$、$y$ 或 $z$ 标签，并在 `|every axis label|' 之后安装。
+
+    初始设置由 |xlabel absolute| 及其变体（如果初始配置 |compat=pre 1.3| 处于活动状态）或 |xlabel near ticks| 设置，后者提供更好的间距，因为它结合刻度标签大小来计算位置。
+
+
+    \paragraph{注意：}
+
+    这些样式会被 |axis x line| 和/或 |axis y line| 覆盖。请记住将你的修改放在坐标轴线变体之后。
+\end{xystylekey}
+
+\pgfplotsshortxystylekeys \x\ label style,\x label style=every axis \x\ label\pgfeov
+
+\begin{stylekey}{/pgfplots/every axis title}
+    用于任何坐标轴标题。|at=|\parg{x,y} 语法将使用 |axis description cs| 放置标题。
+
+    初始设置为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis title/.style={at={(0.5,1)},above,yshift=6pt}}
+\end{codeexample}
+
+    更准确地说，|yshift| 不使用硬编码的 |6pt|：它使用以下值
+
+    \begin{key}{/pgfplots/every axis title shift=\marg{default shift} (initially 6pt)}
+    \end{key}
+
+    如果需要可以重置。
+\end{stylekey}
+
+\pgfplotsshortstylekey title style=every axis title\pgfeov
+
+\begin{stylekey}{/pgfplots/every axis legend}
+    为每个图例安装。如 |axis description cs| 所述，图例的位置可以使用 $0$ 到 $1$ 之间的坐标放置（它自动采用 |axis description cs|）。
+
+    初始设置为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every axis legend/.style={
+        cells={anchor=center},
+        inner xsep=3pt,inner ysep=2pt,
+        nodes={inner sep=2pt,text depth=0.15em},
+        anchor=north east,
+        shape=rectangle,
+        fill=white,draw=black,
+        at={(0.98,0.98)},
+    },
+}
+\end{codeexample}
+\end{stylekey}
+
+\pgfplotsshortstylekey legend style=every axis legend\pgfeov
+
+\begin{stylekey}{/pgfplots/every legend image post}
+    允许在绘图样式的选项应用\emph{之后}更改小图例图像的外观。因此，可以使用 |every legend image post| 独立于绘图样式更改图例格式。
+
+    此键也在第~\pageref{key:legendimagepost} 页记录。
+\end{stylekey}
+
+\pgfplotsshortstylekey legend image post style=every legend image post\pgfeov
+
+\begin{stylekey}{/pgfplots/every legend to name picture}
+    一个与 |legend to image| 一起使用的样式，参见其中的文档。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every colorbar}
+    一个用于更改 |colorbar| 的样式。|every colorbar| 的参考文档参见第~\pageref{key:every:colorbar} 页。
+\end{stylekey}
+
+\pgfplotsshortstylekey colorbar style=every colorbar\pgfeov
+
+\subsection*{坐标轴线的样式}
+\begin{xystylekey}{/pgfplots/every outer \x\ axis line (initially empty)}
+    为位于外框上的每条坐标轴线安装。
+
+    如果你想要箭头，可能还需要查看 |separate axis lines| 布尔键。
+\end{xystylekey}
+
+\begin{xystylekey}{/pgfplots/every inner \x\ axis line (initially empty)}
+    为使用 |center| 或 |middle| 选项绘制的每条坐标轴线安装。
+\end{xystylekey}
+
+\begin{pgfplotsxykeylist}{%
+    axis line style=\marg{key-value-list},
+    inner axis line style=\marg{key-value-list},
+    outer axis line style=\marg{key-value-list},
+    \x\ axis line style=\marg{key-value-list}%
+}
+    这些选项修改坐标轴线样式的各个部分。它们将选项追加到 |every inner x axis line| 和 |every outer x axis line| 以及相应的 $y$/$z$ 变体。
+\end{pgfplotsxykeylist}
+
+\noindent 有关坐标轴线样式的详细信息，请参见第~\pageref{pgfplots:page:axislines} 页的 Section~\ref{sec:pgfplots:axislines}。
+
+\begin{stylekey}{/pgfplots/every 3d box foreground}
+    为 |3d box=complete| 绘制的部分安装。这影响在\emph{前景}中绘制的坐标轴线、刻度线和网格线。当此样式被求值时，背景绘图操作已经完成。
+\end{stylekey}
+
+\pgfplotsshortstylekey 3d box foreground style=every 3d box foreground\pgfeov
+
+\begin{stylekey}{/pgfplots/every colorbar sampled line}
+    与 |colorbar sampled line| 一起使用，参见其中的文档。
+\end{stylekey}
+
+\pgfplotsshortstylekey colorbar sampled line style=every colorbar sampled line\pgfeov
+
+
+\subsection*{刻度的样式}
+
+\begin{stylekey}{/pgfplots/every tick (initially very thin,gray)}
+    为每条小刻度\emph{线}安装。
+\end{stylekey}
+
+\pgfplotsshortstylekey tick style=every tick\pgfeov
+
+\begin{stylekey}{/pgfplots/every minor tick (initially empty)}
+    用于每条次刻度线，在 `|every tick|' 之后安装。
+\end{stylekey}
+
+\pgfplotsshortstylekey minor tick style=every minor tick\pgfeov
+
+\begin{stylekey}{/pgfplots/every major tick (initially empty)}
+    用于每条主刻度线，在 `|every tick|' 之后安装。
+\end{stylekey}
+
+\pgfplotsshortstylekey major tick style=every major tick\pgfeov
+
+\begin{stylekey}{/pgfplots/every tick label (initially empty)}
+    用于每个 $x$ 和 $y$ 刻度标签。
+\end{stylekey}
+
+\pgfplotsshortxystylekeys tick label style,ticklabel style=every tick label\pgfeov
+
+\begin{xystylekey}{/pgfplots/every \x\ tick label (initially empty)}
+    用于每个 $x$（或分别为 $y$ 或 $z$）刻度标签，在 `|every tick label|' 之后安装。
+\end{xystylekey}
+
+\pgfplotsshortxystylekeys \x\ tick label style,\x ticklabel style=every \x\ tick label\pgfeov
+
+\begin{xystylekey}{/pgfplots/every \x\ tick scale label}
+    配置包含刻度标签数量级的节点的放置和显示；有关 |scaled ticks| 的更多信息，参见 Section~\ref{sec:scaled:ticks}。
+
+    使用 |compat=1.8| 或更高版本时的初始设置为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every x tick scale label/.style={
+        at={(xticklabel cs:0.9,5pt)},
+        anchor=near xticklabel,
+        inner sep=0pt,
+    },
+    every y tick scale label/.style={
+        at={(yticklabel* cs:1.03,-0.3em)},
+        /pgfplots/near ticklabel align=outside,
+        anchor=near yticklabel opposite,
+        inner sep=0pt,
+    },
+    every z tick scale label/.style={
+        at={(zticklabel* cs:1.2,-0.3em)},
+        anchor=near zticklabel,
+        inner sep=0pt,
+    },
+}
+\end{codeexample}
+\end{xystylekey}
+
+\pgfplotsshortxystylekey \x\ tick scale label style=every \x\ tick scale label\pgfeov
+
+\begin{xystylekey}{/pgfplots/every \x\ tick (initially empty)}
+    为 $x$ 轴或 $y$ 轴上的刻度\emph{线}安装。
+\end{xystylekey}
+
+\pgfplotsshortxystylekey \x tick style=every \x\ tick\pgfeov
+
+\begin{xystylekey}{/pgfplots/every minor \x\ tick (initially empty)}
+    为 $x$ 轴或 $y$ 轴上的次刻度线安装。
+\end{xystylekey}
+
+\pgfplotsshortxystylekey minor \x\ tick style=every minor \x\ tick\pgfeov
+
+\begin{xystylekey}{/pgfplots/every major \x\ tick (initially empty)}
+    为 $x$ 轴或 $y$ 轴上的主刻度线安装。
+\end{xystylekey}
+\pgfplotsshortxystylekey major \x\ tick style=every major \x\ tick\pgfeov
+
+\begin{xystylekey}{/pgfplots/every extra \x\ tick}
+    允许配置 `|extra x ticks|' 的外观。此样式在处理第一个额外 $x$ 刻度之前安装。可以设置任何影响刻度或网格线生成的选项。
+
+    初始设置为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every extra x tick/.style={/pgfplots/log identify minor tick positions=true},
+    every extra y tick/.style={/pgfplots/log identify minor tick positions=true},
+}
+\end{codeexample}
+
+    有用的示例如下。
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every extra x tick/.append style={grid=major}}
+\pgfplotsset{every extra x tick/.append style={major tick length=0pt}}
+\pgfplotsset{every extra x tick/.append style={/pgf/number format=sci subscript}}
+\pgfplotsset{
+    extra x tick style={
+        grid style={
+            color=red,
+        },
+        tickwidth=3mm,
+        % the initial 'every tick style' defines a 'line width'.
+        % this here redefines it:
+        tick style={
+            line width=2mm,
+        },
+    },
+}
+\end{codeexample}
+\end{xystylekey}
+
+\pgfplotsshortxystylekey extra \x\ tick style=every extra \x\ tick\pgfeov
+
+\begin{stylekey}{/pgfplots/extra tick style=\marg{key-value-list}}
+    一个缩写，它将 \meta{key-value-list} 追加到 |every extra x tick|、|every extra y tick| 和 |every extra z tick|。
+\end{stylekey}
+
+
+\subsection*{网格线的样式}
+
+\begin{stylekey}{/pgfplots/every axis grid (initially thin,black!25)}
+    用于每条网格线。
+\end{stylekey}
+
+\pgfplotsshortstylekey grid style=every axis grid\pgfeov
+
+\begin{stylekey}{/pgfplots/every minor grid (initially empty)}
+    用于每条次网格线，在 `|every axis grid|' 之后安装。
+\end{stylekey}
+
+\pgfplotsshortstylekey minor grid style=every minor grid\pgfeov
+
+\begin{stylekey}{/pgfplots/every major grid (initially empty)}
+    类似，用于主网格线。
+\end{stylekey}
+
+\pgfplotsshortstylekey major grid style=every major grid\pgfeov
+
+\begin{xystylekey}{/pgfplots/every axis \x\ grid (initially empty)}
+    用于 $x$ 或 $y$ 方向上的每条网格线。
+\end{xystylekey}
+
+\pgfplotsshortxystylekey \x\ grid style=every axis \x\ grid\pgfeov
+
+\begin{xystylekey}{/pgfplots/every minor \x\ grid (initially empty)}
+    用于 $x$ 或 $y$ 方向上的每条次网格线。
+\end{xystylekey}
+
+\pgfplotsshortxystylekey minor \x\ grid style=every minor \x\ grid\pgfeov
+
+\begin{xystylekey}{/pgfplots/every major \x\ grid (initially empty)}
+    用于 $x$ 或 $y$ 方向上的每条主网格线。
+\end{xystylekey}
+
+\pgfplotsshortxystylekey major \x\ grid style=every major \x\ grid\pgfeov
+
+
+\subsection*{误差棒的样式}
+
+\begin{stylekey}{/pgfplots/every error bar (initially thin)}
+    为每个误差棒安装。
+\end{stylekey}
+
+\pgfplotsshortstylekey error bars/error bar style=every error bar\pgfeov
+
+
+\subsection{（重新）定义自定义样式}
+\label{sec:styles:own}
+
+使用 |\pgfplotsset{|\meta{style name}|/.style=|\marg{key-value-list}|}| 创建自定义样式。如果 \meta{style name} 已存在，它将被替换。请注意，在此上下文中\emph{不能}使用 \Tikz{} 命令 |\tikzstyle|\marg{style name}|=[]|。\footnote{这在以前的版本中是可能的，并且为了向后兼容仍受支持。但在某些情况下，它可能无法按预期工作。}
+%
+\begin{codeexample}[]
+\pgfplotsset{
+    my personal style/.style={
+        grid=major,
+        font=\large,
+    },
+}
+\begin{tikzpicture}
+\begin{axis}[my personal style]
+    \addplot coordinates {(0,0) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}

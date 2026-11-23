@@ -1,0 +1,305 @@
+
+\section{极坐标轴}
+\label{sec:polar}
+
+{
+\def\pgfplotsmanualcurlibrary{polar}
+\tikzset{external/figure name/.add={}{polar_}}
+
+\begin{pgfplotslibrary}{polar}
+    本库用于绘制极坐标轴以及依赖极坐标的绘图类型，坐标由角度（以度为单位，
+    或可选地以弧度为单位）与半径表示。
+\end{pgfplotslibrary}
+
+
+\subsection{极坐标轴}
+
+\begin{environment}{{polaraxis}}
+    |polar| 库提供 |polaraxis| 环境。
+    在该环境内，所有坐标均应以 $(\mathit{angle},\mathit{radius})$ 的极坐标形式给出，
+    即 $x$ 坐标始终为角度，$y$ 坐标始终为半径：
+\end{environment}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}
+    \addplot coordinates {
+        (0,1)
+        (90,1)
+        (180,1)
+        (270,1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}
+    \addplot+ [domain=0:3] (360*x,x); % (angle,radius)
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}
+    \addplot+ [
+        mark=none,
+        domain=0:720,
+        samples=600,
+    ]
+        {sin(2*x)*cos(2*x)};
+    % equivalent to (x,{sin(..)cos(..)}), i.e.
+    % the expression is the RADIUS
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+极坐标轴支持 \PGFPlots{} 的大部分用户接口，例如 |legend entries|、各种坐标轴描述、
+|xtick|/|ytick| 等：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[
+    xtick={0,90,180,270},
+    title=A polar axis,
+]
+    \addplot coordinates {(0,1) (45,1)};
+        \addlegendentry{First}
+
+    \addplot coordinates {(180,0.5) (0,0)};
+        \addlegendentry{Second}
+    \end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 此外，你可以使用所有受支持的输入坐标方式（如
+\verbpdfref{\addplot coordinates}、\verbpdfref{\addplot table}、
+\verbpdfref{\addplot expression}）。唯一的差别在于：极坐标轴将（前两个）输入坐标
+解释为 $(\mathit{angle\,in\,degrees},\mathit{radius})$ 形式的极坐标。
+
+也可以使用 \verbpdfref{\addplot3}；此时第三个坐标将被忽略（不过它仍可通过
+|point meta=z| 用作颜色数据）。示例见下文第~\ref{sec:polar:cart} 节。
+
+
+\subsection{使用弧度代替角度}
+
+初始配置中，角度（即每个输入坐标的 $x$ 分量）以度为单位。\PGFPlots{} 也支持通过
+|data cs=polarrad| 开关以弧度提供角度：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[title={Degrees and/or Radians}]
+    \addplot coordinates {
+        (0,1) (90,1) (180,1) (270,1)
+    };
+        \addlegendentry{Deg}
+
+    \addplot+ [
+        data cs=polarrad,
+    ] coordinates {
+        (0,1.5) (pi/2,1.5)
+        (pi,1.5) (pi*3/2,1.5)
+    };
+        \addlegendentry{Rad}
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+|data cs| 键的完整说明见第~\pageref{key:data:cs} 页；它告知 \PGFPlots{} 输入数据的
+坐标系。随后 \PGFPlots{} 会自动将每个坐标变换到所需的坐标系（在本例中即
+|data cs=polar|）。
+
+
+\subsection{与笛卡尔坐标混用}
+\label{sec:polar:cart}
+
+与上述过程类似，你也可以在极坐标轴内提供笛卡尔坐标：只需通过 |data cs=cart|
+告知 \PGFPlots{} 自动将其变换为极坐标形式：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[title=Cartesian Input]
+    \addplot+ [
+        data cs=cart,
+    ] coordinates {
+        (1,0) (0,1) (-1,0) (0,-1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 关于 |data cs| 键的更多细节见第~\pageref{key:data:cs} 页。
+
+这也使得可以使用那些基于笛卡尔坐标工作的更复杂可视化技术。下面的例子使用
+\verbpdfref{\addplot3} 对函数 $f\colon \R^2 \to \R$ 采样，计算 |contour| 等高线，
+并将结果显示在 |polaraxis| 中：
+%
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}
+    \addplot3 [
+        contour lua,
+        domain=-3:3,
+        data cs=cart,
+    ]
+        {exp(-x^2-y^2)};
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 具体过程为：在 $x,y \in [-3,3]$ 上对 $z=\exp(-x^2-y^2)$ 采样，然后在
+$(x,y,z)$ 上计算等高线，再将所得三元组 $(x,y,z)$ 变换为极坐标 $(\alpha,r,z)$
+（$z$ 保持不变）。最后，$z$ 坐标作为 |point meta| 用于决定颜色。
+
+注意，\verbpdfref{\addplot3} 允许处理三维输入类型，但结果始终是二维的
+（在 |polaraxis| 中，点位置的放置会忽略 $z$ 坐标）。不过，$z$ 坐标仍可用于
+决定点的颜色（通过 |point meta=z|）。
+
+
+\subsection{极坐标描述}
+
+极坐标轴与其他绘图类型一样支持坐标轴标签。\footnote{注意：在 1.13 之前的版本中，
+极坐标轴标签支持存在缺陷。请升级到 \PGFPlots{} 1.13 并使用
+\texttt{compat=1.13} 或更高版本，以使用极坐标轴描述。}
+此时，|xticklabel cs| 指角度（$x$ 轴）的标签位置，|yticklabel cs| 指半径（$y$ 轴）
+的标签位置。
+
+角度的默认坐标轴标签放置在 $45$ 度处，
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[
+    xlabel=x axis,
+    ylabel=y axis,
+]
+    \addplot coordinates {
+        (0,1) (90,1) (180,1) (270,1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+并配置为 |sloped|\index{sloped Polar labels} 标签，采用如下默认配置：
+%
+\begin{codeexample}[code only]
+    every axis x label/.style={
+        at={(xticklabel cs:0.125)},
+        sloped={at position=45},
+        anchor=near ticklabel,
+        near ticklabel at=45,
+    },
+    every axis y label/.style={
+        at={(yticklabel cs:0.5)},
+        anchor=near ticklabel,
+    },
+\end{codeexample}
+
+下面的例子也展示了倾斜的 $x$ 标签。\footnote{注意，倾斜的极坐标标签同样需要
+\PGFPlots{} 1.13 及 \texttt{compat=1.13} 或更新版本。}
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[
+    xlabel=x axis,
+    ylabel=y axis,
+    xticklabel style={sloped like x axis},
+]
+    \addplot coordinates {
+        (0,1) (90,1) (180,1) (270,1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+
+\subsection{特殊极坐标绘图类型}
+
+\begin{plottype}{polar comb}
+    |polar comb| 绘图处理器由 \Tikz{} 提供；它从原点向指定位置绘制路径，并在
+    位置上放置 |mark|（与 |comb| 绘图处理器类似）。由于路径始终从原点出发，
+    它特别适合 |polaraxis|：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}
+    \addplot+ [
+        polar comb,
+    ] coordinates {
+        (300,1)
+        (20,0.3)
+        (40,0.5)
+        (120,1)
+        (200,0.4)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+\end{plottype}
+
+
+\subsection{局部极坐标轴}
+
+|polar| 库也支持局部坐标轴。若你提供 |xmin|/|xmax|，即可限制坐标轴使用的角度：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[
+    xmin=45,
+    xmax=360,
+]
+    \addplot coordinates {
+        (0,1) (90,1) (180,1) (270,1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+目前，第一个角度必须小于第二个角度。但你可以利用周期性，按如下方式得到扇形：
+%
+\message{Overfull hbox is OK}%
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{polaraxis}[xmin=90,xmax=270]
+        \addplot coordinates { (0,1) (90,1) (180,1) (270,1) };
+    \end{polaraxis}
+\end{tikzpicture}~%
+\begin{tikzpicture}
+    \begin{polaraxis}[xmin=270,xmax=420]
+        \addplot coordinates { (0,1) (90,1) (180,1) (270,1) };
+    \end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 类似地，显式提供 |ymin| 可将显示范围从 $0$ 缩小：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[
+    ymin=0.3,
+]
+    \addplot coordinates {
+        (0,1) (90,1) (180,1) (270,1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\noindent 手动修改 |xmin| 与 |xmax| 还可以用来移动 $y$ 轴线（即带有 |ytick| 和
+|yticklabels| 的那条线）：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{polaraxis}[
+    xmin=45,
+    xmax=405,
+]
+    \addplot coordinates {
+        (0,1) (90,1) (180,1) (270,1)
+    };
+\end{polaraxis}
+\end{tikzpicture}
+\end{codeexample}
+}

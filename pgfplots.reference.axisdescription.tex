@@ -1,0 +1,3289 @@
+
+\section{坐标轴描述}
+
+坐标轴描述是 $x$ 轴和 $y$ 轴的标签、标题、图例等。坐标轴描述在绘图完成后绘制，且不受裁剪影响。
+
+
+\subsection{坐标轴描述的放置}
+
+本节说明如何\emph{修改}标题、标签、图例及其他坐标轴描述的位置。初读时可跳过。
+
+放置坐标轴描述有不同方法。一种是提供相对于坐标轴矩形的坐标，使
+|(0,0)| 为左下角、|(1,1)| 为右上角——这对图标题或图例非常有用。
+此类坐标（即不带单位，如 |(0,0)| 或 |(1.03,1)|）称为
+|axis description cs|（|cs| 代表``坐标系''）。另一种方法主要用于
+坐标轴标签——它们应放在刻度标签附近，但以不重叠或遮挡刻度标签的方式。
+此外，坐标轴标签的放置应使坐标轴旋转时（或刻度标签移到图右侧时）
+自动移动。有一个特殊坐标系实现这两个需求，即 |ticklabel cs|。
+
+下面详细描述 |axis description cs| 和 |ticklabel cs| 这两个坐标系。
+应注意，|axis description cs| 会自动使用，因此可能永远不需要显式使用它。
+
+
+\begin{coordinatesystem}{axis description cs}
+\label{pgfplots:sec:axis:description:cs}
+    用于放置坐标轴描述的坐标系。每当 `|at={(|\meta{x}|,|\meta{y}|)}|'
+    出现在 |label style|、|legend style| 或任何其他坐标轴描述中时，
+    |(|\meta{x}|,|\meta{y}|)| 被解释为 |axis description cs| 中的坐标。
+
+    点 $(0,0)$ 始终是坐标轴周围最紧包围盒（不含任何描述或刻度）的左下角，
+    而点 $(1,1)$ 是该包围盒的右上角。
+
+    在大多数情况下，\emph{无需}显式写 |axis description cs|，因为它是
+    任何坐标轴描述的默认坐标系。下面显示坐标放置示例。
+    %
+\begin{codeexample}[width=4cm]
+% [See the TikZ manual if you'd like to learn about nodes and pins]
+\begin{tikzpicture}
+    \tikzset{
+        every pin/.style={fill=yellow!50!white,rectangle,rounded corners=3pt,font=\tiny},
+        small dot/.style={fill=black,circle,scale=0.3},
+    }
+    \begin{axis}[
+        clip=false,
+        title=How \texttt{axis description cs} works,
+    ]
+        \addplot {x};
+
+        \node [small dot,pin=120:{$(0,0)$}]      at (axis description cs:0,0)      {};
+        \node [small dot,pin=-30:{$(1,1)$}]      at (axis description cs:1,1)      {};
+        \node [small dot,pin=-90:{$(1.03,0.5)$}] at (axis description cs:1.03,0.5) {};
+        \node [small dot,pin=125:{$(0.5,0.5)$}]  at (axis description cs:0.5,0.5)  {};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    坐标轴描述是 \Tikz{} 节点，这意味着 \cite{tikz} 的所有放置和细节
+    选项都适用。节点边界上实际移动到 |at| 坐标的点需要通过 anchor 提供
+    （参见~\cite[``Nodes and Edges'']{tikz}）：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        legend entries={$x$,$x^2$},
+        legend style={
+            at={(1.03,0.5)},
+            anchor=west,
+        },
+    ]
+        \addplot {x};
+        \addplot {x^2};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    节点的标准 anchor 有 |north|、|east|、|south|、|west| 及组合组件如
+    |north east|。完整 anchor 文档请参阅 \cite{tikz}。
+
+
+    \paragraph{说明：}
+
+    \begin{itemize}
+        \item 第~\ref{sec:pgfplots:sec:align} 节描述的每个 anchor
+            也可由 |axis description cs| 描述。
+        \item |axis description cs| 独立于坐标轴反转或斜轴。
+            仅对于带框坐标轴的默认配置，它与 |rel axis cs| 相同，
+            即标准带框坐标轴中 |(0,0)| 与最小坐标轴坐标相同，
+            |(1,1)| 与最大坐标相同。\footnote{这在 1.3 之前的版本中不同：
+            早期版本没有 \texttt{axis description cs} 和
+            \texttt{rel axis cs} 的区分。}
+        \item 即使对于三维坐标轴，|axis description cs| 仍是二维的：
+            它始终指相对于坐标轴周围最紧包围盒（不含任何描述或刻度）的
+            坐标。
+            %
+\begin{codeexample}[width=4cm]
+% the same as above for 3D ...
+% [See the TikZ manual if you'd like to learn about nodes and pins]
+\begin{tikzpicture}
+    \tikzset{
+        every pin/.style={fill=yellow!50!white,rectangle,rounded corners=3pt,font=\tiny},
+        small dot/.style={fill=black,circle,scale=0.3},
+    }
+    \begin{axis}[
+        clip=false,
+        title=How \texttt{axis description cs} works in 3D,
+    ]
+        \addplot3 coordinates {(-5,-5,-5) (5,5,5)};
+
+        \draw [black!15] (axis description cs:0,0) rectangle (axis description cs:1,1);
+
+        \node [small dot,pin=120:{$(0,0)$}]      at (axis description cs:0,0)      {};
+        \node [small dot,pin=-30:{$(1,1)$}]      at (axis description cs:1,1)      {};
+        \node [small dot,pin=-90:{$(1.03,0.5)$}] at (axis description cs:1.03,0.5) {};
+        \node [small dot,pin=125:{$(0.5,0.5)$}]  at (axis description cs:0.5,0.5)  {};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+            %
+        \item 由于视图不影响这些位置，|axis description cs| 可能不是
+            三维坐标轴标签的好选择。此时使用 |ticklabel cs|。
+    \end{itemize}
+\end{coordinatesystem}
+
+\begin{coordinatesystemlist}{%
+    xticklabel cs,
+    yticklabel cs,
+    zticklabel cs,
+    ticklabel cs,
+    xticklabel* cs,
+    yticklabel* cs,
+    zticklabel* cs,
+    ticklabel* cs%
+}
+    一组特殊坐标系，用于将坐标轴描述（或任何其他绘图操作）放在刻度标签
+    旁边，使刻度标签和坐标轴本身都不被遮挡。
+
+    另见 |xlabel near ticks|，它是 |ticklabel cs| 的一个主要应用。
+
+    |xticklabel cs|（及其变体）始终指一个唯一标识的坐标轴：带（或将带）
+    刻度标签注释的那个。
+
+    |ticklabel cs|（不带显式 \texttt{x}、\texttt{y} 或 \texttt{z}）
+    只能在上下文中坐标轴字符已知的地方使用（例如，在 |xlabel style|
+    内部——那里 |ticklabel cs| 等价于 |xticklabel cs|）。
+
+    星号变体 |xticklabel* cs| 及其同类不考虑任何刻度标签的大小。
+
+    每个这样的坐标系都允许指定平行于带刻度标签的坐标轴放置的直线上的点，
+    该直线移开刚好足够远以避免与刻度标签重叠：
+    %
+\begin{codeexample}[width=4cm]
+\tikzset{
+    every pin/.style={fill=yellow!50!white,rectangle,rounded corners=3pt,font=\tiny},
+    small dot/.style={fill=black,circle,scale=0.3},
+}
+\begin{tikzpicture}
+    \begin{axis}[
+        clip=false,
+        ticklabel style={draw=red},
+        title=Positioning with \texttt{xticklabel cs},
+    ]
+        \addplot {x};
+        \node [small dot,pin=-90:{\texttt{xticklabel cs:0}}]    at (xticklabel cs:0)   {};
+        \node [small dot,pin=-90:{\texttt{xticklabel cs:0.5}}]  at (xticklabel cs:0.5) {};
+        \node [small dot,pin=-90:{\texttt{xticklabel cs:1}}]    at (xticklabel cs:1)   {};
+
+        \node [small dot,pin=180:{\texttt{yticklabel cs:0}}]    at (yticklabel cs:0)   {};
+        \node [small dot,pin=180:{\texttt{yticklabel cs:0.5}}]  at (yticklabel cs:0.5) {};
+        \node [small dot,pin=180:{\texttt{yticklabel cs:1}}]    at (yticklabel cs:1)   {};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    基本思路是将坐标放在平行于带刻度标签的坐标轴的直线上——但平移使
+    该直线不穿过刻度标签。
+
+    注意，用 |xticklabel cs| 或其同类放置的坐标轴描述也适用于斜轴或
+    |axis x line| 变体——对所有这些变体通常是相同的值。特别地，
+    它对三维坐标轴有用，见下文。
+
+    通常，|xticklabel cs| 将节点放在最大关联刻度标签结束的确切位置。
+    虽然这非常有用，但可能不合需要——例如，如果想向相反方向移动
+    （此时特殊 anchor |near ticklabel opposite| 可能有用）。为此，
+    有星号变体，即 |xticklabel* cs| 及其同类：
+    %
+\begin{codeexample}[width=4cm]
+\tikzset{
+    every pin/.style={fill=yellow!50!white,rectangle,rounded corners=3pt,font=\tiny},
+    small dot/.style={fill=black,circle,scale=0.3},
+}
+\begin{tikzpicture}
+    \begin{axis}[
+        clip=false,
+        ticklabel style={draw=red},
+        title=Starred variant \texttt{xticklabel* cs},
+    ]
+        \addplot {x};
+        \node [small dot,pin=-90:{\texttt{xticklabel* cs:0}}]   at (xticklabel* cs:0)   {};
+        \node [small dot,pin=-90:{\texttt{xticklabel* cs:0.5}}] at (xticklabel* cs:0.5) {};
+        \node [small dot,pin=-90:{\texttt{xticklabel* cs:1}}]   at (xticklabel* cs:1)   {};
+
+        \node [small dot,pin=180:{\texttt{yticklabel* cs:0}}]   at (yticklabel* cs:0)   {};
+        \node [small dot,pin=180:{\texttt{yticklabel* cs:0.5}}] at (yticklabel* cs:0.5) {};
+        \node [small dot,pin=180:{\texttt{yticklabel* cs:1}}]   at (yticklabel* cs:1)   {};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 前一个示例将所有附加 anchor 精确放在绘制刻度标签的坐标轴上。
+    星号版本 |xticklabel* cs| 忽略刻度标签大小。
+
+    当然，使用 |axis description cs| 获得与上述二维示例相同的坐标相对简单，
+    只是 |ticklabel cs| 始终适当尊重刻度标签大小。但是，在三维定位方面，
+    |ticklabel cs| 远胜一筹：
+    %
+\begin{codeexample}[width=4cm]
+% the same as above for 3D ...
+\begin{tikzpicture}
+    \tikzset{
+        every pin/.style={fill=yellow!50!white,rectangle,rounded corners=3pt,font=\tiny},
+        small dot/.style={fill=black,circle,scale=0.3},
+    }
+    \begin{axis}[
+        ticklabel style={draw=red},
+        clip=false,
+        title=Positioning with \texttt{ticklabel cs} in 3D,
+    ]
+        \addplot3 coordinates {(-5,-5,-5) (5,5,5)};
+
+        \node [small dot,pin=-90:{\texttt{xticklabel cs:0}}]   at (xticklabel cs:0)   {};
+        \node [small dot,pin=-90:{\texttt{xticklabel cs:0.5}}] at (xticklabel cs:0.5) {};
+        \node [small dot,pin=-90:{\texttt{xticklabel cs:1}}]   at (xticklabel cs:1)   {};
+
+        \node [small dot,pin=-45:{\texttt{yticklabel cs:0}}]   at (yticklabel cs:0)   {};
+        \node [small dot,pin=-45:{\texttt{yticklabel cs:0.5}}] at (yticklabel cs:0.5) {};
+        \node [small dot,pin=-45:{\texttt{yticklabel cs:1}}]   at (yticklabel cs:1)   {};
+
+        \node [small dot,pin=180:{\texttt{zticklabel cs:0}}]   at (zticklabel cs:0)   {};
+        \node [small dot,pin=180:{\texttt{zticklabel cs:0.5}}] at (zticklabel cs:0.5) {};
+        \node [small dot,pin=180:{\texttt{zticklabel cs:1}}]   at (zticklabel cs:1)   {};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    坐标 |ticklabel cs:0| 与坐标轴下限关联，而 |ticklabel cs:1| 靠近坐标轴
+    上限。值 |0.5| 在坐标轴中间，任何其他值（包括负值或超过 $1$ 的值）
+    在中间线性插值。
+
+    所有类似 |ticklabel cs| 的坐标系还接受第二个（可选）参数：
+    从刻度标签``向外''的偏移。偏移指向与关联坐标轴正交的向量，
+    \footnote{实际上，外法线给人的印象是与其坐标轴``正交''，
+    这似乎足够了。} 远离刻度标签。偏移 |0pt| 沿法向量方向直接位于
+    刻度标签边缘，正值将位置移远，负值移近刻度标签。
+    %
+\begin{codeexample}[width=4cm]
+\tikzset{
+    every pin/.style={fill=yellow!50!white,rectangle,rounded corners=3pt,font=\tiny},
+    small dot/.style={fill=black,circle,scale=0.3},
+}
+\begin{tikzpicture}
+    \begin{axis}[
+        xticklabel style={draw=red},
+        clip=false,
+        title=\texttt{ticklabel cs} and its optional shift,
+    ]
+        \addplot3 coordinates {(-5,-5,-5) (5,5,5)};
+
+        \draw [blue,thick,->]      (xticklabel cs:0,0)     -- (xticklabel cs:1,0);
+        \draw [red,thick,->]       (xticklabel cs:0,5pt)   -- (xticklabel cs:1,5pt);
+        \draw [magenta,thick,->]   (xticklabel cs:0,10pt)  -- (xticklabel cs:1,10pt);
+        \draw [green,thick,->]     (xticklabel cs:0,15pt)  -- (xticklabel cs:1,15pt);
+        \node [small dot,pin=0:{\texttt{xticklabel cs:1,0}}]      at (xticklabel cs:1,0) {};
+        \node [small dot,pin=0:{\texttt{xticklabel cs:1,15pt}}]   at (xticklabel cs:1,15pt) {};
+
+        \draw [blue,thick,->]      (xticklabel cs:0,0)     -- (xticklabel cs:0,15pt);
+        \draw [blue,thick,->]      (xticklabel cs:1,0)     -- (xticklabel cs:1,15pt);
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    每当使用 |ticklabel cs| 时，应将 anchor 设为 |anchor=near ticklabel|
+    （见下文）。
+
+    每当使用星号版本 |ticklabel* cs| 时，|anchor=near ticklabel| 和
+    |anchor=near ticklabel opposite| 两个 anchor 都是有用的选择。
+
+    有一个特殊情况：如果反转坐标轴（用 |x dir=reverse|），
+    |ticklabel cs| 提供的点\emph{不受}坐标轴反转影响。这旨在为反转坐标轴
+    提供一致的放置。使用 |allow reversal of rel axis cs=false| 停用此功能。
+
+    |ticklabel cs| 的目的是将节点放在``刻度标签旁边''。刻度标签本身的位置
+    以类似 |ticklabel* cs| 的方式确定，沿外法向量有自定义偏移。偏移通常为
+
+    |\pgfkeysvalueof{/pgfplots/major tick length}|（对居中坐标轴为一半）。
+\end{coordinatesystemlist}
+
+除上述定位方法外，还有预定义节点 |current axis|。|current axis| 的
+anchor 也可用于放置描述：在绘制坐标轴描述时，所有指向坐标轴原点
+（即``真实''点 $(0,0)$）或任何坐标轴角点的 anchor 都可使用
+|current axis.|\meta{anchor name} 引用。详情请参阅第
+~\ref{sec:pgfplots:sec:align} 节``对齐''。
+
+
+\subsection{坐标轴描述的对齐}
+
+本节说明如何修改坐标轴描述的默认对齐。初读时可跳过。
+
+定位和对齐这两个主题总是协同工作：\emph{定位}意味着选择合适的坐标，
+\emph{对齐}意味着选择描述内部实际移动到所需位置的 anchor。
+
+\Tikz{} 使用许多 anchor 提供对齐；大多数命名为 |north|、
+|north east| 等。这些名称同样适用于任何坐标轴描述
+（因为坐标轴描述是 \Tikz{} 节点）。读者可在 \Tikz{} 手册
+~\cite{tikz} 或第~\ref{sec:pgfplots:sec:align} 节中了解更多细节。
+
+当涉及坐标轴描述时，\PGFPlots{} 提供一些专用 anchor 和对齐方法，
+如下所述。
+
+\begin{anchorlist}{near xticklabel,near yticklabel,near zticklabel,near ticklabel}
+\labelprefix\label{key:near:ticklabel}
+    这些 anchor 可用于对齐节点（例如坐标轴描述）中\emph{最靠近}特定
+    坐标轴刻度标签的部分（或最靠近如果有刻度标签会绘制的位置）。
+
+    这些 anchor 用于坐标轴标签，特别是三维坐标轴。此外，它们用于
+    每个刻度标签。
+
+    也许最好用示例说明：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        title=Without \texttt{near ticklabel},
+        ylabel={$f(x)=x$},
+        every axis y label/.style={
+            at={(ticklabel cs:0.5)},rotate=90,anchor=center,
+        },
+        clip=false,                 % to display the \path below
+        ylabel style={draw=red},
+        yticklabel style={draw=red},
+    ]
+        \addplot {x};
+
+        % visualize the position:
+        \fill (yticklabel cs:0.5) circle(2pt);
+    \end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+    \begin{axis}[
+        title=With \texttt{near ticklabel},
+        ylabel={$f(x)=x$},
+        every axis y label/.style={
+            at={(ticklabel cs:0.5)},rotate=90,anchor=near ticklabel,
+        },
+        clip=false,
+        ylabel style={draw=red},
+        yticklabel style={draw=red},
+    ]
+        \addplot {x};
+        \fill (yticklabel cs:0.5) circle(2pt);
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    其动机是放置节点，使其锚定在刻度标签旁边，无论节点的旋转或刻度位置如何。
+    特殊 anchor |near ticklabel| 仅用于坐标轴标签（因为它们有唯一标识的
+    坐标轴，即 $x$、$y$ 或 $z$）。
+
+    更详细地，anchor 的放置方式为：首先，节点中心位于从节点的 |at| 位置
+    出发、沿包含刻度标签的轴线内法向量方向的直线上；其次，节点不侵入
+    坐标轴（另见键 |near ticklabel align| 和下文
+    |near xticklabel opposite| 文档中详尽阐述的细节）。该法向量与
+    |ticklabel cs| 中 shift 参数使用的相同：它与刻度标签坐标轴正交。
+    此外，|near ticklabel| 在计算此交点之前反转变换矩阵。
+
+    |near ticklabel| anchor 及其同类会临时添加到坐标轴内使用的任何形状。
+    这包括坐标轴描述，但不限于它们：它适用于每个 \Tikz{}
+    |\node[anchor=near xticklabel] ...| 设置。
+
+    注意，坐标轴中完全不\emph{需要}有刻度标签。anchor 放置在靠近
+    \emph{会}绘制刻度标签的坐标轴处。事实上，每个刻度标签都使用
+    |anchor=near ticklabel| 作为初始配置。
+\end{anchorlist}
+
+\begin{anchorlist}{%
+    near xticklabel opposite,
+    near yticklabel opposite,
+    near zticklabel opposite,
+    near ticklabel opposite%
+}
+    这些 anchor 与 |near xticklabel| 及其变体类似，只是它们对齐在
+    \emph{相反}方向。
+
+    数学上，与 |near xticklabel| 及其变体的唯一区别是法向量前的符号。
+
+    但最好用示例说明。
+    %
+\begin{codeexample}[width=4cm]
+\begin{tikzpicture}
+    \begin{axis}[
+        clip=false,
+        small,
+        title=\texttt{near ticklabel} (\texttt{opposite}),
+        min=0, max=1,
+    ]
+        \node [draw=yellow,anchor=near xticklabel,font=\small]
+            (namex) at (xticklabel cs:0.2) {\texttt{near xticklabel}.};
+        \fill (xticklabel cs:0.2) circle(2pt);
+        \draw [green,-stealth] (xticklabel* cs:0.2) -- (xticklabel cs:0.2);
+        \draw [blue,-stealth]  (xticklabel cs:0.2)  -- (namex.center);
+        \draw [red,-stealth]   (namex.north east)   -- (xticklabel cs:0.2);
+
+        \node [draw=yellow,anchor=near xticklabel opposite,font=\small]
+            (namexx) at (xticklabel* cs:0.6) {\texttt{near xticklabel opposite}.};
+        \fill [red] (xticklabel* cs:0.6) circle(2pt);
+        \draw [blue,-stealth]       (xticklabel* cs:0.6) -- (namexx.center);
+        \draw [red,thick,-stealth]  (namexx.south west)  -- (xticklabel* cs:0.6);
+
+        \node [draw=yellow,anchor=near yticklabel,font=\small]
+            (name) at (yticklabel cs:1) {\texttt{near yticklabel}.};
+        \fill (yticklabel cs:1) circle(2pt);
+        \draw [green,-stealth] (yticklabel* cs:1) -- (yticklabel cs:1);
+        \draw [blue,-stealth]  (yticklabel cs:1)  -- (name.center);
+        \draw [red,-stealth]   (name.north west)  -- (yticklabel cs:1);
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    图是一个带标准范围的带框三维坐标轴。它有三个手动放置的节点。
+    节点分别放在 |at (xticklabel cs:0.2)|、|at (xticklabel* cs:0.6)| 和
+    |at (yticklabel cs:1)|。`|at|' 位置用填充圆视觉强调。
+
+    尽管位置不同，我们清楚看到 |near xticklabel opposite| 的效果：
+    它使节点对齐到框内而非框外。注意，这是 `|near xticklabel opposite|'
+    和 `|near xticklabel|' 两个节点之间\emph{唯一}本质区别。
+
+    该图还显示了比较 `|at|' 位置时 |xticklabel cs| 和 |xticklabel* cs|
+    的区别。以 $x$ 轴上的两个节点为例。位置 |at (xticklabel cs:0.2)|
+    由绿色箭头平移。该箭头的长度恰好是最大 $x$ 刻度标签的长度。位置
+    |at (xticklabel* cs:0.6)| 正好在坐标轴上；它忽略任何刻度标签的大小。
+    注意，绿色箭头的方向是``$x$ 方向的外法向量''（在本例中，
+    它是带适当符号的 $z$ 和 $y$ 单位向量之和）。
+
+    |near xticklabel opposite| 和 |near xticklabel| 的区别是绿色箭头
+    （``外法线''）的方向翻转。
+
+    节点还强调 anchor 如何工作。此技术对 |anchor=near xticklabel| 和
+    |anchor=near xticklabel opposite| 几乎相同。让我们讨论文本为
+    `|near yticklabel|' 的节点的技术。黑色圆放在 |at (yticklabel cs:1)|。
+    该位置从 $y$ 轴 $100\%$ 处开始计算\footnote{在本例中，百分比和绝对值
+    恰好相同。}，沿绿色向量移动，其大小是最大 $y$ 刻度标签包围盒的大小。
+    一旦 `|at|' 位置固定，|near yticklabel| 的算法开始。首先，它计算节点
+    内部的 anchor，使我们不穿透 $y$ 轴。为此，它检查绿色向量的方向。
+    结果是 |north west|。然后，它考虑从 |(name.north west)| 开始、
+    与 $y$ 轴同方向的红线。注意，红线与 $y$ 轴平行。它还考虑蓝线。
+    该线指向绿线方向，由当前节点的 |center| 固定。红线和蓝线的精确交点
+    是 |anchor=near yticklabel| 的结果。其他两个节点同样如此：
+    红线始终平行于所考虑的坐标轴，并锚定在节点的``吸附到最近 anchor''。
+    蓝线始终平行于所考虑坐标轴的外法向量，并锚定在当前节点的 |center|。
+\end{anchorlist}
+
+\begin{pgfplotskey}{near ticklabel align=\mchoice{inside,center,outside} (initially center)}
+    允许修改 |anchor=near ticklabel| 的对齐算法。
+
+    在默认配置中，|anchor=near ticklabel| 及其变体采用节点的 |center|
+    以推导最终 anchor。这对应于上述 |near xticklabel opposite| 图示中
+    蓝线的目标。
+
+    此键修改此处使用的节点 anchor。选项 \declaretext{center} 可将节点
+    包围盒的一半移到关联坐标轴之外。选项 \declaretext{inside} 移动整个
+    节点包围盒，使其不在关联坐标轴之外。选项 \declaretext{outside}
+    移动整个节点包围盒，使其在关联坐标轴之外：
+    %
+\begin{codeexample}[width=4cm]
+\begin{tikzpicture}
+    \begin{axis}[
+        clip=false,
+        small,
+        title=\texttt{near ticklabel align},
+        min=0, max=1,
+        /tikz/node style/.style={
+            draw=yellow,
+            anchor=near yticklabel,
+            font=\tiny,
+        },
+    ]
+        \node [node style,/pgfplots/near ticklabel align=center]
+            (C) at (yticklabel cs:0) {\texttt{center}.};
+
+        \node [node style,/pgfplots/near ticklabel align=inside]
+            (I) at (yticklabel cs:1) {\texttt{inside}.};
+
+        \node [node style,/pgfplots/near ticklabel align=outside]
+            (O) at (yticklabel cs:1) {\texttt{outside}.};
+
+        \fill (yticklabel cs:0) circle(2pt);
+        \fill (yticklabel cs:1) circle(2pt);
+
+        \fill [blue] (C.center)     circle(1pt);
+        \fill [blue] (I.south west) circle(1pt);
+        \fill [blue] (O.north east) circle(1pt);
+
+        \draw [green,-stealth]  (yticklabel* cs:0) -- (yticklabel cs:0);
+        \draw [blue]            (yticklabel cs:0)  -- (C.center);
+        \draw [red,-stealth]    (C.north west)     -- (yticklabel cs:0);
+
+        \draw [green,-stealth]  (yticklabel* cs:1) -- (yticklabel cs:1);
+        \draw [blue]            (yticklabel cs:1)  -- (O.north east);
+        \draw [red,-stealth]    (O.north west)     -- (yticklabel cs:1);
+        \draw [red,-stealth]    (I.north west)     -- (yticklabel cs:1);
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    该示例与上面类似：生成一个默认范围的空坐标轴。然后，创建三个节点：
+    一个用于 \declaretext{center}，一个用于 \declaretext{inside}，
+    一个用于 \declaretext{outside}。|center| 的节点放在
+    |at (yticklabel cs:0)|（下方黑色圆）。我们看到其包围盒扩展了 $y$ 轴
+    的大小。这是因为使用其 anchor |C.center| 进行对齐。|inside| 和
+    |outside| 的节点都放在 |at (yticklabel cs:1)|（上方黑色圆）。
+    它们唯一区别是 |near ticklabel align| 的选择。|inside| 的节点不扩展
+    $y$ 轴大小；它放在其边界内——因为自动使用其内部 anchor
+    |(I.north east)|（蓝色）来对齐节点。|outside| 的节点完全在 $y$ 轴
+    扩展之外，因为选择了其（蓝色）anchor |(O.south west)|。
+
+    注意，红线始终相同。它们是``吸附到最近'' anchor，使节点在坐标轴外。
+    只有蓝色 anchor 的位置受此键影响。
+
+    注意，|near ticklabel align| 始终产生相同的对齐，与节点的实际
+    \emph{位置}无关。这是因为 |anchor| 独立于节点的 |at| 位置。
+    在此上下文中，名称``inside''和``outside''可能不是好选择：
+    它们强调节点选在坐标轴上端时的预期含义。但是，如果说
+    |at (yticklabel cs:0), near ticklabel align=inside|，它实际上会
+    最终位于坐标轴\emph{外}。这是因为``inside''anchor 的计算没有考虑
+    节点在哪里。
+%    FIXME : what is a better name!?
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{near ticklabel at=\marg{coordinate} (initially empty)}
+    有时，|anchor=near ticklabel| 会根据节点放置位置产生\emph{不同}的
+    anchor。这可能发生在 |polaraxis|。
+
+    如果需要此键，\PGFPlots{} 会发出警告``无法正确计算 anchor
+    `near ticklabel'，因为位置缺失。请添加 `near ticklabel at=coordinate'
+    并使用合适坐标''。
+
+    \PGFPlots{} 使用上下文信息确定正确信息，因此这可能不必要。
+    如果遇到此警告，应添加 |near ticklabel at=|\meta{value} 并使用合适值。
+\end{pgfplotskey}
+
+
+\begin{pgfplotsxykeylist}{%
+    /tikz/sloped like \x\space axis,%
+    /tikz/sloped like \x\space axis=\marg{options}%
+}
+    替换变换矩阵的旋转/缩放部分，使节点像提供的坐标轴一样倾斜。
+    对于二维图，|sloped like y axis| 实际上与 |rotate=90| 相同。
+    对于三维坐标轴，这会导致更大的区别：
+    %
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Variable 1,
+    ylabel=Variable 2,
+    zlabel=value,
+    xlabel style={sloped like x axis},
+    ylabel style={sloped},
+]
+    \addplot3 [surf] {y*x*(1-x)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    在坐标轴标签内部，|sloped| 是 |sloped like |\meta{char}| axis| 的别名，
+    自动选择正确的 \meta{char}。
+
+    请注意，旋转的文本看起来可能不太好（无论在屏幕上还是打印时）。
+
+    可以通过以下键自定义 |sloped like x axis|，这些键需要作为
+    \meta{options} 提供（简单忽略冗长的灰色键前缀）：
+    %
+\pgfkeys{
+    /pgfmanual/gray key prefixes={/pgfplots/sloped/},
+}
+    \begin{key}{/pgfplots/sloped/allow upside down=\mchoice{true,false} (initially false)}
+        使用 |sloped like x axis=allow upside down| 启用上下颠倒的标签。
+    \end{key}
+
+    \begin{key}{/pgfplots/sloped/execute for upside down=\mchoice{code} (initially empty)}
+        使用 |sloped like x axis={execute for upside down=\tikzset{anchor=north}}|
+        或类似方式自定义处理上下颠倒的文本节点（这由 |smithchart| 库使用）。
+    \end{key}
+
+    \begin{key}{/pgfplots/sloped/reset nontranslations=\mchoice{true,false} (initially true)}
+        使用 |sloped like x axis={reset nontranslations=false}| 以\emph{追加}
+        变换到实际变换矩阵（而非替换它）。
+    \end{key}
+
+    \begin{key}{/pgfplots/sloped/at position=\marg{position} (initially empty)}
+        此键可以为空或一个位置。它仅对变换取决于坐标轴位置的坐标轴（如
+        |polaraxis|）有用。
+    \end{key}
+\end{pgfplotsxykeylist}
+
+
+\subsection{标签}
+
+\begin{pgfplotsxykey}{\x label=\marg{text}}
+    这些选项将坐标轴标签设置为 \meta{text}，即任何 \TeX{} 文本。
+
+    要包含特殊字符，可使用花括号：``|xlabel={, = characters}|''。
+    如果需要逐字包含 `|=|' 或 `|,|' 等字符，这是必要的。
+
+    使用 |xlabel/.add=|\marg{prefix}\marg{suffix} 修改已分配的标签。
+
+    标签是 \Tikz{} 节点，放置时使用
+    %
+\begin{codeexample}[code only]
+% for x:
+\node [
+    style=every axis label,
+    style=every axis x label,
+]
+% for y:
+\node [
+    style=every axis label,
+    style=every axis y label,
+]
+\end{codeexample}
+    %
+    因此可自定义其位置和外观。
+
+    例如，多行 |xlabel| 可使用以下配置：
+    \index{xlabel!Multiline}
+    \index{xlabel!Line break}
+    %
+\begin{codeexample}[code only]
+\begin{axis}[xlabel style={align=right,text width=3cm},xlabel=A quite long label with a line break]
+...
+\end{axis}
+\end{codeexample}
+    %
+    \noindent 参阅 \cite{tikz} 了解关于 |align| 和 |text width| 的更多信息。
+
+    \paragraph{Upgrade notice:}
+
+    自 1.3 版起，标签放置\emph{可以}尊重相邻刻度标签的大小。在导言区使用
+    |\pgfplotsset{compat=1.3}|（或更新）激活此功能。详见 |xlabel near ticks|。
+
+    \begin{pgfplotsxykeylist}{%
+        \x label shift=\marg{dimension} (initially 0pt),label shift=\marg{dimension}%
+    }
+        沿坐标轴外法向量方向按 \meta{dimension} 量平移标签。|label shift|
+        将所有三个标签平移设为相同值。
+
+
+        \paragraph{注意：}
+
+        这仅在调用过 |\pgfplotsset{compat=1.3}|（或更新）时工作
+        （更精确地：如果相应坐标轴激活了 |xlabel near ticks|）。
+    \end{pgfplotsxykeylist}
+
+    \begin{pgfplotsxykeylist}{\x label near ticks,compat=1.3}
+        这些键将坐标轴标签（如 |xlabel|）放在刻度标签附近。如果刻度标签小，
+        标签将移近坐标轴。如果刻度标签大，坐标轴标签将远离坐标轴。这是
+        每个三维图的默认设置，但为向后兼容，二维图最初\emph{不}使用它。
+        示例见第~\pageref{key:near:ticklabel} 页 |near ticklabel| 的定义。
+
+        这些样式的定义为
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/xlabel near ticks/.style={
+        /pgfplots/every axis x label/.style={
+            at={(ticklabel cs:0.5)},anchor=near ticklabel,
+        },
+    },
+    /pgfplots/ylabel near ticks/.style={
+        /pgfplots/every axis y label/.style={
+            at={(ticklabel cs:0.5)},rotate=90,anchor=near ticklabel,
+        },
+    },
+}
+\end{codeexample}
+
+        建议编写
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{compat=1.3} % or newer
+\end{codeexample}
+        %
+        \noindent 在导言区安装文档级样式——它产生最佳输出（避免不必要的
+        空间）。最初未激活，是为了向后兼容早期版本中使用距刻度标签固定
+        距离的设置。
+    \end{pgfplotsxykeylist}
+
+    \begin{pgfplotsxykeylist}{\x label absolute,compat=pre 1.3}
+        安装坐标轴标签的放置样式，使 |xlabel| 产生与坐标轴绝对固定距离的
+        描述。这是初始配置（为向后兼容 1.3 之前的版本）。使用 |compat=1.3|
+        获得最新、更灵活的配置。示例见第
+        ~\pageref{key:near:ticklabel} 页 |near ticklabel| 的定义。
+
+        这些样式由以下定义：
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/xlabel absolute/.style={
+        /pgfplots/every axis x label/.style={at={(0.5,0)},below,yshift=-15pt},
+        /pgfplots/every x tick scale label/.style={
+            at={(1,0)},yshift=-2em,left,inner sep=0pt,
+        },
+    },
+    /pgfplots/ylabel absolute/.style={
+        /pgfplots/every axis y label/.style={at={(0,0.5)},xshift=-35pt,rotate=90},
+        /pgfplots/every y tick scale label/.style={
+            at={(0,1)},above right,inner sep=0pt,yshift=0.3em,
+        },
+    },
+}
+\end{codeexample}
+
+        三维坐标轴没有预定义的绝对放置样式。
+    \end{pgfplotsxykeylist}
+
+    只要可能，考虑使用 |/.append style| 而非覆盖默认样式，以确保与未来
+    版本兼容。
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis label/.append style={...}}
+\pgfplotsset{every axis x label/.append style={...}}
+\pgfplotsset{every axis y label/.append style={...}}
+\end{codeexample}
+\end{pgfplotsxykey}
+
+\begin{pgfplotskey}{title=\marg{text}}
+    向图添加标题。这将放置一个 \Tikz{} 节点：
+    %
+\begin{codeexample}[code only]
+\node [every axis title] {text};
+\end{codeexample}
+    %
+    到当前坐标轴。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    xlabel=Dof,ylabel=Error,
+    title={$\mu=0.1$, $\sigma=0.2$},
+]
+    \addplot coordinates {
+        (5,    8.312e-02)
+        (17,   2.547e-02)
+        (49,   7.407e-03)
+        (129,  2.102e-03)
+        (321,  5.874e-04)
+        (769,  1.623e-04)
+        (1793, 4.442e-05)
+        (4097, 1.207e-05)
+        (9217, 3.261e-06)
+    };
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+%--------------------------------------------------
+% \hfill
+% \begin{tikzpicture}
+% \begin{loglogaxis}[
+%     width=0.48\linewidth,
+%     xlabel=Dof,ylabel=Error,
+%     title={$\mu=1$, $\sigma=\frac{1}{2}$},
+% ]
+%     \addplot [color=red,mark=*] coordinates {
+%         (7,        8.472e-02)
+%         (31,    3.044e-02)
+%         (111,    1.022e-02)
+%         (351,    3.303e-03)
+%         (1023,    1.039e-03)
+%         (2815,    3.196e-04)
+%         (7423,    9.658e-05)
+%         (18943,    2.873e-05)
+%         (47103,    8.437e-06)
+%     };
+% \end{loglogaxis}
+% \end{tikzpicture}
+%--------------------------------------------------
+    %
+    标题的外观和/或位置可通过以下重新配置：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{title style={at={(0.75,1)}}}
+% or, equivalently,
+\pgfplotsset{every axis title/.append style={at={(0.75,1)}}}
+\end{codeexample}
+    %
+    这将把标题放在 $x$ 轴的~75\% 处。坐标~$(0,0)$ 是左下角，
+    ~$(1,1)$ 是右上角（详见 |axis description cs|）。
+
+    使用 |title/.add=|\marg{prefix}\marg{suffix} 修改已分配的标题。
+\end{pgfplotskey}
+
+\begin{pgfplotscodekey}{extra description}
+    允许在坐标轴标签、标题和图例排版后插入 \meta{commands}。
+
+    与所有其他坐标轴描述一样，代码可使用 $(0,0)$ 访问左下角，
+    $(1,1)$ 访问右上角。它不会被裁剪。
+    %
+\begin{codeexample}[]
+\pgfplotsset{
+    every axis/.append style={
+        extra description/.code={
+            \node at (0.5,0.5) {Center!};
+        },
+    },
+}
+\begin{tikzpicture}
+    \begin{axis}
+        \addplot {x^2};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotscodekey}
+
+
+\subsection{图例}
+\label{pgfplots:sec:legendopts}
+\label{pgfplots:sec:legendcmds}
+
+图例可以两种方式生成：第一种是在坐标轴内使用 |\addlegendentry| 或
+|\legend|。另一种方法是使用键 |legend entries|。
+
+\begin{command}{\addlegendentry\oarg{options}\marg{name}}
+    向图例列表添加单个图例条目。这也会启用到图例绘制。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \addplot [smooth,mark=*,blue] coordinates {
+        (0,2)
+        (2,3)
+        (3,1)
+    };
+    \addlegendentry{Case 1}
+
+    \addplot [smooth,color=red,mark=x]
+        coordinates {
+            (0,0)
+            (1,1)
+            (2,1)
+            (3,2)
+        };
+    \addlegendentry{Case 2}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    |\addlegendentry| 命令放在哪里无关紧要，只有顺序重要。每个
+    |\addplot| 命令需要一个 |\addlegendentry|（除非你喜欢空图例）。
+
+    可选 \meta{options} 影响文本绘制方式；它们仅适用于此特定描述文本。
+    例如，|\addlegendentry[red]{Text}| 产生红色图例文本。在幕后，
+    文本用 |\node|\oarg{options} \marg{name}|;| 放置，因此 \meta{options}
+    可以是任何影响节点的 \Tikz{} 选项。
+
+    使用 |\addlegendentry| 会禁用键 |legend entries|。
+    %
+\end{command}
+
+\begin{command}{\addlegendentryexpanded\oarg{options}\marg{\TeX{} text}}
+    |\addlegendentry| 的变体，提供处理 \meta{\TeX{} text} 内宏的方法。
+
+    假设 \meta{\TeX{} text} 包含某种参数，它\emph{对每个图}都不同。
+    此外，你喜欢用循环生成图。那么，使用 |\addlegendentryexpanded| 更简单：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+    \foreach \p in {1,2,3} {
+        \addplot {x^\p};
+            \addlegendentryexpanded{$x^\p$}
+    }
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    注意，此示例用 |\addlegendentry{$x^\p$}| 不会工作，因为当 \PGFPlots{}
+    尝试绘制图例时，宏 |\p| 已不再定义。
+
+    调用 |\addlegendentryexpanded{$x^\p$}| 等价于在 |\p| 展开为 |2| 时
+    调用 |\addlegendentry{$x^2$}|。
+
+    参数 \meta{\TeX{} text} 会展开直到只剩不可展开的材料
+    （即使用 \TeX{} 原语 |\edef|）。有时，\meta{\TeX{} text} 包含应展开
+    的部分（如 |\p|）和不应展开的部分（例如 |\pgfmathprintnumber{\p}|）。
+    此时，使用
+
+        |\noexpand\pgfmathprintnumber{\p}|
+
+    或等价地
+
+        |\protect\pgfmathprintnumber{\p}|
+
+    以避免紧跟 |\protect| 之后的宏展开。
+\end{command}
+
+\begin{command}{\legend\marg{list}}
+    可使用 |\legend|\marg{list} 分配完整图例。
+    %
+\begin{codeexample}[code only]
+\legend{$d=2$,$d=3$,$d=4$,$d=5$,$d=6$}
+\end{codeexample}
+    %
+    |\legend| 的参数是条目列表，每个图对应一个。
+
+    支持两种不同的分隔符：
+    %
+    \begin{enumerate}
+        \item 有逗号分隔的列表，如
+            %
+\begin{codeexample}[code only]
+\legend{$d=2$,$d=3$,$d=4$,$d=5$,$d=6$}
+\end{codeexample}
+            %
+            这些列表使用 \PGF{} |\foreach| 命令处理，非常强大。
+
+            |\foreach| 命令支持省略号表示法表示范围，如
+            |\legend{1,2,...,5}| 或甚至
+            |\legend{$x^1$,$x^...$,$x^d$}|。
+
+
+            \paragraph{注意句点：}
+
+            为避免与省略号 |...| 表示法混淆，可能需要用花括号括起
+            含句点的图例条目：|\legend{{ML spcm.},{CW spcm.},{ML AC}}|
+            （或使用 |\\| 分隔符，见下文）。
+
+        \item 也可以用 `|\\|' 分隔列表。此时，\emph{最后一个元素也必须用
+            |\\| 终止}：
+            %
+\begin{codeexample}[code only]
+\legend{$a=1, b=2$\\,$a=2, b=3$\\$a=3, b=5$\\}
+\end{codeexample}
+            %
+            此语法简化了图例条目内 `|,|' 的使用，但不支持省略号表示法。
+    \end{enumerate}
+    %
+    图例中显示的短标记/线组合从 |\addplot| 的 \meta{style options}
+    参数获取。
+
+    使用 |\legend| 会覆盖任何其他现有图例条目。
+\end{command}
+
+\begin{pgfplotskey}{legend entries=\marg{comma separated list}}
+    此键可用于分配图例条目，就像 |\addlegendentry| 和 |\legend| 命令一样。
+    同样，位置相对于坐标轴矩形（除非显式指定 |cm| 或 |pt| 等单位）。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend entries={$x$,$x^2$},
+]
+    \addplot {x};
+    \addplot {x^2};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    图例创建命令优先：仅当当前坐标轴中没有图例命令时，才考虑键
+    |legend entries|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend entries={$x$,$x^2$},
+]
+    \addplot {x};
+    \addplot {x^2};
+
+    \legend{$a$,$b$}    % overrides the option
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    请注意 \meta{comma separated list} 中的空格：它们会成为图例条目。
+    考虑在多行参数的每行末尾使用 `|%|'（换行符在 \TeX{} 中也是空格）。
+
+    与 |\addlegendentry| 一样，可以为单个描述提供 \oarg{options}。
+    为此，将选项放在文本前的方括号中：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend entries={$x$,[red]$x^2$,$x^3$},
+]
+    \addplot {x};
+    \addplot {x^2};
+    \addplot {x^3};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    如果方括号内包含逗号，可用花括号括起完整条目，如
+    |{[red,font=\Huge]Text}|（或使用 `|\\|' 分隔符）。
+\end{pgfplotskey}
+
+
+\subsection{图例外观}
+
+{%
+\pgfplotsset{
+    every axis/.append style={
+        width=3cm,
+        scale only axis,
+        legend style={
+            font=\footnotesize,
+        },
+    },
+}
+
+\begin{stylekey}{/pgfplots/every axis legend}
+    样式``|every axis legend|''决定图例的位置和外观：
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every axis legend/.append style={
+        at={(0,0)},
+        anchor=south west,
+    },
+}
+\end{codeexample}
+    %
+    将其绘制在坐标轴左下角，而
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every axis legend/.append style={
+        at={(1,1)},
+        anchor=north east,
+    },
+}
+\end{codeexample}
+    %
+    表示右上角。`|anchor|' 选项决定\emph{图例}的哪个点放在
+    $(0,0)$ 或 $(1,1)$。
+
+    图例是 \Tikz{} 矩阵，因此可使用任何影响节点和矩阵的 \Tikz{}
+    选项（参见~\cite[Chapters~13 and 14]{tikz}）。矩阵由类似以下方式创建：
+    %
+\begin{codeexample}[code only]
+\matrix [style=every axis legend] {
+    draw plot specification 1 & \node{legend 1}\\
+    draw plot specification 2 & \node{legend 2}\\
+    ...
+};
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    % this modifies 'every axis legend':
+    legend style={font=\large},
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    % align right:
+    legend style={
+        cells={anchor=east},
+        legend pos=outer north east,
+    },
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$, legend $2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+% similar placement as previous example:
+\pgfplotsset{
+    every axis legend/.append style={
+        at={(1.02,1)},
+        anchor=north west,
+    },
+}
+\begin{tikzpicture}
+\begin{axis}
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    使用 |legend columns=|\marg{number} 配置水平图例条目数。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\pgfplotsset{
+    every axis legend/.append style={
+        at={(0.5,1.03)},
+        anchor=south
+    },
+}
+\begin{axis}[
+    legend columns=4,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 不使用 |/.append style|，也可以使用 |legend style|，
+    如以下示例。效果相同。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend style={
+        at={(1,0.5)},
+        anchor=east},
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    \noindent 默认 |every axis legend| 样式为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis legend/.style={
+        cells={anchor=center},% Centered entries
+        inner xsep=3pt,inner ysep=2pt,nodes={inner sep=2pt,text depth=0.15em},
+        anchor=north east,
+        shape=rectangle,
+        fill=white,
+        draw=black,
+        at={(0.98,0.98)},
+    }
+}
+\end{codeexample}
+    %
+    只要可能，考虑使用 |/.append style| 保持默认样式激活。这确保与未来
+    版本兼容。
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis legend/.append style={...}}
+\end{codeexample}
+
+    注意，为禁用到图例框的绘制，可使用 |draw=none| 作为样式参数：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    tiny,
+    title=With legend box,
+]
+    \addplot [blue]{x};
+    \addplot [red]{2*x};
+
+    \legend{$x$,$2x$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    tiny,
+    title=Without legend box,
+    legend style={draw=none},
+]
+    \addplot [blue]{x};
+    \addplot [red]{2*x};
+
+    \legend{$x$,$2x$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{stylekey}
+
+
+\pgfplotsshortstylekey legend style=every axis legend\pgfeov
+
+
+\begin{pgfplotskey}{legend pos=\mchoice{%
+        south west,
+        south east,
+        north west,
+        north east,
+        outer north east%
+    }%
+}
+    一种样式，提供对一些常用图例位置的简写访问。
+
+    每个这样的样式都将
+    |at={(|\meta{x}|,|\meta{y}|)},anchor=|\meta{name} 值追加到
+    |every axis legend|。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend pos=south west,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend pos=south east,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend pos=north east,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend pos=north west,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend pos=outer north east,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{$l_1$,$l_2$,$l_3$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotskey}
+
+
+\begin{pgfplotskey}{legend cell align=\mchoice{left,right,center} (initially center)}
+    这些键提供图例单元格的水平对齐。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend cell align=left,
+    legend pos=outer north east,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{a,fine,legend}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend cell align=center,
+    legend pos=outer north east,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{a,fine,legend}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend cell align=right,
+    legend pos=outer north east,
+]
+    \addplot coordinates {(0,0) (1,1)};
+    \addplot coordinates {(0,1) (1,2)};
+    \addplot coordinates {(0,2) (1,3)};
+
+    \legend{a,fine,legend}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    它们实际上只是常用对齐选择的样式：选项 |left| 等价于
+    |legend style={cells={anchor=west}}|；第二个选项 |right| 等价于
+    |legend style={cells={anchor=east}}|，而 |center| 等价于
+    |legend style={cells={anchor=center}}|。使用不同值可对单元格对齐
+    进行更多控制。
+\end{pgfplotskey}
+}
+
+\begin{pgfplotskey}{legend columns=\marg{number} (default 1)}
+    允许配置相邻图例条目的最大数量。默认值~|1| 将图例条目垂直上下排列。
+
+    使用 |legend columns=-1| 水平绘制所有条目。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{legend plot pos=\mchoice{left,right,none} (initially left)}
+    配置小线规格绘制位置：描述左侧、描述右侧或不绘制。
+\end{pgfplotskey}
+
+\begin{stylekey}{/pgfplots/every legend image post}
+\label{key:legendimagepost}
+    一种样式，可用于为每个小图例图像提供绘制选项。这些选项在
+    |current plot style| 设置后应用，允许用户为图例使用与图不同的
+    线样式。
+
+    例如，假设有一个线图，并在其上绘制选定标记（同色）。那么，可能只想
+    绘制\emph{单个}图例条目（应同时包含线\emph{和}标记）。以下示例显示
+    解决方案：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    legend image post style={mark=*},
+]
+    \addplot+ [only marks,forget plot]
+        coordinates {(0.5,0.75) (1,1) (1.5,0.75)};
+    \addplot+ [mark=none,smooth,domain=0:2]
+        {-x*(x-2)};
+
+    \addlegendentry{Parabola}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 该示例有两个 |\addplot| 命令，一个用于线，一个用于标记。
+    由于 |forget plot| 选项，标记图（第一个）不推进 |cycle list|。
+    坐标轴只有一个图例条目，并且由于使用了 |legend image post style={mark=*}|，
+    图例也有图标记。由于 |forget plot| 选项，标记图不会获得单独的图例标签。
+\end{stylekey}
+
+\pgfplotsshortstylekey legend image post style=every legend image post\pgfeov
+
+\begin{pgfplotscodekey}{legend image code}
+\label{opt:legend:image:code}
+    允许替换图例内绘制的默认图像。当评估此键时，当前图规格已激活
+    （使用 |\begin{scope}[current|\allowbreak| plot style]|）%
+    \footnote{%
+        这在 1.3 之前的版本中不同。新的 scope 功能允许图样式修改
+        \texttt{legend image code}。
+    },
+    因此任何绘制操作都使用与 |\addplot| 命令相同的样式。
+
+    默认是样式 |line legend|。
+
+
+    \paragraph{技术说明：}
+
+    绘制图例图像时，样式 |every axis legend| 生效——由于参数改变，
+    它有不必要的副作用（特别是关于节点放置、对齐和偏移的参数）。
+    可能需要手动重置这些参数（\PGFPlots{} 也尝试重置填充颜色）。
+
+\end{pgfplotscodekey}
+
+\begin{stylekey}{/pgfplots/line legend}
+    一种样式，将 |legend image code| 设置（回）为其初始值。
+
+    其初始值为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/line legend/.style={
+        legend image code/.code={
+            \draw [mark repeat=2,mark phase=2,##1]
+                plot coordinates {
+                    (0cm,0cm)
+                    (0.3cm,0cm)
+                    (0.6cm,0cm)
+                };
+        },
+    },
+}
+\end{codeexample}
+
+    样式 |line legend| 也可用于为特定图应用不同的图例样式
+    （示例见 |area legend| 文档）。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/empty legend}
+    一种样式，清除 |legend image code|，从而省略图例图像。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/area legend}
+    一种样式，将 |legend image code| 设置为
+\begin{codeexample}[code only]
+\pgfplotsset{
+    legend image code/.code={
+        \draw [#1] (0cm,-0.1cm) rectangle (0.6cm,0.1cm);
+    },
+}
+\end{codeexample}
+
+% \usetikzlibrary{patterns}
+\begin{codeexample}[]
+% \usetikzlibrary{patterns}
+\begin{tikzpicture}
+\begin{axis}[area legend,
+    axis x line=bottom,axis y line=left,
+    domain=0:1,
+    legend pos=north west,
+    axis on top,xmin=0,
+]
+    \addplot [pattern=crosshatch dots,
+        pattern color=blue,draw=blue,
+        samples=500]
+            {sqrt(x)} \closedcycle;
+    \addplot [pattern=crosshatch,
+        pattern color=blue!30!white,
+        draw=blue!30!white]
+            {x^2}     \closedcycle;
+    \addplot [red,line legend]
+        coordinates {(0,0) (1,1)};
+    \legend{$\sqrt x$,$x^2$,$x$}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{stylekey}
+
+\begin{pgfplotsxykeylist}{\x bar legend,\x bar interval legend,single \x bar legend}
+    这些样式键重定义 |legend image code|，使图例使用 |xbar|、|ybar| 或
+    |xbar interval| 和 |ybar interval| 处理程序。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[legend pos=north west]
+    \addplot {x^3};
+    \addplot [
+        ybar,
+        ybar legend,
+        fill=red,
+        draw=red!60,
+        mark=none,
+        samples=5,
+    ] {-30*(x +4)};
+
+    \legend{first,second}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    如果有人想修改这些样式，它们的初始值可能有用。如下：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/xbar legend/.style={
+        /pgfplots/legend image code/.code={
+            \draw [##1,/tikz/.cd,bar width=3pt,yshift=-0.2em,bar shift=0pt]
+            plot coordinates {(0cm,0.8em) (2*\pgfplotbarwidth,0.6em)};
+        },
+    },
+    /pgfplots/ybar legend/.style={
+        /pgfplots/legend image code/.code={
+            \draw [##1,/tikz/.cd,bar width=3pt,yshift=-0.2em,bar shift=0pt]
+            plot coordinates {(0cm,0.8em) (2*\pgfplotbarwidth,0.6em)};
+        },
+    },
+    /pgfplots/xbar interval legend/.style={
+        /pgfplots/legend image code/.code={
+            \draw [##1,/tikz/.cd,yshift=-0.2em,bar interval width=0.7,bar interval shift=0.5]
+            plot coordinates {(0cm,0.8em) (5pt,0.6em) (10pt,0.6em)};
+        },
+    },
+    /pgfplots/ybar interval legend/.style={
+        /pgfplots/legend image code/.code={
+            \draw [##1,/tikz/.cd,yshift=-0.2em,bar interval width=0.7,bar interval shift=0.5]
+            plot coordinates {(0cm,0.8em) (5pt,0.6em) (10pt,0.6em)};
+        },
+    },
+    /pgfplots/single xbar legend/.style={
+        /pgfplots/legend image code/.code={
+            \draw[##1,/tikz/.cd,bar width=6pt,yshift=0.2ex,bar shift=0pt]
+            plot coordinates {(0.8em,0pt)};
+        },
+    },
+    /pgfplots/single ybar legend/.style={
+        /pgfplots/legend image code/.code={
+            \draw[##1,/tikz/.cd,bar width=6pt,yshift=-0.2em,bar shift=0pt]
+            plot coordinates {(0pt,0.8em)};
+        },
+    },
+}
+\end{codeexample}
+\end{pgfplotsxykeylist}
+
+\begin{pgfplotskey}{mesh legend}
+    重定义 |legend image code|，使其与 |mesh| 和 |surf| 绘图处理程序兼容
+    （主要用于三维可视化）。
+    %
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[legend pos=outer north east]
+        \addplot3 [surf,samples=9,domain=0:1]
+            {(1-abs(2*(x-0.5))) * (1-abs(2*(y-0.5)))};
+        \addlegendentry{$\phi_x \phi_y$}
+
+        \addplot3+ [ultra thick] coordinates {(0,0,0) (0.5,0,1) (1,0,0)};
+        \addlegendentry{$\phi_x $}
+
+        \addplot3+ [ultra thick] coordinates {(1,0,0) (1,0.5,1) (1,1,0)};
+        \addlegendentry{$\phi_y $}
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotskey}
+
+\begin{pgfplotskeylist}{%
+    reverse legend=\mchoice{true,false} (initially false),%
+    legend reversed=\mchoice{true,false} (initially false)%
+}
+    允许反转（图例条目，图样式）对的绘制顺序。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    reverse legend,
+]
+    \addplot {x};
+        \addlegendentry{$x$}
+    \addplot {x^2};
+        \addlegendentry{$x^2$}
+    \addplot {x^3};
+        \addlegendentry{$x^3$}
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    transpose legend=\mchoice{true,false} (initially false),%
+    legend transposed=\mchoice{true,false} (initially false)%
+}
+    允许转置（图例条目，图样式）对的绘制顺序。
+
+    考虑一组 $3$ 个实验，每个包含 $2$ 个参数。我们可能想把它们画在一起，
+    如下例：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        legend columns=2,
+        legend pos=outer north east,
+        cycle multi list={
+            color list\nextlist
+            [2 of]mark list
+        },
+    ]
+        \addplot {-x};          \addlegendentry{A1}
+        \addplot {-x+1};        \addlegendentry{A2}
+
+        \addplot {-1.2*x + 4};  \addlegendentry{B1}
+        \addplot {-1.2*x + 5};  \addlegendentry{B2}
+
+        \addplot {-1.3*x + 9};  \addlegendentry{C1}
+        \addplot {-1.4*x + 10}; \addlegendentry{C2}
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    另一种方法是水平绘制——此时，我们想使用 |transpose legend| 获得
+    扁平图例：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    transpose legend,
+    legend columns=2,
+    legend style={at={(0.5,-0.1)},anchor=north},
+    cycle multi list={
+        color list\nextlist
+        [2 of]mark list
+    },
+]
+    \addplot {-x};          \addlegendentry{A1}
+    \addplot {-x+1};        \addlegendentry{A2}
+
+    \addplot {-1.2*x + 4};  \addlegendentry{B1}
+    \addplot {-1.2*x + 5};  \addlegendentry{B2}
+
+    \addplot {-1.3*x + 9};  \addlegendentry{C1}
+    \addplot {-1.4*x + 10}; \addlegendentry{C2}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    因此，|legend columns| 定义转置前的\emph{输入}列
+    （换言之，|legend columns| 指示结果图例的\emph{行}）。
+
+    转置图例仅在 |legend columns| $>1$ 时有效。注意，|reverse legend|
+    优先级更高：先应用它。
+\end{pgfplotskeylist}
+
+
+\subsection{使用 \texttt{\textbackslash label} 和 \texttt{\textbackslash ref} 的图例}
+\label{pgfplots:legend:labelref}
+
+\PGFPlots{} 为 \LaTeX{} 提供 |\label| 和 |\ref| 功能以手动组装图例，
+例如作为图标题的一部分。这些引用像通常的 \LaTeX{} 引用一样工作：
+|\label| 记住需要引用的位置和内容，|\ref| 展开为合适文本。在图的上下文中，
+|\label| 记住一个图的图规格，|\ref| 展开为也会在图例内使用的小图像。
+%
+\begin{codeexample}[]
+\begin{tikzpicture}[baseline]
+\begin{axis}
+    \addplot+ [
+        only marks,
+        samples=15,
+        error bars/y dir=both,
+        error bars/y fixed=2.5,
+    ] {3*x+2.5*rand};
+        \label{pgfplots:label1}
+
+    \addplot+ [mark=none] {3*x};
+        \label{pgfplots:label2}
+
+    \addplot {4*cos(deg(x))};
+        \label{pgfplots:label3}
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\begin{codeexample}[code only]
+The picture shows the estimations \ref{pgfplots:label1} which are subjected to noise.
+It appears the model \ref{pgfplots:label2} fits the data appropriately.
+Finally, \ref{pgfplots:label3} is only here to get three examples.
+\end{codeexample}
+%
+\noindent 该图显示估计值 \ref{pgfplots:label1}，它们受到噪声影响。
+看来模型 \ref{pgfplots:label2} 合适地拟合了数据。最后，
+\ref{pgfplots:label3} 只是这里用于给出三个示例。
+
+\begin{commandlist}{\label\marg{label name},\label\oarg{reference}\marg{label name}}
+    在 |\addplot| 后使用时，此命令创建名为 \meta{label name} 的
+    \LaTeX{} 标签。\footnote{此功能\emph{仅}在 \LaTeX{} 中可用，抱歉。}
+    如果此标签在某处用 |\ref|\marg{label name} 交叉引用，将插入关联的
+    图规格。
+    %
+\begin{codeexample}[]
+Label3 = \ref{pgfplots:label3};
+Label2 = \ref{pgfplots:label2}
+\end{codeexample}
+    %
+    该标签使用 |legend image code| 和最后一个图的图样式组装。任何
+    \PGFPlots{} 选项都会展开，直到只剩 \Tikz{}（或 \pgfname{}）选项；
+    这些选项用于获得独立标签。
+
+    更精确地，|\ref|\marg{label name} 生成的小图像为
+    %
+\begin{codeexample}[code only]
+\tikz [/pgfplots/every crossref picture] {...}
+\end{codeexample}
+    %
+    \noindent 其内容由 |legend image code| 和图样式决定。
+
+    第二种语法 |\label|\oarg{reference}\marg{label name} 允许为
+    |\addplot| 命令的特定片段加标签。它（目前）仅对 |scatter/classes|
+    有用：在那里，它允许引用散点图的特定类。详见第
+    ~\pageref{pgfplots:scatterclasses} 页。
+
+    注意，|\label| 信息，即使是这里的小 \Tikz{} 图片，也可与 |external|
+    库组合用于图像外部化，详见第~\ref{sec:pgfplots:export} 节
+    （特别是 |external/mode| 键）。换言之，即使定义坐标轴已被外部化，
+    引用仍有效。
+\end{commandlist}
+
+\begin{command}{\ref\marg{label name}}
+    可用于引用加标签的单个图。见上例。
+
+    这也与 |hyperref| 链接和 |\pageref| 协同工作。\footnote{早期版本的
+    \PGFPlots{} 在标题或节标题内使用时，需要
+    \texttt{\textbackslash protect\textbackslash ref}。这不再必要。}
+\end{command}
+
+\begin{key}{/pgfplots/refstyle=\marg{label name}}
+    可用于设置加标签的单个图的\emph{样式}。这允许写
+    %
+\begin{codeexample}[code only]
+\addplot[/pgfplots/refstyle={pgfplots:label2}]
+\end{codeexample}
+    %
+    \noindent 在某处。请注意，用 |.style| 定义样式可能更容易。
+\end{key}
+
+\begin{stylekey}{/pgfplots/every crossref picture}
+    一种样式，由图的交叉引用功能使用。默认是
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every crossref picture/.style={baseline,yshift=0.3em}}
+\end{codeexample}
+\end{stylekey}
+
+\begin{pgfplotskeylist}{%
+    invoke before crossref tikzpicture=\marg{\TeX{} code},
+    invoke after crossref tikzpicture=\marg{\TeX{} code}%
+}
+    在每个交叉引用图片之前或之后调用的代码。这适用于用 |\ref|、
+    |legend to name| 和 |colorbar to name| 图像生成的图例图像。
+
+    初始配置检查 |external| 库是否生效。如果是，它通过
+    |\tikzappendtofigurename{_crossref}| 修改生成的图名。
+    \index{crossref file suffix}
+\end{pgfplotskeylist}
+
+
+\subsection{坐标轴外的图例}
+
+有时，有多个相邻图，每个都有相同图例——只需\emph{一个}图例即可。
+但它应放在哪里？如何放置？一种解决方案是使用 |overlay| 键将图例排除在
+包围盒计算之外，并绝对放置使其合适。另一种是 |legend to name| 功能：
+
+\begin{pgfplotskey}{legend to name=\marg{name} (initially empty)}
+\label{key:legend:to:name}
+    启用到图例导出模式：不绘制图例，而是使用标签 \meta{name} 存储一组
+    自包含、独立的绘制命令。定义使用 |\label|\marg{name}，就像任何其他
+    \LaTeX{} 标签。该名称可使用
+
+    |\ref|\marg{name} 引用。
+
+    因此，在坐标轴外某处（甚至任何图片外）输入 |\ref|\marg{name}，
+    将导致图例被绘制。
+{
+\pgfplotsmanualdisablecolorforref
+\begin{codeexample}[vbox]
+\pgfplotsset{footnotesize,samples=10}
+\begin{center}% note that \centering uses less vspace...
+\begin{tikzpicture}
+    \begin{axis}[
+        legend columns=-1,
+        legend entries={$(x+0)^k$;,$(x+1)^k$;,$(x+2)^k$;,$(x+3)^k$},
+        legend to name=named,
+        title={$k=1$},
+    ]
+        \addplot {x};
+        \addplot {x+1};
+        \addplot {x+2};
+        \addplot {x+3};
+    \end{axis}
+\end{tikzpicture}
+%
+\begin{tikzpicture}
+    \begin{axis}[title={$k=2$}]
+        \addplot {x^2};
+        \addplot {(x+1)^2};
+        \addplot {(x+2)^2};
+        \addplot {(x+3)^2};
+    \end{axis}
+\end{tikzpicture}
+%
+\begin{tikzpicture}
+    \begin{axis}[title={$k=3$}]
+        \addplot {x^3};
+        \addplot {(x+1)^3};
+        \addplot {(x+2)^3};
+        \addplot {(x+3)^3};
+    \end{axis}
+\end{tikzpicture}
+\\
+
+\ref{named}
+\end{center}
+\end{codeexample}
+}
+
+    注意，只有\emph{第一个}图有 |legend entries|。因此，其图例将照常创建，
+    并存储在名`|named|'下，但不绘制。然后，存储的图例可在三个图下方用
+    |\ref{named}| 绘制。由于此上下文中没有图片，会创建 |\tikz| 图片，
+    并在其中绘制 |\matrix[/pgfplots/every axis legend]| 路径，产生的图例
+    就像它放在坐标轴内一样。
+
+    存储的图例将包含图例和图样式相关选项的当前活动值。这包括
+    |legend image code|、|every axis legend| 以及任何图样式选项
+    （还有更多）。算法工作方式与 |\label| 和 |\ref| 相同，即它保留任何
+    带 |/tikz/| 前缀的选项，并展开带 |/pgfplots/| 前缀的选项。
+
+    注意，图例用 |every axis legend| 绘制，即使放置选项可能选择为适合
+    坐标轴。你可能需要在定义存储图例的同一坐标轴中调整样式
+    （该值也会被复制和恢复）。
+
+    \paragraph{关于 \texttt{\string\ref}\marg{name}}
+
+    |\ref|\marg{name} 命令检索存储的图例（由 |legend to name| 定义）并绘制。
+
+{
+\pgfplotsmanualdisablecolorforref
+        |\ref{named}: | \ref{named}
+}
+
+    如果想让图例被导出\emph{且}在当前坐标轴内绘制，考虑使用
+    |extra description/.append code={\ref|\marg{name}|}|。
+
+    注意，|\ref| 可与 |external| 库组合用于图像外部化。换言之，即使定义
+    坐标轴已被外部化，图例仍工作，详见第~\ref{sec:pgfplots:export} 节
+    （特别是 |external/mode| 键）。
+
+    此外注意，此 |.aux| 文件相关内容（目前）仅在 \PGFPlots{} 由
+    \LaTeX{} 运行时支持，抱歉。
+
+    \begin{command}{\pgfplotslegendfromname\marg{name}}
+        此命令提供 |\ref|\marg{name} 的等价替代：它本质上效果相同，
+        但与 |hyperref| 包一起使用时不创建链接。\footnote{由于本手册使用
+        彩色链接，\texttt{\string\ref} 中的文本通常为蓝色。使用
+        \texttt{\string\pgfplotslegendfromname} 避免链接文本颜色，
+        legend (this has been applied to the manual styles here).}
+    \end{command}
+
+    \begin{stylekey}{/pgfplots/every legend to name picture}
+        一种样式，在图片外使用 |\ref| 时安装：将用
+        |\tikz[/pgfplots/every legend to name picture]| 创建新图片。
+
+        因此，你可重定义此样式设置对齐选项（如 |baseline|）。例如，初始化
+        %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    legend style={matrix anchor=west,at={(0pt,0pt)}},
+    every legend to name picture/.style={baseline},
+}
+...
+\end{codeexample}
+        %
+        将导致图例被定位，使其 |west|
+        锚点位于 |y=0pt| 处。|baseline| 选项将图例的这一点与
+        文本基线对齐（有关 |baseline| 的详细信息，请参阅
+        第~\ref{sec:pgfplots:sec:align} 节的文档）。
+    \end{stylekey}
+\end{pgfplotskey}
+
+
+\subsection{Legends with Customized Texts or Multiple Lines}
+
+\begin{command}{\addlegendimage\marg{options}}
+    为图例创建添加另一个图例图像。
+
+    每个 |\addplot| 命令将其图样式选项追加到列表，而 |\addlegendimage|
+    将 \meta{options} 添加到同一列表。
+
+    因此，效果就像你提供了 |\addplot|\oarg{options}，但
+    |\addlegendimage| 绕过通常与图相关的所有逻辑。换言之：除了图例，
+    坐标轴状态保持为好像命令未发出。甚至不推进当前图的索引。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+    domain=0:4,
+]
+    \addplot {x};   \addlegendentry{$x$}
+    \addplot {x^2}; \addlegendentry{$x^2$}
+    \addplot {x^3}; \addlegendentry{$x^3$}
+    \addlegendimage{empty legend}
+    \addlegendentry{---}
+    \addplot {x^(-1)}; \addlegendentry{$x^{-1}$}
+    \addplot {x^(-2)}; \addlegendentry{$x^{-2}$}
+    \addplot {x^(-3)}; \addlegendentry{$x^{-3}$}
+\end{semilogyaxis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    上例有六个图，每个都有图例条目。此外，它有一个 |\addlegendimage|
+    命令及其单独的图例条目。我们看到 |\addlegendimage| 需要自己的
+    图例条目，但它与图的处理本身分离。在本例中，我们选择
+    |empty legend| 作为分隔符样式。
+
+    使用 |\addlegendimage| 向图例提供自定义样式，例如记录坐标轴内的
+    自定义 |\draw| 命令。
+
+    可在 |\addlegendimage| 后调用 |\label|，就像普通样式一样。
+\end{command}
+
+有时，可能想要图例条目多行。这也可以用固定 |text width| 实现：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+    domain=0:4,
+]
+    \addplot {x};   \addlegendentry{$x$}
+    \addplot {x^2}; \addlegendentry{$x^2$}
+    \addplot {x^3}; \addlegendentry{$x^3$}
+    \addlegendimage{empty legend}
+    \addlegendentry [text width=25pt,text depth=]
+        {Neg. Sign:}
+    \addplot {x^(-1)}; \addlegendentry{$x^{-1}$}
+    \addplot {x^(-2)}; \addlegendentry{$x^{-2}$}
+    \addplot {x^(-3)}; \addlegendentry{$x^{-3}$}
+\end{semilogyaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 该示例为单个多行元素提供选项。注意，|legend style| 的初始
+配置使用 |text depth=0.15em|，需要手动重置为
+|text depth={}|。\footnote{也许将来我可以自动重置
+\texttt{text depth}。}
+
+\noindent 有两种方法效果相同，是下例的主题：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+    domain=0:4,
+    legend entries={
+      $x$,$x^2$,$x^3$,
+      {[text width=25pt,text depth=]Neg. Sign:},
+      $x^{-1}$,$x^{-2}$,$x^{-3}$},
+    % same effect:
+    % legend style={
+    %     nodes={text width=25pt,text depth=},}
+]
+    \addplot {x};
+    \addplot {x^2};
+    \addplot {x^3};
+    \addlegendimage{empty legend}
+    \addplot {x^(-1)};
+    \addplot {x^(-2)};
+    \addplot {x^(-3)};
+\end{semilogyaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 这里，|legend entries| 使用单键语法提供。注意，特殊选项作为
+图例条目的一部分提供，在文本前使用方括号。注释表示你也可以将
+|text width| 内容添加到 |legend style|，此时它适用于每个节点。
+
+注意，图例文本使用 |\node|\oarg{options} \marg{text}|;| 实现，因此任何
+产生有效 \Tikz{} 节点的内容都允许（这包括 \meta{text} 内的 |minipage|
+或 |tabular| 环境）。
+
+
+\subsection{轴线}
+\label{sec:pgfplots:axislines}
+
+{\small \emph{Pascal Wolkotte 的扩展}}
+\vspace{0.4cm}%
+
+\noindent 默认情况下，轴线绘制为 |box|，但可以改变 $x$ 轴和 $y$ 轴线的
+外观。
+
+\begin{pgfplotskeylist}{%
+    axis x line=\mchoice{box,top,middle,center,bottom,none} (initially box),
+    axis x line*=\mchoice{box,top,middle,center,bottom,none} (initially box),
+    axis y line=\mchoice{box,left,middle,center,right,none} (initially box),
+    axis y line*=\mchoice{box,left,middle,center,right,none} (initially box),
+    axis z line=\mchoice{box,left,middle,center,right,none} (initially box),
+    axis z line*=\mchoice{box,left,middle,center,right,none} (initially box),
+    axis lines=\mchoice{box,left,middle,center,right,none},
+    axis lines*=\mchoice{box,left,middle,center,right,none}%
+}
+    这些键允许选择轴线的位置。最后一个 |axis lines| 为每个坐标轴设置
+    相同值。
+
+    刻度和刻度标签也根据所选值放置。选项 |bottom| 将 $x$ 线画在
+    $y=y_{\min}$，|middle| 将 $x$~线画在 $y=0$，|top| 将其画在
+    $y=y_{\max}$。最后，|box| 是选项 |top| 和 |bottom| 的组合。
+    选项 |axis x line=none| 是 |hide x axis| 的别名。$y$ 和 $z$ 变体
+    类似工作。
+
+    |center| 情况是 |middle| 的同义词，两者都画通过相应坐标~$0$ 的线。
+    如果此坐标不是坐标轴极限的一部分，则选择下坐标轴极限。
+
+    星号版本 $\dotsc$|line*| \emph{仅}影响轴线，不校正坐标轴标签、
+    刻度线或其他（可能）受改变的轴线影响的键的位置。非星号版本实际上是
+    样式，设置星号键\emph{和}其他影响图布局的键：
+    %
+    \begin{itemize}
+        \item 在 |axis x line=box| 情况下，样式 |every boxed x axis|
+            将立即安装。
+        \item 在 |axis x line|$\neq$|box| 情况下，样式
+            |every non boxed x axis| 将立即安装。此外，其中一些选择将
+            修改坐标轴标签位置。
+    \end{itemize}
+    %
+    |axis y line| 和 |axis z line| 的处理类似。默认样式定义为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every non boxed x axis/.style={
+        xtick align=center,
+        enlarge x limits=false,
+        x axis line style={-stealth},
+    },
+    every boxed x axis/.style={},
+}
+\end{codeexample}
+    %
+    此外，将采取坐标轴标签样式的条件修改。例如，|axis x line=middle|
+    将设置
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis x label/.style={at={(current axis.left of origin)},anchor=south west}}
+\end{codeexample}
+    %
+    如果匹配的 $y$ 样式值为 |axis y line=right|，以及
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{every axis x label/.style={at={(current axis.right of origin)},anchor=south east}}
+\end{codeexample}
+    %
+    如果 |axis y line|$\neq$|right|。
+
+    如果默认不适合你的需要或品味，请随意覆盖这些样式。同样，这些样式
+    \emph{不}用于``星号''版本的变体（如 |axis lines*| 或 |axis x line*|）。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=$x$,ylabel=$\sin x$,
+]
+    \addplot [
+        blue,mark=none,
+        domain=-10:0,samples=40,
+    ] {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis x line=middle,
+    axis y line=right,
+    ymax=1.1, ymin=-1.1,
+    xlabel=$x$,ylabel=$\sin x$,
+]
+    \addplot [
+        blue,mark=none,
+        domain=-10:0,samples=40,
+    ] {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis x line=bottom,
+    axis y line=left,
+    xlabel=$x$,ylabel=$\sqrt{|x|}$,
+]
+    \addplot [
+        blue,mark=none,
+        domain=-4:4,samples=501,
+    ] {sqrt(abs(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    minor tick num=3,
+    axis y line=center,
+    axis x line=middle,
+    xlabel=$x$,ylabel=$\sin x$,
+]
+    \addplot [
+        smooth,blue,mark=none,
+        domain=-5:5,samples=40,
+    ] {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    minor tick num=3,
+    axis y line=left,
+    axis x line=middle,
+    xlabel=$x$,ylabel=$\sin x$,
+]
+    \addplot [
+        smooth,blue,mark=none,
+        domain=-5:5,samples=40,
+    ] {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    在 |middle| 情况下，样式 |every inner x axis line| 允许调整外观。
+
+    注意，三维坐标轴仅支持对每个坐标轴使用相同值，即三维坐标轴仅支持
+    |axis lines| 键（或者，对三维坐标轴更好，|axis lines*| 键——检查
+    哪个最好看）。三维轴线变体示例见第
+    ~\ref{sec:pgfplots:axislines:3d} 节。
+\end{pgfplotskeylist}
+
+\begin{pgfplotsxykey}{every inner \x\ axis line}
+\labelprefix\label{pgfplots:page:axislines}
+    一种样式键，可重定义以自定义\emph{内部}轴线的外观。内部轴线是
+    |axis x line| 的 |middle|（或 |center|）选项绘制的线，见上文。
+
+    此样式\emph{仅}影响线本身。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    minor tick num=1,
+    axis x line=middle,
+    axis y line=middle,
+    every inner x axis line/.append style={|->>},
+    every inner y axis line/.append style={|->>},
+    xlabel=$x$,ylabel=$y^3$,
+]
+    \addplot [blue,domain=-3:5] {x^3};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotsxykey}
+
+\begin{pgfplotsxykey}{every outer \x\ axis line}
+    与 |every inner x axis line| 类似，此样式配置作为外部框一部分的所有
+    轴线的外观。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    separate axis lines, % important !
+    every outer x axis line/.append style={-stealth},
+    every outer y axis line/.append style={-stealth},
+]
+    \addplot [
+        blue,id=DoG,
+        samples=100,domain=-15:15,
+    ] gnuplot {1.3*exp(-x**2/10) - exp(-x**2/20)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotsxykey}
+
+\begin{pgfplotskey}{axis line style=\marg{key-value-list}}
+    一个命令，将 \meta{key-value-list} 追加到\emph{所有}轴线外观样式。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{inner axis line style=\marg{key-value-list}}
+    一个命令，将 \meta{key-value-list} 追加到 |every inner x axis line|
+    和 $y$ 变体。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{outer axis line style=\marg{key-value-list}}
+    一个命令，将 \meta{key-value-list} 追加到 |every outer x axis line|
+    和 $y$ 变体。
+\end{pgfplotskey}
+
+\begin{pgfplotsxykey}{\x\ axis line style=\marg{key-value-list}}
+    一个命令，将 \meta{key-value-list} 追加到 $x$ 轴或 $y$ 轴的所有
+    轴线样式。
+\end{pgfplotsxykey}
+
+\begin{pgfplotsxykey}{every boxed \x\ axis}
+    一种样式，一旦设置 |axis x line=box|（|y|）就安装。
+
+    默认值为空。
+\end{pgfplotsxykey}
+
+\begin{pgfplotsxykey}{every non boxed \x\ axis}
+    一种样式，一旦 |axis x line|（|y|）设置为不同于 |box| 就安装。
+
+    默认值为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every non boxed x axis/.style={
+        xtick align=center,
+        enlarge x limits=false,
+        x axis line style={-stealth},
+    },
+}
+\end{codeexample}
+    %
+    \noindent 对 |y| 变体有类似值。请随意根据你的需要和品味重定义此样式。
+\end{pgfplotsxykey}
+
+\begin{pgfplotskey}{separate axis lines=\marg{true,false} (default true)}
+    启用或禁用每条轴线的独立路径命令。此选项\emph{仅}在轴线绘制为
+    \emph{框}时影响。
+
+    两种情况各有优缺点，恐怕没有合理的默认值（欢迎建议）。
+
+    |separate axis lines=true| 情况允许在每条轴线上绘制箭头，但它不能
+    很好地闭合边——在粗线情况下，会出现不令人满意的边。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    separate axis lines,
+    every outer x axis line/.append style=
+        {-stealth,red},
+    every outer y axis line/.append style=
+        {-stealth,green!30!black},
+]
+    \addplot [
+        blue,
+        samples=100,domain=-15:15,
+    ] {1.3*exp(0-x^2/10) - exp(0-x^2/20)};
+      % Unfortunately, there is a bug in PGF 2.00
+      % something like exp(-10^2)
+      % must be written as exp(0-10^2) :-(
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    |separate axis lines=false| 情况只为所有轴线发出\emph{一个}路径。
+    它绘制一种矩形，如果某些部分不需要，可跳过。优点是边正确闭合。
+    缺点是路径最多添加一个箭头（是的，只能有一种绘制颜色）。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    separate axis lines=false,
+    every outer x axis line/.append style=
+        {-stealth,red},
+    every outer y axis line/.append style=
+        {-stealth,green!30!black},
+]
+    \addplot [
+        blue,id=DoG,
+        samples=100,domain=-15:15,
+    ] gnuplot {1.3*exp(-x**2/10) - exp(-x**2/20)};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotskey}
+
+
+\subsection{Moving Axis Lines}
+
+\PGFPlots{} offers styles to shift axis lines along their normal vector:
+
+\begin{pgfplotsxykeylist}{
+    axis \x\space line shift=\marg{dimension or unit} (initially empty), axis
+    line shift=\marg{dimension or unit} (initially empty)} 允许移动一条
+    或多条坐标轴线及其所有描述。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis line shift=10pt,
+    grid=major
+]
+    \addplot+ [samples=3] {x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    此选项取轴线并沿其``外法向量''平移。此方向对每个坐标轴已知；
+    它是指向远离中心的方向。
+
+    此操作常与 |axis lines| 变体组合，例如
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines=left,
+    axis line shift=10pt,
+    grid=major,
+]
+    \addplot+ [samples=3] {x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    记住，|axis lines=left| 也重新配置坐标轴，使其有箭头和
+    |enlargelimits=false|（另见 |axis lines*=left|）。自定义当然可能，
+    例如显示坐标轴端点的箭头：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines=left,
+    axis line style={|-stealth},
+    axis line shift=10pt,
+    grid=major,
+]
+    \addplot+ [samples=3] {x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    参数 \meta{dimension or unit} 可以是像 |10pt| 这样的尺寸（如前例）。
+    但是，它也可以按坐标轴单位给出：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines=center,
+    axis y line shift=2,
+    axis x line shift=100,
+    grid=major,
+]
+    \addplot+ [samples=3] {30*x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    在此上下文中，|axis y line shift=2| 沿 $x$ 轴平移 $y$ 轴 $2$ 个单位，
+    因为 $x$ 轴（带负号）是``外法线''。按坐标轴单位平移仅对二维图可行，
+    因为外法线在此良定义：它是另一个可用坐标轴。
+
+    |axis line shift| 功能也可应用于三维坐标轴（带 \meta{dimension}
+    参数，而非单位）。此时，平移也沿``外法向量''。注意，此向量是另外两个
+    坐标轴的组合，因此结果坐标轴不再与网格线对齐！谨慎使用此选项，
+    因为当你尝试将坐标轴描述与网格线对齐时，容易导致混淆。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines=left,
+    axis line shift=10pt,
+    grid=major,
+]
+    \addplot3 [surf,shader=interp,samples=2] {x+y};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    选项 |axis line shift| 是一种样式，为每个坐标轴配置 \meta{dimension}
+    的平移。
+
+    注意，|axis line shift| 隐含 |separate axis lines|，并将隐式配置
+    |hide obscured x ticks=false| 及其变体。
+        \index{separate axis lines!Combined with axis line shift}
+        \index{!hide obscured x ticks!Combined with axis line shift}
+\end{pgfplotsxykeylist}
+
+
+\subsection{双纵坐标（$y$ 轴）或多坐标轴}
+
+{%
+\pgfplotsset{every axis/.append style={width=4.5cm}}
+
+在某些应用中，如果 $x$ 范围相同，会使用多个 $y$ 轴。本节演示如何创建
+它们。\PGFPlots{} 中的思路是将两个坐标轴叠放，一个描述只在左侧，
+第二个描述只在右侧：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+        % let both axes use the same layers
+        \pgfplotsset{set layers}
+    \begin{axis}[
+        scale only axis,
+        xmin=-5,xmax=5,
+        axis y line*=left, % the '*' avoids arrow heads
+        xlabel=$x$,
+        ylabel=First ordinate,
+    ]
+        \addplot {x^2};
+    \end{axis}
+
+    \begin{axis}[
+        scale only axis,
+        xmin=-5,xmax=5,
+        axis y line*=right,
+        axis x line=none,
+        ylabel=Second ordinate,
+    ]
+        \addplot [red] {3*x};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent 因此，两个坐标轴``叠放''——一个包含 $x$ 轴和左 $y$ 轴，
+另一个\emph{仅}有右 $y$ 轴。由于 \PGFPlots{} 并不真正知道这里在做什么，
+需要用户注意以下可能不明显的方面：
+%
+\begin{enumerate}
+    \item 缩放。应设置 |scale only axis|，因为这强制两个坐标轴尺寸相等，
+        不考虑任何标签。
+    \item 相同 $x$ 极限。应显式设置这些极限。
+    \item 需要告诉 \PGFPlots{} 它应为两个坐标轴共享相同图形层。此时，
+        \PGFPlots{} 将第一个坐标轴和第二个坐标轴的图绘制到同一层。
+        它还将背景绘制到背景层，描述绘制到前景层。在第一个坐标轴前使用
+        键 |\pgfplotsset{set layers}| 为分层图形准备完整图片。
+\end{enumerate}
+%
+可能需要考虑不同的图例样式。也可以仅使用坐标轴，不带任何图：
+%
+% \usepackage{textcomp}
+\begin{codeexample}[]
+% \usepackage{textcomp}
+\begin{tikzpicture}
+    % let both axes use the same layers
+    \pgfplotsset{set layers}
+\begin{axis}[
+    scale only axis,
+    xmin=-5,xmax=5,
+    axis y line*=left,  %'*' avoids arrow heads
+    xlabel=$x$,
+    ylabel=Absolute,
+]
+    \addplot {x^2};
+\end{axis}
+\begin{axis}[
+    scale only axis,
+    xmin=-5,xmax=5,
+    ymin=0,ymax=1000,
+    yticklabel={
+        $\pgfmathprintnumber{\tick}$\textperthousand
+    },
+    axis y line*=right,
+    axis x line=none,
+    ylabel=per thousand,
+]
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+}
+
+
+\subsection{坐标轴不连续}
+\label{sec:axis:discontinuities}
+
+{\small \emph{Pascal Wolkotte 的扩展}}
+\vspace{0.4cm}%
+
+\noindent 如果任一坐标轴的范围不包含零值，可以在对应轴线上用不连续
+装饰来可视化。
+
+\begin{pgfplotsxykey}{axis \x\ discontinuity=\mchoice{crunch,parallel,none} (initially none)}
+    在 $x$ 轴（或 $y$ 轴）上插入不连续装饰。这是为了可视化 $y$ 轴在其
+    $0$ 值处穿过 $x$ 轴，因为最小 $x$ 轴值为正或最大值为负。
+
+    此描述也适用于 |axis y discontinuity| 和 |axis z discontinuity|，
+    只需将 $x$ 分别替换为 $y$ 或 $z$。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis x line=bottom,
+    axis x discontinuity=parallel,
+    axis y line=left,
+    xmin=360, xmax=600,
+    ymin=0,   ymax=7,
+    enlargelimits=false,
+]
+    \addplot coordinates {
+        (420,2)
+        (500,6)
+        (590,4)
+    };
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis x line=bottom,
+    axis y line=center,
+    tick align=outside,
+    axis y discontinuity=crunch,
+    ymin=95, enlargelimits=false,
+]
+    \addplot [blue,mark=none,
+         domain=-4:4,samples=20,
+    ] {x*x+x+104};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotsxykey}
+
+坐标轴上刻度的放置可能出现问题。这可通过指定放置刻度的最小或最大坐标轴
+值来解决。
+
+\begin{pgfplotsxykeylist}{%
+    \x tickmin=\marg{coord} (default axis limits),
+    \x tickmax=\marg{coord} (default axis limits)%
+}
+\labelprefix\label{key:xytickminmax}
+    选项 |xtickmin|、|xtickmax| 和 |ytickmin|、|ytickmax| 允许定义坐标轴
+    刻度极限，即在此之前或之后不放置刻度的坐标轴值。坐标轴刻度极限外的
+    所有内容将不绘制。它们的默认值等于坐标轴极限。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    axis x line=bottom,
+    axis y line=center,
+    tick align=outside,
+    axis y discontinuity=crunch,
+    xtickmax=3,
+    ytickmin=110,
+    ymin=95, enlargelimits=false,
+]
+    \addplot [blue,mark=none,
+         domain=-4:4,samples=20,
+    ] {x*x+x+104};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotsxykeylist}
+
+\begin{pgfplotsxykeylist}{%
+    hide \x\ axis=\mchoice{true,false} (initially false),
+    hide axis=\mchoice{true,false} (initially false)%
+}
+\tikzset{external/figure name/.add={}{hideaxis_}}
+
+    允许隐藏选定的坐标轴或所有坐标轴。不绘制外矩形、刻度标记和标签。
+    只有标题和图例照常处理。
+
+    坐标轴缩放和裁剪（!）将照常进行，就像你未使用 |hide axis|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    hide x axis,
+    hide y axis,
+    title={$x^2\cos(x)$},
+]
+    \addplot {cos(x)*x^2};
+\end{axis}
+\end{tikzpicture}% <- eliminate space.
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    hide x axis,
+    axis y line=left,
+    title={$x^2\cos(x)$},
+]
+    \addplot {cos(x)*x^2};
+\end{axis}
+\end{tikzpicture}% <- eliminate space
+\end{codeexample}
+
+    注意，隐藏的坐标轴对结果图片的包围盒\emph{无}贡献，
+    \footnote{自 1.8 版起。} 见 |clip bounding box|。
+        \index{Bounding Box Control!hide axis}%
+    %
+\pgfplotsexpensiveexample
+% \usepgfplotslibrary{patchplots}
+\begin{codeexample}[]
+% requires \usepgfplotslibrary{patchplots}
+% and compat=1.8 or newer
+\begin{tikzpicture}
+\begin{axis}[hide axis]
+    \addplot3 [
+        patch,
+        patch type=biquadratic,
+        shader=interp,
+    ] coordinates {
+        (0,0,1) (6,1,0) (5,5,0) (-1,5,0)
+        (3,1,0) (6,3,0) (2,6,0) (0,3,0)
+        (3,3.75,0)
+    };
+\end{axis}
+\end{tikzpicture}% <- eliminate space
+\end{codeexample}
+    %
+    这可用于将需要坐标轴的 \PGFPlots{} 路径嵌入标准 \tikzname{} 图片。
+    另见第~\ref{sec:pgfplots:tikz:interoperability} 节，了解如何同步
+    \PGFPlots{} 图（通常会重缩放坐标）与标准 |tikzpicture| 的对齐。
+
+    注意，\PGFPlots{} 使用输入坐标确定图片的包围盒。此时，包围盒比着色
+    略小。解决方法是手动增大包围盒。
+
+    可能需要使用选项 |clip=false| 禁用 |clip| 路径。
+\end{pgfplotsxykeylist}
+
+
+\subsection{颜色条}
+\label{pgfplots:colorbar}
+
+\PGFPlots{} 支持可使用颜色映射的网格、曲面和散点图。虽然颜色映射可按
+第~\ref{sec:pgfplots:colormap} 节所述选择，但它们可用颜色条可视化。
+
+\begin{pgfplotskey}{colorbar=\mchoice{true,false} (initially false)}
+    启用或禁用颜色条。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar]
+        \addplot [mesh,ultra thick] {x};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar,colormap/greenyellow]
+        \addplot [mesh,ultra thick] {x};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[colorbar horizontal]
+    \addplot [mesh,ultra thick] {x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    颜色条仅对非零颜色数据范围的图有用，更精确地说，对有最小和最大
+    |point meta| 数据的图有用。通常，这适用于 |scatter|、|mesh| 或
+    |surf|（或类似）图，但也可手动设置 |point meta min| 和
+    |point meta max| 以绘制 |colorbar|。
+
+    颜色条只是普通坐标轴，放在其父坐标轴旁边。唯一区别是它们继承若干
+    样式如线宽和字体，并包含用当前坐标轴颜色映射着色的条。
+
+    颜色条在内部使用以下代码绘制：
+    %
+\begin{codeexample}[code only]
+\axis [
+    every colorbar,
+    colorbar shift,
+    colorbar=false,
+]
+    \addplot graphics {};
+\endaxis
+\end{codeexample}
+    %
+    \noindent 其中放置、对齐、外观和其他选项由
+    |every colorbar| 和 |colorbar shift| 两种样式完成。这些样式
+    以及可能的放置和对齐选项将在下面描述。
+
+
+    \paragraph{Remarks for special cases:}
+
+    \begin{itemize}
+        \item 由于每个图始终只有一个颜色条，因此该颜色
+            条使用颜色映射和颜色数据的坐标轴级配置。
+            请考虑使用 |colorbar source| 来选择特定 |\addplot|
+            命令的颜色数据限制。
+        \item 如果需要多个颜色条，则需要更新上面的绘制命令。
+            有关此特殊情况的详细信息，请参阅 |colorbar/draw/.code| 键。
+            this special case.
+    \end{itemize}
+\end{pgfplotskey}
+
+\begin{stylekey}{/pgfplots/colorbar right}
+    一种样式，重定义 |every colorbar| 和 |colorbar shift|，使颜色条放在
+    其父坐标轴右侧。
+
+    这是初始配置。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar right]
+        \addplot [mesh,thick,samples=150,domain=0.1:3] {1/x};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    样式 |colorbar right| 定义为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar right/.style={
+        /pgfplots/colorbar=true,
+        /pgfplots/colorbar shift/.style={xshift=0.3cm},
+        /pgfplots/every colorbar/.style={
+            title=,
+            xlabel=,
+            ylabel=,
+            zlabel=,
+            legend entries=,
+            axis on top,
+            at={(parent axis.right of north east)},
+            anchor=north west,
+            xmin=0,
+            xmax=1,
+            ymin=\pgfkeysvalueof{/pgfplots/point meta min},
+            ymax=\pgfkeysvalueof{/pgfplots/point meta max},
+            plot graphics/xmin=0,
+            plot graphics/xmax=1,
+            plot graphics/ymin=\pgfkeysvalueof{/pgfplots/point meta min},
+            plot graphics/ymax=\pgfkeysvalueof{/pgfplots/point meta max},
+            enlargelimits=false,
+            scale only axis,
+            height=\pgfkeysvalueof{/pgfplots/parent axis height},
+            x=\pgfkeysvalueof{/pgfplots/colorbar/width},
+            yticklabel pos=upper,
+            xtick=\empty,
+            colorbar vertical/lowlevel,
+        },
+    },
+    /pgfplots/colorbar vertical/lowlevel/.style={
+        plot graphics/lowlevel draw/.code 2 args={
+            \pgfuseshading{...} % some advanced basic level shading operations
+        },
+    },
+}
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    |colorbar right| \emph{重}定义 |every colorbar|。这意味着任何用户
+    自定义必须在 |colorbar right| \emph{之后}进行：
+    %
+\begin{codeexample}[code only]
+% correct:
+\begin{axis}[colorbar right, colorbar style={<some customization>}]
+% wrong, colorbar right resets the customization:
+\begin{axis}[colorbar style={<some customization>}, colorbar right]
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colorbar left}
+    一种样式，重定义 |every colorbar| 和 |colorbar shift|，使颜色条放在
+    其父坐标轴左侧。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar left]
+        \addplot [mesh,thick,samples=150]
+            {x*sin(deg(4*x))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    样式 |colorbar left| 定义为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar left/.style={
+        /pgfplots/colorbar right,
+        /pgfplots/colorbar shift/.style={xshift=-0.3cm},
+        /pgfplots/every colorbar/.append style={
+            at={(parent axis.left of north west)},
+            anchor=north east,
+            yticklabel pos=lower,
+        },
+    },
+}
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    |colorbar left| \emph{重}定义 |every colorbar|。这意味着任何用户
+    自定义必须在 |colorbar left| \emph{之后}进行（另见 |colorbar right|
+    文档）。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colorbar horizontal}
+    一种样式，重定义 |every colorbar| 和 |colorbar shift|，使颜色条放在
+    其父坐标轴下方，带水平条。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[colorbar horizontal]
+    \addplot [
+        only marks,
+        scatter,
+        scatter src={
+            mod(\coordindex,15)
+        },
+        samples=150,
+    ] {rand};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    此样式定义为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar horizontal/.style={
+        /pgfplots/colorbar=true,
+        /pgfplots/colorbar shift/.style={yshift=-0.3cm},
+        /pgfplots/every colorbar/.style={
+            title=,
+            xlabel=,
+            ylabel=,
+            zlabel=,
+            legend entries=,
+            axis on top,
+            at={(parent axis.below south west)},
+            anchor=north west,
+            ymin=0,
+            ymax=1,
+            xmin=\pgfkeysvalueof{/pgfplots/point meta min},
+            xmax=\pgfkeysvalueof{/pgfplots/point meta max},
+            plot graphics/ymin=0,
+            plot graphics/ymax=1,
+            plot graphics/xmin=\pgfkeysvalueof{/pgfplots/point meta min},
+            plot graphics/xmax=\pgfkeysvalueof{/pgfplots/point meta max},
+            enlargelimits=false,
+            scale only axis,
+            width=\pgfkeysvalueof{/pgfplots/parent axis width},
+            y=\pgfkeysvalueof{/pgfplots/colorbar/width},
+            xticklabel pos=lower,
+            ytick=\empty,
+            colorbar horizontal/lowlevel,
+        },
+    },
+    /pgfplots/colorbar horizontal/lowlevel/.style={
+        plot graphics/lowlevel draw/.code 2 args={
+            \pgfuseshading{...} % some advanced basic level shading operations
+        },
+    },
+}
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    |colorbar horizontal| \emph{重}定义 |every colorbar|。这意味着任何用户
+    自定义必须在 |colorbar horizontal| \emph{之后}进行：
+    %
+\begin{codeexample}[code only]
+% correct:
+\begin{axis}[colorbar horizontal, colorbar style={<some customization>}]
+% wrong, colorbar horizontal resets the customization:
+\begin{axis}[colorbar style={<some customization>}, colorbar horizontal]
+\end{codeexample}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/every colorbar}
+\label{key:every:colorbar}
+    此样式管理颜色条的放置、对齐和外观。颜色条的任何所需细节更改都可
+    放入此样式。此外，有一个样式 |colorbar shift|，在 |every colorbar|
+    之后设置。后者样式旨在仅包含平移变换如 |xshift| 或 |yshift|
+    （使其更容易覆盖或停用）。
+
+    绘制颜色条时，预定义节点 |parent axis| 可用于对齐父坐标轴。
+
+    \begin{predefinednode}{parent axis}
+        颜色条父坐标轴的节点。仅对颜色条有效。
+    \end{predefinednode}
+
+    因此，
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar style={
+        at={(parent axis.right of north east)},
+        anchor=north west,
+    },
+    colorbar shift/.style={xshift=0.3cm},
+}
+\end{codeexample}
+    %
+    \noindent 放置颜色条，使其左上角（north west）与父坐标轴右上角
+    （|right of north east|）右侧对齐。与此处的 |colorbar shift| 组合
+    实际上与初始设置相同。
+
+    由于颜色条依赖于其父坐标轴的某些属性，这些属性作为以下键的值可用：
+
+    \begin{pgfplotskeylist}{%
+        point meta min,
+        point meta max%
+    }
+        这些键的值包含颜色映射的上下界，即颜色条的上下限。
+
+        在 |every colorbar| 内，值为
+        |\pgfkeysvalueof{/pgfplots/point meta min}|。
+
+        该值通常使用坐标轴范围的 point meta 极限确定，即在所有图上计算
+        最小值和最大值（除非用户手动提供极限）。如果想选择特定
+        |\addplot| 命令的 point meta 极限，考虑键 |colorbar source|。
+    \end{pgfplotskeylist}
+
+    \begin{pgfplotskey}{colorbar source=\marg{true,false} (initially false)}
+        允许选择特定 |\addplot| 命令，其 point meta 极限作为 |colorbar|
+        数据范围的上下限。这影响 |colorbar| 的刻度描述。它需要作为
+        |\addplot| 的参数提供，即使用
+        %
+\begin{codeexample}[code only]
+\addplot [...,colorbar source] ...
+% or
+\addplot+ [colorbar source] ...
+\end{codeexample}
+%
+        \noindent 或作为 |cycle list| 内的键。
+
+        使用 |colorbar source| 自动隐含该特定图的 |point meta rel=per plot|。
+
+        如果有多个带 |colorbar source| 的 |\addplot| 命令，选择最后一个。
+    \end{pgfplotskey}
+
+    \begin{pgfplotskeylist}{parent axis width,parent axis height}
+        这些键的值包含父坐标轴的大小。它们可用作 |every colorbar| 的
+        |width| 和/或 |height| 参数，使用
+        |\pgfkeysvalueof{/pgfplots/parent axis width}|。
+
+        这些值仅在颜色条内有效。
+    \end{pgfplotskeylist}
+
+    除这些值外，每个颜色条继承其父坐标轴的样式列表，即
+    %
+    \begin{itemize}
+        \item |every tick|,
+        \item |every minor tick|,
+        \item |every major tick|,
+        \item |every axis grid|,
+        \item |every minor grid|,
+        \item |every major grid|,
+        \item |every tick label|.
+    \end{itemize}
+    %
+    这可用于继承线宽和/或字体。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colorbar horizontal,
+    colorbar style={
+        at={(0.5,1.03)},
+        anchor=south,
+        xticklabel pos=upper,
+    },
+    title style={yshift=1cm},
+    title=Customization: ``colorbar top'',
+]
+
+    \addplot [
+        mesh,
+        thick,
+        samples=150,
+        domain=0.1:3,
+    ] {x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+    colorbar horizontal,
+    colorbar style={
+      at={(1,1.03)},anchor=south east,
+      width=0.5*
+        \pgfkeysvalueof{/pgfplots/parent axis width},
+      xticklabel pos=upper,
+    },
+    title style={yshift=1cm},
+    title=More Customization: ``colorbar top'',
+]
+    \addplot [
+        mesh,
+        thick,
+        samples=150,
+        domain=0.1:3,
+    ] {x};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    请查看预定义样式 |colorbar right|、|colorbar left| 和
+    |colorbar horizontal|，了解 |every colorbar| 配置可能性的更多详情。
+
+
+    \paragraph{说明：}
+
+    颜色条只是普通坐标轴。这意味着 |every colorbar| 可包含刻度标签位置、
+    额外刻度、缩放以及普通坐标轴的大多数其他功能（嵌套颜色条除外）。
+\end{stylekey}
+
+\begin{pgfplotskey}{colorbar style=\marg{key-value list}}
+    |every colorbar/.append style=|\marg{key-value list} 的简写。它将选项
+    追加到颜色条样式。
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{colorbar/width=\marg{dimension} (initially 0.5cm)}
+    设置颜色条的宽度。
+    %
+\pgfplotsexpensiveexample
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[
+        view/az=45,
+        colorbar,
+        colorbar/width=2cm,
+        colormap/blackwhite,
+    ]
+        \addplot3 [surf,domain=0:1,y domain=-3:3] {x*(1-x)*tanh(y)};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    对于水平颜色条，这设置高度。
+\end{pgfplotskey}
+
+\begin{stylekey}{/pgfplots/colorbar shift}
+    此样式在 |every colorbar| 之后安装。它旨在仅包含平移变换如 |xshift|
+    和/或 |yshift|。提供两个独立样式的原因是允许更容易停用平移变换。
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar shift/.style={xshift=1cm},
+}
+\end{codeexample}
+\end{stylekey}
+
+\begin{predefinednode}{current colorbar axis}
+    坐标轴颜色条的预定义节点。在 |\end{axis}| 后，此节点可用于将其他图形
+    元素对齐到颜色条。注意，|current axis| 指坐标轴本身，而
+    |current colorbar axis| 指颜色条（它本身是坐标轴）。
+\end{predefinednode}
+
+\begin{pgfplotscodekey}{colorbar/draw}
+    此代码键属于颜色条的低层接口。每当需要绘制颜色条时调用它。通常，
+    不需要显式使用或修改此键。
+
+    调用此键时，从父坐标轴继承的样式已设置，所需变量（见
+    |every colorbar| 文档）已初始化。
+
+    如果需要多个颜色条（或其他特殊情况），可替换此代码键。
+
+    初始配置为
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    colorbar/draw/.code={
+        \axis [every colorbar,colorbar shift,colorbar=false]
+            \addplot graphics {};
+        \endaxis
+    },
+}
+\end{codeexample}
+
+    请注意，颜色条坐标轴本身并不特殊——它只是普通坐标轴，带一个
+    |\addplot graphics| 命令，并使用特殊选项集调用。唯一特殊之处是
+    从其父坐标轴继承一组样式和一些变量。
+\end{pgfplotscodekey}
+
+\begin{stylekey}{/pgfplots/colorbar sampled=\marg{optional options} (default surf,mark=none,shader=flat)}
+    一种样式，安装离散采样的颜色条。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar sampled]
+        \addplot [mesh,samples=40] {sin(deg(x))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    \paragraph{注意：}
+
+    此样式仅改变 |colorbar| 的外观。使用 |colormap| 确定图颜色的方式
+    与此键无关。另见 |colormap access=direct|，了解影响颜色选择的方法。
+
+    此样式使用 |\addplot3|\oarg{options} 绘制 |colorbar|，|domain| 设为
+    颜色范围，|samples| 键的当前值确定样本数。换言之：它使用
+    |\addplot expression| 和曲面图可视化 |colorbar|。使用
+    |colorbar style={samples=10}| 改变样本数。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar sampled,colorbar style={samples=8}]
+        \addplot [mesh,samples=40] {sin(deg(x))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \meta{options} 可用于改变颜色条可视化使用的 |\addplot3| 选项。例如，
+    |colorbar sampled={surf,shader=interp}| 将使用 Gouraud 着色，视觉效果
+    与标准颜色条相同。
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colorbar sampled line=\marg{optional options} (default scatter,only marks)}
+    一种样式，绘制离散颜色条。与 |colorbar sampled| 相比，它使用线图
+    而非 |surf| 图可视化 |colorbar|。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[colorbar sampled line]
+        \addplot+ [scatter] {sin(deg(x))};
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    \paragraph{Attention:}
+
+    此样式仅改变 |colorbar| 的外观。|colormap|s 用于确定绘图颜色的方式
+    与此键无关。有关影响颜色选择的方式，另请参阅
+    |colormap access=direct|。
+
+    初始配置使用 |scatter| 图可视化 |colorbar|，可通过指定 \meta{options}
+    改变。
+
+    此外，坐标轴外观使用 |axis y line*=|\mchoice{left,right} 改变，
+    取决于颜色条位置（或对 |colorbar horizontal| 使用
+    |axis x line*=bottom|）。
+
+    如果喜欢刻度线在颜色条外而非内，考虑 |tick align=outside| 功能。
+
+    \begin{stylekey}{/pgfplots/every colorbar sampled line}
+        一种样式，由 |colorbar sampled line| 使用以改变线的颜色（不带刻度）。
+
+        它初始设为 |help lines|。
+    \end{stylekey}
+\end{stylekey}
+
+\begin{stylekey}{/pgfplots/colorbar as legend}
+    一种 |colorbar|，为每种颜色使用相同位置。它对非均匀位置的
+    |colormap| 有用，其中每个条目都需在 |colorbar| 中记录，即使它仅与
+    数据范围的``小''部分相关。
+
+    以下示例显示非均匀 |colormap| 的默认（比例）显示：每种颜色获得与其
+    区间所占``空间''一样多。
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colorbar style={
+        ticklabel style={font=\tiny},
+    },
+    colormap access=const,
+    colormap={CM}{
+        of colormap={
+            viridis,
+            target pos={
+                0,200,300,350,375,
+                400,700,800,850,1000
+            },
+            sample for=const,
+        },
+    },
+]
+\end{codeexample}
+
+    如果我们使用完全相同的 |colormap| 但可视化为 |colorbar as legend|，
+    每种颜色获得相同``空间''，与底层位置区间无关——它更像图例而非普通
+    |colorbar|：
+    %
+\begin{codeexample}[]
+\pgfplotscolorbardrawstandalone[
+    colorbar as legend,
+    colorbar style={
+        ticklabel style={font=\tiny},
+    },
+    colormap access=const,
+    colormap={CM}{
+        of colormap={
+            viridis,
+            target pos={
+                0,200,300,350,375,
+                400,700,800,850,1000
+            },
+            sample for=const,
+        },
+    },
+]
+\end{codeexample}
+    %
+    \noindent 显然，这样的 |colorbar| 失去了插值位置的能力；它变成查找表
+    （同样，更像图例）。
+
+    注意，|colorbar of legend| 安装以下样式：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    /pgfplots/colorbar style={
+        ticklabel style={
+            /pgf/number format/precision=3,
+            /pgf/number format/relative*=3,
+        },
+    },
+}
+\end{codeexample}
+    %
+    \noindent 这意味着所有刻度标签格式化为``相对于 $10^3$ 的
+    |precision=3|''，参见 \PGFPlotstable{} 中
+    |/pgf/number format/relative*| 的参考。\footnote{此精确数字格式最终会
+    改进——它对所有数字范围来说太有限了。}
+
+
+    \paragraph{限制：}
+
+    此样式最适合 |colormap access=const|，特别是与 |sample for=const|
+    组合时。\footnote{注意，\texttt{sample for=const} 添加一个虚拟颜色。
+    此虚拟颜色在显示 \texttt{colorbar as legend} 时省略，假设它是最后
+    一个区间的虚拟颜色。与连续 colormap 一起使用时可能产生意外效果。}
+    用于连续映射时可能产生意外结果。
+\end{stylekey}
+
+
+\subsection{坐标轴外的颜色条}
+
+有时，有多个相邻图，每个都有相同 |colormap| 和相同 |point meta min|、
+|point meta max| 值，我们想显示\emph{单个} |colorbar|。\PGFPlots{} 支持
+|colorbar to name| 功能，它类似于图例的相关方法 |legend to name|：
+
+
+\begin{pgfplotskey}{colorbar to name=\marg{name} (initially empty)}
+    启用从父坐标轴分离 |colorbar|：不绘制 |colorbar|，而是使用标签
+    \meta{name} 存储一组自包含、独立的绘制命令。标签使用 |\label|\marg{name}
+    定义，就像任何其他 \LaTeX{} 标签。该名称可使用
+
+    |\ref|\marg{name} 引用。
+
+    因此，在坐标轴外某处（甚至任何图片外）输入 |\ref|\marg{name}，
+    将导致 |colorbar| 被绘制。
+
+{
+    \pgfplotsmanualdisablecolorforref
+\begin{codeexample}[vbox]
+    \pgfplotsset{footnotesize,samples=10, domain=0:1,point meta min=0, point meta max=1}
+\begin{center}% note that \centering uses less vspace...
+    \begin{tikzpicture}
+        \begin{axis}[colorbar,colorbar horizontal,colorbar to name={storedcolorbar}]
+            \addplot [scatter,only marks,mark=*] {rnd};
+        \end{axis}
+    \end{tikzpicture}
+    %
+    \begin{tikzpicture}
+        \begin{axis}
+            \addplot+ [domain=0:1,mark=none,mesh] {x^2};
+        \end{axis}
+    \end{tikzpicture}
+    %
+    \begin{tikzpicture}
+        \begin{axis}[view={0}{90}]
+            \addplot3 [surf] {x*y};
+        \end{axis}
+    \end{tikzpicture}
+    \\
+
+    \ref{storedcolorbar}
+\end{center}
+\end{codeexample}
+}
+
+    此功能与 |legend to name| 所述工作方式相同，详情请参考第
+    ~\pageref{key:legend:to:name} 页的描述。我们这里仅总结区别。
+
+    \begin{command}{\pgfplotscolorbarfromname\marg{name}}
+        此命令提供 |\ref|\marg{name} 的等价替代：它本质上效果相同，
+        但与 |hyperref| 包一起使用时不创建链接。
+    \end{command}
+
+    \begin{stylekey}{/pgfplots/every colorbar to name picture}
+        一种样式，在图片外使用 |\ref| 时安装：将用
+        |\tikz[/pgfplots/every colorbar to name picture]| 创建新图片。
+
+        另见 |every legend to name picture| 样式。
+    \end{stylekey}
+\end{pgfplotskey}
+
+
+\subsection{刻度标签}
+
+刻度及其标签在第~\ref{sec:pgfplots:ticks} 节中记录。

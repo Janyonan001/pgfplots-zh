@@ -1,0 +1,366 @@
+
+\section{分组图}
+\label{sec:group:plot}
+
+{
+\def\pgfplotsmanualcurlibrary{groupplots}
+
+{\noindent {\emph{作者：Nick Papior Andersen}}}
+
+\index{Group library!Subplots}%
+\pgfkeys{/pdflinks/search key prefixes in/.add={/pgfplots/group/,}{}}
+
+
+\begin{pgfplotslibrary}{groupplots}
+    本库允许用户以矩阵结构排版多个图。常常需要将两个图相互比较，或者只是需要把
+    两个图并列显示。无论哪种情况，本节都将介绍本库，它使矩阵结构比
+    第~\ref{sec:pgfplots:arrayform} 节中讨论的其他方法更简便。
+\end{pgfplotslibrary}
+
+\begin{environment}{{groupplot}\oarg{options}}
+    加载 |groupplots| 库后，你即可使用该环境。本环境的限制与 |axis| 环境相同。
+    它实际上就是在 |axis| 环境之上构建的，可视为其扩展。需要注意的是，
+    \oarg{options} 会应用到整个环境中的所有图。当你需要相同的 |xmin|、|xmax|、
+    |ymin| 与 |ymax| 时，这非常方便。
+\end{environment}
+
+使用这样的环境，可以用矩阵形式排版图：
+%
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+% Example using groupplots library
+\begin{tikzpicture}
+    \begin{groupplot}[group style={group size=2 by 2},height=3cm,width=3cm]
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,1) (2,2)};
+    \nextgroupplot
+        \addplot coordinates {(0,2) (1,1) (2,0)};
+    \nextgroupplot
+        \addplot coordinates {(0,2) (1,1) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,2) (1,1) (1,0)};
+    \end{groupplot}
+\end{tikzpicture}
+    \qquad
+% Same example created as done without the library
+\begin{tikzpicture}
+    \begin{axis}[name=plot1,height=3cm,width=3cm]
+        \addplot coordinates {(0,0) (1,1) (2,2)};
+    \end{axis}
+    \begin{axis}[name=plot2,at={($(plot1.east)+(1cm,0)$)},anchor=west,height=3cm,width=3cm]
+        \addplot coordinates {(0,2) (1,1) (2,0)};
+    \end{axis}
+    \begin{axis}[name=plot3,at={($(plot1.south)-(0,1cm)$)},anchor=north,height=3cm,width=3cm]
+        \addplot coordinates {(0,2) (1,1) (2,1)};
+    \end{axis}
+    \begin{axis}[name=plot4,at={($(plot2.south)-(0,1cm)$)},anchor=north,height=3cm,width=3cm]
+        \addplot coordinates {(0,2) (1,1) (1,0)};
+    \end{axis}
+    \end{tikzpicture}
+\end{codeexample}
+
+等价代码见第二个例子，显然你需要敲的代码少得多。那么该如何使用呢？首先需要使用
+新环境 |groupplot|。在该环境内，以下命令可用。
+
+\begin{command}{\nextgroupplot\oarg{axis options} \meta{normal plot commands}}
+\label{cmd:pgfplots:nextgroupplot}
+    该命令用于移动下一个图的位置。因此，应当总是以 |\nextgroupplot| 命令开始
+    |groupplot| 环境，以创建第一个图。\oarg{axis options} 是应用于后续坐标轴的
+    选项，直到 \TeX{} 遇到下一个 |\nextgroupplot| 命令为止。图的排版顺序如下例所示。
+    %
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}[shorten >=4pt,shorten <=4pt]
+    \begin{groupplot}[group style={group size=2 by 2},
+        height=3.5cm,width=3.5cm,/tikz/font=\small]
+    \nextgroupplot%1
+        \addplot coordinates {(0,1) (1,0)};
+    \nextgroupplot%2
+        \addplot coordinates {(0,1) (1,0)};
+    \nextgroupplot%3
+        \addplot coordinates {(0,1) (1,0)};
+    \nextgroupplot%4
+        \addplot coordinates {(0,1) (1,0)};
+    \end{groupplot}
+    \draw [thick,>=latex,->,red]
+        (group c1r1.center) node {1.}  --
+        (group c2r1.center) node {2.};
+    \draw [thick,>=latex,->,red]
+        (group c2r1.center)  --
+        (group c1r2.center) node {3.};
+    \draw [thick,>=latex,->,red]
+        (group c1r2.center)  --
+        (group c2r2.center) node {4.};
+\end{tikzpicture}
+\end{codeexample}
+    %
+    图先填满第一行，然后是下一行，依此类推。就像表格一样，因此命名为
+    |group c|\meta{column}|r|\meta{row}。|groupplot| 的强大之处在于可以快速创建
+    对齐的图结构。但你也可以用它以更有创意的方式组织数据。看下一个例子。
+    %
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}
+  \begin{groupplot}[group style={group size=2 by 2,
+      horizontal sep=0pt,vertical sep=0pt,
+      xticklabels at=edge bottom},
+      xmin=0,ymin=0,
+      height=3.7cm,width=4cm,no markers]
+  \nextgroupplot[group/empty plot]
+  \nextgroupplot[xmin=5,xmax=10,ymin=50,ymax=100]
+    \addplot [very thick] file {plotdata/group-1.dat};
+  \nextgroupplot[xmax=5,ymax=50]
+    \addplot [very thick] file {plotdata/group-1.dat};
+  \nextgroupplot[xmin=5,xmax=10,ymax=50,yticklabels={}]
+    \addplot [very thick] file {plotdata/group-1.dat};
+  \end{groupplot}
+\end{tikzpicture}
+\end{codeexample}
+
+或者如下例那样对数据进行放大。
+%
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{groupplot}[group style={group size=3 by 1},xmin=0,ymin=0,height=4cm,width=5cm,no markers]
+    \nextgroupplot
+        \addplot [very thick] file {plotdata/group-1.dat};
+        \draw [red,dashed,thick] (0,0) rectangle (5,30);
+    \nextgroupplot[xmax=5,ymax=30]
+        \addplot [very thick] file {plotdata/group-1.dat};
+        \draw [red,dashed,thick] (3,10) rectangle (5,25);
+    \nextgroupplot[xmin=3,xmax=5,ymin=10,ymax=25]
+        \addplot [very thick] file {plotdata/group-1.dat};
+    \end{groupplot}
+    \draw [thick,blue,->,shorten >=2pt,shorten <=2pt]
+        (group c1r1.east) -- (group c2r1.west);
+    \draw [thick,blue,->,shorten >=2pt,shorten <=2pt]
+        (group c2r1.east) -- (group c3r1.west);
+\end{tikzpicture}
+\end{codeexample}
+\end{command}
+
+
+\subsection{分组选项}
+\label{sec:pgfplots:group:options}
+
+\begin{pgfplotskey}{group style=\marg{options with {\normalfont\texttt{group/}} prefix}}
+    该键使用 |/pgfplots/group/| 前缀设置所有 \meta{options}。
+
+    注意，区分 |group/| 与普通选项很重要，因为其中一些非常相似。
+
+    例如，下列语句都是等价的：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{group style={a=2,b=3}}
+\pgfplotsset{group/a=2,group/b=3}
+\pgfplotsset{group/.cd,a=2,b=3}
+\end{codeexample}
+\end{pgfplotskey}
+%
+以下所有键都位于子目录 |group| 中。
+
+\begin{pgfplotskeylist}{%
+    group/group size=\meta{columns} by \meta{rows} (initially 1 by 1),
+    group/columns=\meta{columns} (initially 1),
+    group/rows=\meta{rows} (initially 1)%
+}
+    这些键决定一个 |groupplot| 环境中最多可容纳的图数量。因此，环境中的
+    |\nextgroupplot| 数量不应超过 \meta{columns}$\times$\meta{rows}。
+    当使用多于 1 个图时，务必设置此项。由于键 |group size| 使用 |columns| 与
+    |rows|，你应当只使用 |group size|，或同时使用 |columns| 与 |rows|。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    group/horizontal sep=\meta{dimension} (initially 1cm),
+    group/vertical sep=\meta{dimension} (initially 1cm)%
+}
+    分别为水平方向与竖直方向上图之间的间距。若希望将它们\textit{紧贴}在一起，
+    则应将二者都设为 |0pt|。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskey}{group/every plot/.style=\marg{style} (initially empty)}
+    该样式作为第一个样式应用于每个图。因此它与 |groupplot| 环境中的
+    \meta{options} 等价。
+\end{pgfplotskey}
+
+\begin{pgfplotskeylist}{%
+    group/xlabels at=\mchoice{all,edge bottom,edge top} (initially all),
+    group/ylabels at=\mchoice{all,edge left,edge right} (initially all)%
+}
+    可以使用这些键来决定哪些图排版标签。默认情况下，所有坐标轴都会正常排版，
+    因此同时具有 $x$ 与 $y$ 轴标签。
+    %
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+            group name=my plots,
+            group size=2 by 2,
+            xlabels at=edge bottom,
+            ylabels at=edge left,
+        },
+        footnotesize,
+        width=4cm,
+        height=4cm,
+        %
+        xlabel=time $t$ / h,
+        ylabel=$c$ / mol/L,
+    ]
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \end{groupplot}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    在上面的例子中，只有最下面一行在 $x$ 轴上获得开头 |groupplot| 环境中定义的
+    标签，只有第一列的图在其左侧获得 $y$ 轴标签。这些键在使用\textit{紧贴}的图时
+    特别方便。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    group/xticklabels at=\mchoice{all,edge top,edge bottom} (initially all),
+    group/yticklabels at=\mchoice{all,edge left,edge right} (initially all)%
+}
+    可以使用这些键来决定哪些图排版刻度标签。默认情况下，所有坐标轴都会正常排版，
+    因此同时具有 $x$ 与 $y$ 轴刻度标签。若设置
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    group/xticklabels at=edge bottom,
+    group/yticklabels at=edge right,
+}
+\end{codeexample}
+    %
+    则只有最下面一行在 $x$ 轴上获得刻度标签，只有最后一列在其右侧获得 $y$ 轴
+    刻度标签。这些键在使用\textit{紧贴}的图时特别方便。
+
+    请记住，这意味着所有图使用相同的刻度。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskeylist}{%
+    group/x descriptions at=\mchoice{all,edge top,edge bottom} (initially all),
+    group/y descriptions at=\mchoice{all,edge left,edge right} (initially all)%
+}
+    这些只是同时使用 |xticklabels at| 与 |xlabels at| 的简写：
+    %
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+            group name=my plots,
+            group size=2 by 2,
+            %
+            x descriptions at=edge bottom,
+            y descriptions at=edge right,
+            horizontal sep=0.5cm,
+            vertical sep=0.5cm,
+        },
+        footnotesize,
+        width=4cm,
+        height=4cm,
+        %
+        xlabel=time $t$ / h,
+        ylabel=$c$ / mol/L,
+    ]
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \end{groupplot}
+\end{tikzpicture}
+\end{codeexample}
+
+    这里，|x descriptions at=edge bottom| 使 $x$ 描述（|xlabel| 与 |xticklabel|）
+    仅用于最下面一行；此外，|y descriptions at=edge right| 使 $y$ 描述仅用于
+    最右一列。可根据需要修改 |horizontal sep| 与 |vertical sep|。
+
+    与 |xticklabels at| 一样，使用该键意味着所有图使用相同的刻度。
+
+    这可能\emph{需要} |compat=1.3|（或更新版本）。
+\end{pgfplotskeylist}
+
+\begin{pgfplotskey}{group/group name=\marg{name} (initially group)}
+    这设置了排版后你可以引用这些图的名称。因此稍后可以使用它们的锚点。
+    见下例：
+    %
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+            group name=my plots,
+            group size=2 by 2,
+        },
+        width=4cm,height=4cm,
+    ]
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \end{groupplot}
+    \draw (my plots c1r1.east)
+        circle (3pt) node {East};
+    \draw (my plots c2r1.north)
+        circle (3pt) node {north};
+    \draw (my plots c1r2.center)
+        circle (3pt) node {center};
+    \draw (my plots c2r2.north west)
+        circle (3pt) node {North west};
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotskey}
+
+\begin{pgfplotskey}{group/empty plot/.style=\marg{style} (initially /pgfplots/hide axis)}
+    该键可用作 |\nextgroupplot| 命令的选项。它使下一个图不可见（仅坐标轴），
+    但保留其锚点与名称。若希望它以另一种样式表现，可以重新定义它。
+    考虑与前面相同的例子。
+    %
+% \usepgfplotslibrary{groupplots}
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+            group name=my plots,
+            group size=2 by 2,
+        },
+        width=4cm,height=4cm,
+    ]
+    \nextgroupplot[group/empty plot]
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \nextgroupplot
+        \addplot coordinates {(0,0) (1,2) (2,1)};
+    \end{groupplot}
+    \draw (my plots c1r1.east)
+        circle (3pt) node {East};
+    \draw (my plots c2r1.north)
+        circle (3pt) node {north};
+    \draw (my plots c1r2.center)
+        circle (3pt) node {center};
+    \draw (my plots c2r2.north west)
+        circle (3pt) node {North west};
+\end{tikzpicture}
+\end{codeexample}
+    %
+    注意，你需要再次调用 |\nextgroupplot| 才能跳到下一个图。
+\end{pgfplotskey}
+}

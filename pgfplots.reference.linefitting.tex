@@ -1,0 +1,207 @@
+
+\section{拟合直线——回归}
+\label{sec:linefitting}
+
+{
+\pgfkeys{
+    /pgfmanual/gray key prefixes={/pgfplots/table},
+}
+
+本节记录 \PGFPlots{} 为输入坐标拟合直线的尝试。\PGFPlots{} 目前支持应用于输入表格列的 |create col/linear regression|。该功能依赖于 \PGFPlotstable{}，它实际上是作为表格后处理方法实现的。
+
+\begin{stylekey}{/pgfplots/table/create col/linear regression=\marg{key-value-config}}
+\pgfkeys{
+    /pgfmanual/gray key prefixes={/pgfplots/table/create col/linear regression/},
+    /pdflinks/search key prefixes in/.add={/pgfplots/table/create col/linear regression/,}{},
+}
+    一个用于 |\addplot table| 的样式，它使用样本数据 $(x_i,y_i)$ 计算线性（最小二乘）回归 $y(x) = a \cdot x + b$，样本数据必须在 \meta{key-value-config} 内指定（见下文）。
+
+    它动态创建一个新列，其中包含值 $y(x_i) = a \cdot x_i + b$。值 $a$ 和 $b$ 将（全局）存储到 \declareandlabel{\pgfplotstableregressiona} 和 \declareandlabel{\pgfplotstableregressionb} 中。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+    \begin{axis}[legend pos=outer north east]
+        \addplot table {% plot X versus Y. This is original data.
+            X Y
+            1 1
+            2 4
+            3 9
+            4 16
+            5 25
+            6 36
+        };
+        \addplot table [
+            y={create col/linear regression={y=Y}}, % compute a linear regression from the input table
+        ] {
+            X Y
+            1 1
+            2 4
+            3 9
+            4 16
+            5 25
+            6 36
+        };
+        %\xdef\slope{\pgfplotstableregressiona} %<-- might be handy occasionally
+        \addlegendentry{$y(x)$}
+        \addlegendentry{%
+            $\pgfmathprintnumber{\pgfplotstableregressiona} \cdot x
+            \pgfmathprintnumber[print sign]{\pgfplotstableregressionb}$}
+    \end{axis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    上面的示例有两个图：一个显示数据，一个包含 |linear regression| 直线。我们在这里使用 |y={create col/linear regression={}}|，这意味着自动创建一个包含回归值的新列。\footnote{\texttt{y=\{create col/} 功能可用于任何其他 \PGFPlotstable{} 后处理样式，参见 \PGFPlotstable{} 手册中的 \texttt{create on use} 文档。}作为参数，我们需要显式提供 $y$ 列名。\footnote{事实上，\PGFPlots{} 看到只有两列，默认使用第二列。但如果至少有 3 列，你需要提供它。}$x$ 值由上下文确定：|linear regression| 在 |\addplot table| 内部求值，因此它使用与 |\addplot table| 相同的 $x$（即如果你写 |\addplot table[x=|\marg{col name}|]|，回归也将使用 \meta{col name} 作为其 |x| 输入）。此外，它在图例中显示直线参数 $a$ 和 $b$。
+
+    请注意，如果你有\emph{不止一条}回归线，带有 |\xdef\slope{\pgfplotstableregressiona}| 的取消注释行很有用：它将 |\pgfplotstableregressiona|（在本例中）的值复制到名为 `|\slope|' 的新全局变量中。这允许使用 `|\slope|' 代替 |\pgfplotstableregressiona|——即使在 |\pgfplotstableregressiona| 被覆盖之后。
+
+    以下 \meta{key-value-config} 键以逗号分隔列表形式被接受：
+
+    \begin{key}{%
+        /pgfplots/table/create col/linear regression/table=%
+            \marg{\textbackslash macro {\normalfont or} file name} (initially empty)%
+    }
+        提供从中加载 |x| 和 |y| 列的表格。它默认为当前处理的表格，即 |\pgfplotstablename| 的值。
+    \end{key}
+
+    \begin{keylist}{%
+        /pgfplots/table/create col/linear regression/x=\marg{column} (initially empty),
+        /pgfplots/table/create col/linear regression/y=\marg{column} (initially empty)%
+    }
+        分别提供 $x_i$ 和 $y_i$ 数据的来源。参数 \meta{column} 通常是输入表格的列名，但它也可以包含 |[index]|\meta{integer} 来指定列索引（从 $0$ 开始）、|create on use| 规范或 |alias|（有关 |create on use| 和 |alias| 的详细信息，参见 \PGFPlotstable{} 手册）。
+
+        初始配置（空值）检查 |linear regression| 求值的上下文。如果它在 |\pgfplotstabletypeset| 内部求值，它使用第一和第二个表格列。如果它在 |\addplot table| 内部求值，它使用与 |\addplot table| 语句相同的 $x$ 输入。|y| 键需要显式提供（除非表格只有两列）。
+    \end{keylist}
+
+    \begin{keylist}{%
+        /pgfplots/table/create col/linear regression/xmode=\mchoice{auto,linear,log} (initially auto),
+        /pgfplots/table/create col/linear regression/ymode=\mchoice{auto,linear,log} (initially auto)%
+    }
+        启用或禁用对数坐标的处理。对数处理意味着在计算回归线之前应用 $\ln$，之后应用 $\exp$。
+
+        选项 |auto| 检查该列是否在 \PGFPlots{} 坐标轴内部求值。如果是，它使用嵌入坐标轴的坐标轴缩放。否则，它使用 |linear|。
+
+        对于对数坐标，|log basis x| 和 |log basis y| 键确定底数。
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}
+ \addplot table [x=dof,y=error2]
+    {pgfplotstable.example1.dat};
+  \addlegendentry{$y(x)$}
+
+ \addplot table [
+      x=dof,
+      y={create col/linear regression={y=error2}},
+ ] {pgfplotstable.example1.dat};
+
+  % might be handy occasionally:
+  %\xdef\slope{\pgfplotstableregressiona}
+ \addlegendentry{slope
+   $\pgfmathprintnumber{\pgfplotstableregressiona}$}
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+        包含 |\slope| 的（已注释）行在上面已解释；它允许在我们的示例中记住不同的回归斜率。
+    \end{keylist}
+
+    \begin{keylist}{%
+        /pgfplots/table/create col/linear regression/variance list=\marg{list} (initially empty),
+        /pgfplots/table/create col/linear regression/variance=\marg{column name} (initially empty)%
+    }
+        这两个键允许为单个数据点提供不确定性（方差）。高（相对）方差表示不可靠的数据点，值 $1$ 是标准值。
+
+        |variance list| 键允许直接以逗号分隔列表形式提供方差，例如
+
+        |variance list={1000,1000,500,200,1,1}|.
+
+        |variance| 键允许从表格 \meta{column name} 加载值。这样的列名（最初，见下文）从找到数据点的同一表格加载。\meta{column name} 也可以是 |create on use| 名称。
+        %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}
+ \addplot table [x=dof,y=error2]
+    {pgfplotstable.example1.dat};
+  \addlegendentry{$y(x)$}
+
+ \addplot table [
+      x=dof,
+        y={create col/linear regression={
+            y=error2,
+            variance list={1000,800,600,500,400},
+        }}
+ ] {pgfplotstable.example1.dat};
+
+ \addlegendentry{slope
+  $\pgfmathprintnumber{\pgfplotstableregressiona}$}
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+        如果同时给出 |variance list| 和 |variance|，将优先使用第一个。请注意，不必为每个数据点提供方差。
+    \end{keylist}
+
+    \begin{key}{/pgfplots/table/create col/linear regression/variance src=\marg{\textbackslash table {\normalfont or} file name} (initially empty)}
+        允许从另一个表格加载 |variance|。初始设置为空。如果外部表格中的 |variance| 列具有比预期更少的条目，这是可接受的，在这种情况下，只使用前几个。
+    \end{key}
+
+    \begin{key}{/pgfplots/table/create col/linear regression/variance format=\mchoice{linear,log} (initially log)}
+
+		默认配置假设方差已经以对数坐标给出，可能被证明不适用于指数函数。使用 |variance format=linear| 以将方差显式映射到对数坐标。即使未指定方差，这也适用：
+
+\begin{codeexample}[code only]
+% file plotdata/approx_exp.dat
+n  eapprox
+1  97.71828182845904
+2  101.38905609893065
+3  87.08553692318768
+4  92.59815003314424
+5  194.4131591025766
+6  410.4287934927351
+7  1174.6331584284585
+8  3032.9579870417283
+9  8198.083927575384
+10 22124.465794806718
+11 59973.14171519782
+\end{codeexample}
+        
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}
+	\addplot table[x=n,y=eapprox]
+		{plotdata/approx_exp.dat};
+	\addplot[no markers,red,thick] 
+		table [x=n,y={create col/linear regression={
+			y=eapprox,ymode=log,
+			variance format=linear}}]
+		{plotdata/approx_exp.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+	该选项也可以指定给坐标轴环境：
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{axis}[
+  ymode=log,
+  table/create col/linear regression/variance format=linear
+]
+	\addplot table[x=n,y=eapprox]
+		{plotdata/approx_exp.dat};
+	\addplot[no markers,red,thick] 
+		table [x=n,y={create col/linear regression={
+			y=eapprox,ymode=log}}]
+		{plotdata/approx_exp.dat};
+\end{axis}
+\end{tikzpicture}
+\end{codeexample}
+
+    \end{key}
+\end{stylekey}
+
+
+\paragraph{限制：}
+
+目前，\PGFPlots{} 仅支持线性回归，并且它仅支持与 |\addplot table| 一起的回归。此外，长输入表格可能需要相当长的时间。
+
+}

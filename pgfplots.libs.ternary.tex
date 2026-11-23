@@ -1,0 +1,630 @@
+
+\section{三元相图}
+\begingroup
+\def\pgfplotsmanualcurlibrary{ternary}
+
+\begin{pgfplotslibrary}{ternary}
+    本库用于绘制三元相图。
+
+    三元相图用于可视化三组分体系，三者之和为 $100\%$。三元相图是三角形坐标轴。
+\end{pgfplotslibrary}
+
+
+\subsection{三元坐标轴}
+
+\begin{environment}{{ternaryaxis}\oarg{options}}
+    三元坐标轴的坐标轴环境。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}
+    \addplot3 coordinates {
+        (0.81,    0.19,    0.00)
+        (0.76,    0.17,    0.07)
+        (0.66,    0.16,    0.16)
+        (0.76,    0.07,    0.17)
+        (0.81,    0.00,    0.19)
+    };
+
+    \addplot3 coordinates {
+        (0.85,    0.15,    0.00)
+        (0.82,    0.13,    0.05)
+        (0.73,    0.14,    0.13)
+        (0.82,    0.06,    0.13)
+        (0.84,    0.00,    0.16)
+    };
+    \legend{$10$\textdegree, $20$\textdegree}
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+    |ternaryaxis| 使用\emph{相对坐标}：每个数据点由 $x$、$y$、$z$ 三个分量组成。
+    它们之和构成一个具有 $100\%$（任意度量下）的复合实体。在标准配置中，
+    $x,y,z \in [0,1]$。单位区间并非必需：你也可以选择\emph{绝对数据范围}
+    $x \in [x_{\min},x_{\max}]$、$y \in [y_{\min},y_{\max}]$ 与
+    $z \in [z_{\min},z_{\max}]$。重要的是相对值
+    %
+        \[
+            \tilde x := \frac{x-x_{\min}}{x_{\max} - x_{\min}},\;
+            \tilde y := \frac{y-y_{\min}}{y_{\max} - y_{\min}},\;
+            \tilde z := \frac{z-z_{\min}}{z_{\max} - z_{\min}}
+        \]
+    %
+    之和为 $100\%$，即 $\tilde x + \tilde y + \tilde z = 1$。因此，\PGFPlots{}
+    计算 $\tilde x$、$\tilde y$ 与 $\tilde z$，并将它们解释为重心（三角）坐标。
+
+    要使其工作，\textbf{必须}精确提供 |xmin|、|xmax|、|ymin|、|ymax| 以及
+    |zmin|、|zmax|！初始配置将它们固定为单位区间。
+
+    幕后的过程是：数据点 $(x,y,z)$ 被放置在由下式确定的 $X,Y$ 处：
+    %
+        \[
+            \begin{bmatrix}
+                X(x,y,z)\\
+                Y(x,y,z)
+            \end{bmatrix}
+            =
+            \tilde x A + \tilde y B + \tilde z C
+            =
+            \begin{bmatrix}
+                \frac12 {\tilde x+2 \tilde z}\\
+                \frac{\sqrt 3}{2} {\tilde x}
+                %\frac12 \frac{\tilde x+2 \tilde z}{\tilde x+\tilde y+\tilde z}\\
+                %\frac{\sqrt 3}{2} \frac{\tilde x}{\tilde x+\tilde y+\tilde z}
+            \end{bmatrix}
+        \]
+    %
+    其中 $A=(\nicefrac12,\nicefrac{\sqrt3}{2})$ 为三角形的顶角，$B=(0,0)$ 为左下角，
+    $C=(1,0)$ 为右下角。由于线性依赖 $\tilde x+\tilde y+\tilde z=1$，
+    $\tilde y$ 分量并非真正必需。
+
+    输入坐标 $(100\%,0\%,0\%)$ 映射到 $A$，输入坐标 $(0\%,100\%,0\%)$ 映射到 $B$，
+    $(0\%,0\%,100\%)$ 映射到 $C$（Acrobat Reader：点击坐标轴以验证）。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[xlabel=A,ylabel=B,zlabel=C]
+    \addplot3 coordinates {
+        (0.81,  0.19,  0.00)
+        (0.76,  0.17,  0.07)
+        (0.66,  0.16,  0.16)
+        (0.76,  0.07,  0.17)
+        (0.81,  0.00,  0.19)
+    };
+
+    \addplot3 coordinates {
+        (0.85,  0.15,  0.00)
+        (0.82,  0.13,  0.05)
+        (0.73,  0.14,  0.13)
+        (0.82,  0.06,  0.13)
+        (0.84,  0.00,  0.16)
+    };
+
+    \node [pin=130:Deduced $z$,draw=black] at (0.2,0.2) {};
+
+    \legend{$10$\textdegree, $20$\textdegree}
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+\end{environment}
+
+与普通 |axis| 一样，|ternaryaxis| 可以包含零个、一个或多个 |\addplot3| 命令。
+若你只提供二维坐标（例如使用 |\addplot| 或 |axis cs|），第三个分量会被自动推导，
+使各分量之和为 $100\%$。|\addplot3| 命令可以使用任何受支持的输入格式，例如
+|coordinates|、|table|、|expression| 等——但输入始终被解释为重心坐标（三个分量
+之和为 $100\%$）。
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    title=Sloped labels and minor ticks,
+    xlabel=Water,
+    ylabel=D-Threonine,
+    zlabel=L-Threonine,
+    label style={sloped},
+    minor tick num=2,
+]
+    \addplot3 coordinates {
+        (0.82,  0.18,  0.00)
+        (0.75,  0.17,  0.08)
+        (0.77,  0.12,  0.11)
+        (0.75,  0.08,  0.17)
+        (0.81,  0.00,  0.19)
+    };
+    \addplot3 coordinates {
+        (0.75,  0.25,  0.00)
+        (0.69,  0.25,  0.06)
+        (0.64,  0.24,  0.12)
+        (0.655, 0.23,  0.115)
+        (0.67,  0.17,  0.16)
+        (0.66,  0.12,  0.22)
+        (0.64,  0.11,  0.25)
+        (0.69,  0.05,  0.26)
+        (0.76,  0.01,  0.23)
+    };
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    title=Sloped labels and minor grids,
+    xlabel=Water,
+    ylabel=D-Threonine,
+    zlabel=L-Threonine,
+    label style={sloped},
+    minor tick num=2,
+    grid=both,
+]
+    \addplot3 coordinates {
+        (0.82,  0.18,  0.00)
+        (0.75,  0.17,  0.08)
+        (0.77,  0.12,  0.11)
+        (0.75,  0.08,  0.17)
+        (0.81,  0.00,  0.19)
+    };
+    \addplot3 coordinates {
+        (0.75,  0.25,  0.00)
+        (0.69,  0.25,  0.06)
+        (0.64,  0.24,  0.12)
+        (0.655, 0.23,  0.115)
+        (0.67,  0.17,  0.16)
+        (0.66,  0.12,  0.22)
+        (0.64,  0.11,  0.25)
+        (0.69,  0.05,  0.26)
+        (0.76,  0.01,  0.23)
+    };
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\noindent |ternaryaxis| 支持 \PGFPlots{} 坐标轴接口的（大部分）功能，其中包括
+|grid| 选项、通过 |xtick=|\marg{positions} 提供刻度的方式，以及 |extra x ticks|
+及其变体。当然，它也可以包含普通坐标轴的任何 |mark|、|color| 与 |cycle list|
+选项。
+
+\noindent 下例（粗略地）复制自
+
+\url{http://www.sv.vt.edu/classes/MSE2094_NoteBook/96ClassProj/experimental/ternary2.html}
+
+\noindent 并使用 |area style| 修改 |cycle list| 与图例外观。
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    title=Want--be--Stainless Steel,
+    xlabel=Weight Percent Chromium,
+    ylabel=Weight Percent Iron,
+    zlabel=Weight Percent Nickel,
+    label style=sloped,
+    area style,
+]
+    \addplot3 table {
+        A B C
+        1 0 0
+        0.5 0.4 0.1
+        0.45 0.52 0.03
+        0.36 0.6 0.04
+        0.1 0.9 0
+    };
+    \addlegendentry{Cr}
+
+    \addplot3 table {
+        A B C
+        1 0 0
+        0.5 0.4 0.1
+        0.28 0.35 0.37
+        0.4 0 0.6
+    };
+    \addlegendentry{Cr+$\gamma$FeNi}
+
+    \addplot3 table {
+        0.4 0 0.6
+        0.28 0.35 0.37
+        0.25 0.6 0.15
+        0.1 0.9 0
+        0 1 0
+        0 0 1
+    };
+    \addlegendentry{$\gamma$FeNi}
+
+    \addplot3 table {
+        0.1 0.9 0
+        0.36 0.6 0.04
+        0.25 0.6 0.15
+    };
+    \addlegendentry{Cr+$\gamma$FeNi}
+
+    \addplot3 table {
+        0.5 0.4 0.1
+        0.45 0.52 0.03
+        0.36 0.6 0.04
+        0.25 0.6 0.15
+        0.28 0.35 0.37
+    };
+    \addlegendentry{$\sigma$+$\gamma$FeNi}
+
+    \node [inner sep=0.5pt,circle,draw,fill=white,pin=-15:\footnotesize Stainless Steel]
+        at (0.18,0.74,0.08) {};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\indent\refstepcounter{pgfmanualentry}\label{page:ternary:contour}
+三元图也可以使用 |contour prepared| 绘制等高线。下面的例子（粗略地）复制自
+
+\url{http://www.sv.vt.edu/classes/MSE2094_NoteBook/96ClassProj/experimental/ternary2.html}：
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    title=Want--be--Stainless Steel,
+    xlabel=Weight Percent Chromium,
+    ylabel=Weight Percent Iron,
+    zlabel=Weight Percent Nickel,
+    label style=sloped,
+]
+    % plotdata/pgfplotsternary.example1.dat:
+    %
+    % Chromium Iron Nickel Temperature
+    % 0.90    0.0     0.10    1700
+    % 0.85    0.14    0.00    1700
+    %
+    % 0.85    0.00    0.15    1600
+    % 0.78    0.22    0.00    1600
+    % 0.71    0.29    0.00    1600
+    % ...
+    \addplot3 [contour prepared={labels over line},
+        point meta=\thisrow{Temperature}]
+            table [x=Chromium,y=Iron,z=Nickel]
+              {plotdata/pgfplotsternary.example1.dat};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+\noindent |contour prepared={labels over line}| 安装显示样式
+|contour/labels over line|，并期望输入流中包含预先计算好的等高线。这里，
+输入流是一个表格，包含铬、铁、镍三个相对分量——|point meta| 被设置为温度列。
+|contour prepared| 样式使用 $(x,y,z)$ 坐标绘制数据点，并使用 |point meta| 决定
+等高线标签（|contour prepared| 的初始配置为 |point meta=z|）。因此，输出既可以
+使用重心坐标（三元分量），\emph{又}可以使用等高线标签。
+
+\begin{pgfplotskeylist}{%
+    ternary limits relative=\mchoice{true,false} (initially true),
+    ternary relative limits=\mchoice{true,false} (initially true)%
+}
+    用于在 $[0,100]$ 范围内的相对数字与绝对数字之间切换刻度标签。
+
+    选择 |ternary limits relative=true| 时，接受任意输入数值范围的数据，例如
+    $(x,y,z) \in [0,1]^3$、$(x,y,z) \in [0,100]^3$，或形如
+    $x_i \in [\underline x_i,\overline x_i]$ 的任意绝对尺度，其中
+    $x_i \in \{x,y,z\}$（请记住，必须通过 |xmin|、|xmax|、|ymin|、|ymax| 与
+    |zmin|、|zmax| 显式将这些范围告知 \PGFPlots{}，以便计算相对坐标，细节见上文
+    描述）。无论哪种情况，都会绘制相对刻度标签，即 $[0,100]$ 范围内的刻度标签。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    ternary limits relative,
+    title={Data range $[0,1]$, limits relative},
+    area style,
+]
+    \addplot3 coordinates {
+        (0.2,0.8,0)
+        (0.31,0.4,0.29)
+        (0.34,0.2,0.46)
+        (0.4,0,0.6)
+        (1,0,0)
+    };
+    \addplot3 coordinates {
+        (0.4,0,0.6)
+        (0.34,0.2,0.46)
+        (0.31,0.4,0.29)
+        (0.14,0.46,0.4)
+        (0,0.37,0.63)
+        (0,0,1)
+    };
+    \node [fill=white]
+        at (axis cs:0.56,0.28,0.16) {$F 42$};
+    \node [fill=white]
+        at (0.7,0.2) {$F 43$};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    xmax=500,ymin=1,ymax=2,
+    ternary limits relative,
+    title={Data range $x\in[0,500]$,
+        $y\in[1,2]$, $z\in[0,1]$ limits relative},
+    area style,
+]
+    \addplot3 coordinates {
+        (100,1.8,0)
+        (155,1.4,0.29)
+        (170,1.2,0.46)
+        (200,1,0.6)
+        (500,1,0)
+    };
+    \addplot3 coordinates {
+        (200,1,0.6)
+        (170,1.2,0.46)
+        (155,1.4,0.29)
+        (70,1.46,0.4)
+        (0,1.37,0.63)
+        (0,1,1)
+    };
+    \node [fill=white]
+        at (axis cs:280,1.28,0.16) {$F 42$};
+    \node [fill=white]
+        at (0.7,0.2) {$F 43$};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+    选择 |ternary limits relative=false| 时，接受相同的数据范围，但会在相同的数据
+    范围内绘制刻度标签。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    ternary limits relative=false,
+    xmax=500,ymin=1,ymax=2,
+    title={Data range $x\in[0,500]$,
+        $y\in[1,2]$, $z\in[0,1]$ limits absolute},
+    footnotesize, % just for the sake of demonstration...
+    area style,
+]
+    \addplot3 coordinates {
+        (100,1.8,0)
+        (155,1.4,0.29)
+        (170,1.2,0.46)
+        (200,1,0.6)
+        (500,1,0)
+    };
+    \addplot3 coordinates {
+        (200,1,0.6)
+        (170,1.2,0.46)
+        (155,1.4,0.29)
+        (70,1.46,0.4)
+        (0,1.37,0.63)
+        (0,1,1)
+    };
+    \node [fill=white]
+        at (axis cs:280,1.28,0.16) {$F 42$};
+    \node [fill=white]
+        at (0.7,0.2) {$F 43$};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+\end{pgfplotskeylist}
+
+\begin{coordinatesystem}{cartesian cs}
+    一种允许笛卡尔坐标的坐标系。左下角点坐标为 $(0,0)$，右下角点为 $(1,0)$，
+    三角形顶点为 $(\nicefrac{1}{2},\nicefrac{\sqrt3}{2})$。
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    title=Cartesian Annotations,
+    clip=false,
+]
+    \addplot3 coordinates {
+        (0.1,0.5,0.4)
+        (0.2,0.5,0.3)
+        (0.3,0.6,0.1)
+    };
+    \node [fill=white,draw]
+        at (cartesian cs:0,0) {$y (0,0)$};
+    \node [fill=white,draw]
+        at (cartesian cs:1,0) {$z (1,0)$};
+    \node [fill=white,draw]
+        at (cartesian cs:0.5,{sqrt(3)/2})
+        {$x (\frac12,\frac{\sqrt3}{2})$};
+    \draw [red,-stealth]
+           (cartesian cs:0.5,0)
+        -- (cartesian cs:0.5,0.7);
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+    %
+    \noindent 注意，需要在坐标前加 |cartesian cs:|；否则 \PGFPlots{} 会将坐标
+    解释为 |ternary|（自 |compat=1.11| 起）。
+\end{coordinatesystem}
+
+\begin{stylekey}{/pgfplots/every ternary axis}
+    该样式在每个三元坐标轴开始时安装。它用于调整部分 \PGFPlots{} 键，以适应
+    三角形形状。
+
+    初始配置为：
+    %
+\begin{codeexample}[code only]
+\pgfplotsset{
+    every ternary axis/.style={
+        tick align=outside,
+        grid=major,
+        xticklabel style={anchor=west},
+        every 3d description/.style={},
+        every axis x label/.style={at={(ticklabel cs:0.5)},anchor=near ticklabel},
+        every axis y label/.style={at={(ticklabel cs:0.5)},anchor=near ticklabel},
+        every axis z label/.style={at={(ticklabel cs:0.5)},anchor=near ticklabel},
+        every x tick scale label/.style=
+          {at={(xticklabel cs:0.95,5pt)},anchor=near xticklabel,inner sep=0pt},
+        every y tick scale label/.style=
+          {at={(yticklabel cs:0.95,5pt)},anchor=near yticklabel,inner sep=0pt},
+        every z tick scale label/.style=
+          {at={(yticklabel cs:0.95,5pt)},anchor=near yticklabel,inner sep=0pt},
+        every axis title shift=15pt,
+        every axis legend/.style={
+            cells={anchor=center},
+            inner xsep=3pt,inner ysep=2pt,nodes={inner sep=2pt,text depth=0.15em},
+            shape=rectangle,
+            fill=white,
+            draw=black,
+            at={(1.03,1.03)},
+            anchor=north west,
+        },
+        annot/point format 3d/.initial={(\%.2f, \%.2f, \%.2f)},
+    },
+}
+\end{codeexample}
+\end{stylekey}
+
+
+\subsection{结线图}
+\label{sec:tieline}
+
+\begin{plottype}{tieline=\marg{options with {\normalfont tieline/} prefix}}
+\pgfkeys{/pdflinks/search key prefixes in/.add={/pgfplots/tieline/,}{}}
+    一种用于三元相图的绘图处理器，用于绘制结线与双节点曲线。
+
+    输入时，它接受坐标\emph{对}
+    $A^{(i)}=(A_x^{(i)},A_y^{(i)},A_z^{(i)})$ 与
+    $B^{(i)}=(B_x^{(1)},B_y^{(2)},B_z^{(3)})$，其中 $i=1,\dotsc,N$
+    （即总共需要六个坐标，可能再加上额外的颜色数据）。
+
+    输出时，它将这些对连接起来，即对每个固定的 $i=1,\dotsc,N$，连接
+    $A^{(i)}$ -- $B^{(i)}$（即所谓“结线”）。此外，它还绘制双节点曲线，该曲线由
+    连接所有 $A^{(i)}$、再按逆序连接所有 $B^{(i)}$ 构成：
+    $A^{(1)}$ -- $A^{(2)}$ -- $\dotsb$ -- $A^{(N)}$ -- $B^{(N)}$ -- $B^{(N-1)}$ --
+    $\dotsb$ -- $B^{(1)}$：
+    %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    xlabel=x (IPA),
+    ylabel=y (water),
+    zlabel=z (propene),
+    axis on top,
+]
+    % plotdata/ternary_data.txt is a table of the form
+    %A_propene A_water A_IPA  B_propene B_water B_IPA
+    % 0.0009   0.9990  0      0.9333    0.0667  0
+    % 0.0009   0.9988  0.0002 0.9303    0.0665  0.0032
+    % 0.0011   0.9975  0.0013 0.9135    0.0673  0.0191
+    % 0.0013   0.9962  0.0024 0.8956    0.0693  0.0351
+    %...
+    \addplot3 [tieline,fill=blue!10]
+        table [x=A_IPA,y=A_water,z=A_propene]
+            {plotdata/ternary_data.txt};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+    我们看到，每个输入行有六列，这六列都会被考虑（这与其他绘图处理器不同！）。
+    这六列分别构成 $A$ 点与 $B$ 点的三个分量。在上例中，我们使用了显式列名：
+    通过 |x=A_IPA| 提供 $A_x$，通过 |y=A_water| 提供 $A_y$，通过
+    |z=A_propene| 提供 $A_z$。注意，这些键是 |\addplot table| 的常用输入方式；
+    它们并无特别之处（这意味着也可以改用 |x index|）。$B$ 的三列可以手动提供
+    （见下），也可以自动推导：在本例中，$B_x$ 的值在 |x=A_IPA| 之后第三列找到
+    （即 |B_IPA|）；$B_y$ 的值在 |y=A_water| 之后第三列找到；$B_z$ 由
+    |z=A_propene| 之后第三列构成。换句话说，$B$ 值（默认）是通过在对应 $A$
+    坐标的列索引上加 $3$ 来搜索的。
+
+    你\emph{无需}提供\emph{任何}列名；此时前三列按出现顺序构成 $A$，后三列
+    构成 $B$。
+
+    |tieline| 图唯一支持的输入类型是表格输入。它针对 |\addplot3 table| 进行了优化
+    （如上所述）。若要使用二维变体 |\addplot table|，需要显式告知 \PGFPlots{}
+    哪些列构成 $A_x,A_y,B_x,B_y$；$z$ 坐标会被自动推导，使结果之和为 $100\%$。
+
+    \begin{pgfplotsxykeylist}{%
+        table/tie end \x=\marg{colname} (initially empty),
+        table/tie end \x\space index=\marg{col index} (initially empty)%
+    }
+        这些键分别用于为 $B_x$、$B_y$、$B_z$ 提供列名或列索引。可以这样提供：
+
+        |\addplot3[tieline] table[tie end y=B_water] ...|。
+
+        注意，|tie end x| 键\emph{仅}在之前已使用 |tieline| 选项时可用。
+
+        $A$ 的值通过 |table/x|、|table/x index| 及其变体提供，与其他绘图类型相同。
+    \end{pgfplotsxykeylist}
+
+    |tieline| 绘图处理器接受若干选项来自定义外观。可以在 |tieline| 之后作为参数
+    提供，使用 |tieline=|\marg{options}。此时可省略 |tieline/| 前缀。这些键如下：
+
+    \pgfkeys{/pgfmanual/gray key prefixes=/pgfplots/tieline}
+    \begin{pgfplotskey}{tieline/each nth tie=\marg{number} (initially empty)}
+        允许只绘制每隔第 $n$ 条结线，即使双节点曲线使用所有提供的坐标：
+        %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    xlabel=x (IPA),
+    ylabel=y (water),
+    zlabel=z (propene),
+    axis on top,
+]
+    % plotdata/ternary_data.txt is a table of the form
+    %A_propene A_water A_IPA  B_propene B_water B_IPA
+    % 0.0009   0.9990  0      0.9333    0.0667  0
+    % 0.0009   0.9988  0.0002 0.9303    0.0665  0.0032
+    % 0.0011   0.9975  0.0013 0.9135    0.0673  0.0191
+    % 0.0013   0.9962  0.0024 0.8956    0.0693  0.0351
+    %...
+    \addplot3 [
+        tieline={each nth tie=5},
+        fill=blue!10,
+    ] table [x=A_IPA,y=A_water,z=A_propene]
+        {plotdata/ternary_data.txt};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+        注意，绘图 |mark|（若有）会绘制在每个输入位置；可使用 |mark repeat|
+        选项改变这一行为。
+    \end{pgfplotskey}
+
+    \begin{pgfplotskey}{tieline/tieline style=\marg{options}}
+        将 \meta{options} 追加到样式 \declareandlabel{tieline/every tieline}。
+
+        有用的 \meta{options} 例如用于调整结线外观的其他绘图处理器。假设你为每条
+        结线都有额外的颜色数据（可能已作为额外输入列提供）。在本例中，我们使用
+        |point meta=rand| 提供随机颜色数据，并像使用 |contour prepared| 一样可视化
+        各条结线：
+        %
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{ternaryaxis}[
+    xlabel=x (IPA),
+    ylabel=y (water),
+    zlabel=z (propene),
+    axis on top,
+]
+    % plotdata/ternary_data.txt is a table of the form
+    %A_propene A_water A_IPA  B_propene B_water B_IPA
+    % 0.0009   0.9990  0      0.9333    0.0667  0
+    % 0.0009   0.9988  0.0002 0.9303    0.0665  0.0032
+    % 0.0011   0.9975  0.0013 0.9135    0.0673  0.0191
+    % 0.0013   0.9962  0.0024 0.8956    0.0693  0.0351
+    %...
+    \addplot3 [
+        point meta=rand,
+        tieline={
+            each nth tie=8,
+            tieline style={contour prepared},
+        },
+        fill=blue!10,
+    ] table [x=A_IPA,y=A_water,z=A_propene]
+        {plotdata/ternary_data.txt};
+\end{ternaryaxis}
+\end{tikzpicture}
+\end{codeexample}
+        %
+        \noindent 这里的效果是：为每条结线选择等高线标签与线条颜色，实际颜色由
+        |point meta| 与 |colormap| 决定。|tieline style| 中绘图处理器的其他选择
+        可以是 |mesh|。
+    \end{pgfplotskey}
+
+    \begin{pgfplotskey}{tieline/curve style=\marg{options}}
+        将 \meta{options} 追加到样式 \declareandlabel{tieline/every curve}。
+
+        |curve style| 允许自定义曲线的绘图处理器。可行的选择可以是
+        |curve style={smooth}|，或单独的填充/描边颜色。
+    \end{pgfplotskey}
+\end{plottype}
+\endgroup

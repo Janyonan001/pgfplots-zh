@@ -1,0 +1,410 @@
+\section{解决一个实际用例：科学数据分析}
+
+本节假设你做了某个科学实验。该科学实验产生了三张输入数据表：
+每个涉及的参数 $d=2$、$d=3$、$d=4$ 各一张。这些数据表包含“自由度”
+和某个精度度量“|l2_err|”。此外，它们可能还包含一些元数据
+（本例中是一列“level”）。例如，$d=2$ 的数据表可能存放在
+|data_d2.dat| 中，并可能包含
+%
+\begin{codeexample}[code only]
+dof        l2_err     level
+5          8.312e-02  2
+17         2.547e-02  3
+49         7.407e-03  4
+129        2.102e-03  5
+321        5.874e-04  6
+769        1.623e-04  7
+1793       4.442e-05  8
+4097       1.207e-05  9
+9217       3.261e-06  10
+\end{codeexample}
+%
+另外两张表与之类似，我们在这里提供它们是为了便于
+复现这些示例。$d=3$ 的表存放在 |data_d3.dat| 中，
+内容为
+%
+\begin{codeexample}[code only]
+dof        l2_err     level
+7          8.472e-02  2
+31         3.044e-02  3
+111        1.022e-02  4
+351        3.303e-03  5
+1023       1.039e-03  6
+2815       3.196e-04  7
+7423       9.658e-05  8
+18943      2.873e-05  9
+47103      8.437e-06  10
+\end{codeexample}
+%
+最后一张表是 |data_d4.dat|
+%
+\begin{codeexample}[code only]
+dof        l2_err     level
+9          7.881e-02  2
+49         3.243e-02  3
+209        1.232e-02  4
+769        4.454e-03  5
+2561       1.551e-03  6
+7937       5.236e-04  7
+23297      1.723e-04  8
+65537      5.545e-05  9
+178177     1.751e-05  10
+\end{codeexample}
+
+我们想做的是生成三幅图，每幅都是 dof 对 |l2_err|，放在双对数图中。
+我们预期结果在双对数图中是一条直线，并且我们
+关心它的斜率 $\log e(N) = -a \log(N)$，因为它刻画了我们的
+实验。
+
+
+\subsection{把数据读入 \TeX{}}
+\label{sec:tut2:step1}
+
+我们的第一步是把其中一张数据表读入 \PGFPlots{}。此外，
+我们还想为 $x$ 轴和 $y$ 轴添加坐标轴描述，并在图的顶部加一个标题。
+
+我们的第一版如下所示：
+%
+\begin{codeexample}[]
+%\documentclass{article}
+%\usepackage{pgfplots}
+%\pgfplotsset{compat=1.5}
+
+%\begin{document}
+
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    title=Convergence Plot,
+    xlabel={Degrees of freedom},
+    ylabel={$L_2$ Error},
+]
+    \addplot table {data_d2.dat};
+\end{loglogaxis}
+\end{tikzpicture}
+
+%\end{document}
+\end{codeexample}
+
+我们的示例与 Section~\ref{sec:tut1:step1} 那次讲座类似：它通过
+|title|、|xlabel| 和 |ylabel| 指定一些基本的坐标轴描述，并用
+|\addplot table| 提供数据。唯一的区别是我们使用了
+|\begin{loglogaxis}| 而不是 |\begin{axis}|，以便在两个坐标轴上
+配置对数刻度。另外注意，我们省略了 |\addplot| 之后的任何
+选项。如 Section~\ref{sec:tut1:step1} 所解释的，这会
+让 \PGFPlots{} 查阅它的 |cycle list|，以确定一个合适的选项
+列表。
+
+
+\subsection{加入示例中其余的数据文件}
+\label{sec:tut2:step2}
+
+\PGFPlots{} 接受多条 |\addplot ... ;| 命令——所以我们可以直接
+把其余数据文件加进来：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    title=Convergence Plot,
+    xlabel={Degrees of freedom},
+    ylabel={$L_2$ Error},
+]
+    \addplot table {data_d2.dat};
+    \addplot table {data_d3.dat};
+    \addplot table {data_d4.dat};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+你也许会好奇 \PGFPlots{} 是如何为不同图选择不同线型的。你也许还会
+好奇如何修改它们。其实，如果你只是写不带方括号选项的
+|\addplot|，\PGFPlots{} 会为那幅特定的图自动
+选择样式。这里“自动”的意思是它会查阅当前的
+|cycle list|：一组预定义样式，使每条 |\addplot| 语句
+得到其中一个样式。这个列表可以高度自定义。
+
+除了 |cycle list| 之外，你也可以轻松地手动提供样式选项。如果
+你写
+
+|\addplot[|\meta{options}|] ...|，
+
+\PGFPlots{} 将只使用 \meta{options}，并忽略它的 |cycle list|。如果
+像下面这样在方括号前写一个加号
+
+|\addplot+[|\meta{options}|] ...|，
+
+\PGFPlots{} 会把 \meta{options} 追加到自动分配的循环
+列表之后。
+
+
+\subsection{加上图例和网格}
+\label{sec:tut2:step3}
+
+图例是一段文字标签，说明各幅图是什么。可以使用 |legend entries|
+键为一条或多条 |\addplot| 语句提供图例：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    title=Convergence Plot,
+    xlabel={Degrees of freedom},
+    ylabel={$L_2$ Error},
+    grid=major,
+    legend entries={$d=2$,$d=3$,$d=4$},
+]
+    \addplot table {data_d2.dat};
+    \addplot table {data_d3.dat};
+    \addplot table {data_d4.dat};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+这里，我们指定了一个逗号分隔的文字标签列表，每条 |\addplot|
+指令一个。注意文字标签中数学模式的用法。另外注意，
+如果你的某个标签包含逗号，就必须用花括号把该项
+括起来。例如，我们本可以使用
+|legend entries={{$d=2$},{$d=3$},{$d=4$}}|——\PGFPlots{} 用这些花括号
+界定参数，之后再去掉它们（顺便说一句，这对任何选项都
+成立）。
+
+我们的示例还包含网格线，为此使用了 |grid=major| 键。它
+在所有坐标轴中激活主网格线。
+
+你也许会好奇这些文字标签是如何对应到 |\addplot| 指令的。其实，
+它们按序号对应。第一个标签赋给第一幅图，第二个
+标签赋给第二幅图，依此类推。如果你给某幅图加上
+|forget plot| 选项（例如使用 |\addplot+[forget plot]|），就可以把该图
+排除在这个计数之外。这样的图同时被排除在循环列表和
+图例之外。
+
+
+\subsection{加一条选定的拟合线}
+\label{sec:tut2:step4}
+
+有时，需要对输入样本计算线性回归直线。假设我们想为
+第四张数据表（|data_d4.dat|）中的数据计算一条拟合线。
+不过，我们假设图中有趣的部分出现在自由度数目达到某个
+渐近极限时（即非常大时）。因此，在计算拟合线时，我们想
+给前几个点赋予较高的
+不确定性。
+
+\PGFPlots{} 支持把表输入与数学表达式结合起来（注意，
+你也可以直接写纯数学表达式，不过这超出了本例的
+范围）。本例中，我们利用这个特性创建一个
+全新的列——线性回归直线：
+%
+\begin{codeexample}[]
+%\usepackage{pgfplotstable}
+%...
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    title=Convergence Plot,
+    xlabel={Degrees of freedom},
+    ylabel={$L_2$ Error},
+    grid=major,
+    legend entries={$d=2$,$d=3$,$d=4$},
+]
+    \addplot table {data_d2.dat};
+    \addplot table {data_d3.dat};
+    \addplot table {data_d4.dat};
+    \addplot table [
+      x=dof,
+      y={create col/linear regression={y=l2_err,
+       variance list={1000,800,600,500,400,200,100}}}]
+        {data_d4.dat};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+注意，我们又加了一个宏包：|pgfplotstable|。它允许对
+表做后处理（等等。它还有一个功能强大的表排版工具箱，
+能根据你输入的 CSV 文件对数字进行四舍五入和格式化）。
+
+这里，我们给坐标轴加了第四幅图。第一幅图同样是一条
+|\addplot table| 语句——我们看到它像前一幅图一样加载数据文件
+|data_d4.dat|。不过，它带有一些控制坐标输入的特殊键：
+|x=dof| 表示从名为“dof”的列加载 x 坐标。这与我们其他所有图
+本质上相同（因为“dof”列就是第一列）。它还使用
+|y={create col/...}|。这条长长的语句定义了一个全新的列。
+|create col/linear regression| 前缀是一个键，凡是
+可以生成新表列的地方都能使用它。一旦表被
+第一次查询，该语句就会被求值，然后应用于所有后续行。
+|create col/linear regression| 的参数表包含用于回归直线的
+函数值列名 |y=l2_err|（x 参数正如你猜对的那样，由 |x=dof|
+推出）。|variance list| 选项是可选的。我们用它给
+前几个输入点赋予方差
+（不确定性）。更确切地说：第一个遇到的数据点得到方差
+1000，第二个 800，第三个 600，依此类推。方差的个数不必与
+点数匹配；\PGFPlots{} 只是把它们与最先遇到的
+坐标配对。
+
+注意，由于我们的 |legend entries| 键只含三个值，
+回归直线没有图例项。如果想加，我们可以轻松加上一个。我们
+也可以使用 |\addplot+[forget plot] table[...]| 来如上所述显式
+抑制图例的生成。
+
+每当 \PGFPlots{} 遇到数学表达式时，它就使用内置的
+浮点单元。因此，它的数据范围非常大——精度也
+相当不错。
+
+
+\subsection{用 \Tikz{} 添加标注：斜率三角形}
+\label{sec:tut2:step5}
+
+数据往往需要解读——你可能想在图中突出特定的
+项。这种“突出特定项”需要画进
+坐标轴内部，而且需要高度的灵活性。\Tikz{} 的用户会说
+\Tikz{} 是理所当然的选择——确实如此。
+
+在我们的用例中，我们关心斜率。我们可能想比较
+不同实验的斜率。我们还可能想展示选定的斜率
+绝对值。
+
+这里，我们用 \Tikz{} 往 \PGFPlots{} 坐标轴中添加自定义标注。我们
+选择了一种特定类型的自定义标注：我们想在
+线图上标记两个点。一种做法是确定确切坐标，
+并在该坐标处放置一个图形元素（这可以用
+|\draw ... (1e4,1e-5) ... ;| 实现）。另一种（可能更简单的）做法是使用
+|pos| 功能来标识“线开始后 25\%”的位置。
+
+基于 Section~\ref{sec:tut2:step4} 的结果，我们得到
+%
+\begin{codeexample}[]
+%\usepackage{pgfplotstable}
+%...
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    title=Convergence Plot,
+    xlabel={Degrees of freedom},
+    ylabel={$L_2$ Error},
+    grid=major,
+    legend entries={$d=2$,$d=3$,$d=4$},
+]
+    \addplot table {data_d2.dat};
+    \addplot table {data_d3.dat};
+    \addplot table {data_d4.dat};
+    \addplot table [
+      x=dof,
+      y={create col/linear regression={y=l2_err,
+       variance list={1000,800,600,500,400,200,100}}}]
+        {data_d4.dat}
+            % save two points on the regression line
+            % for drawing the slope triangle
+            coordinate [pos=0.25] (A)
+            coordinate [pos=0.4]  (B)
+   ;
+    % save the slope parameter:
+    \xdef\slope{\pgfplotstableregressiona}
+
+    % draw the opposite and adjacent sides
+    % of the triangle
+    \draw (A) -| (B)
+         node [pos=0.75,anchor=west]
+         {\pgfmathprintnumber{\slope}};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+
+这个示例已经相当复杂，因为我们每一步都在增加复杂度。
+在深入细节之前，先看一个更简单的例子：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}
+    \addplot table {data_d2.dat}
+       coordinate [pos=0.25] (A)
+       coordinate [pos=0.4]  (B)
+    ;
+
+    \draw [-stealth] (A) -| (B);
+
+    \node [pin=0:Special.] at (769,1.623e-04) {};
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+这里，我们看到 \PGFPlots{} 提供的两种标注概念：第一种是
+在一条 |\addplot| 命令之后（但在
+结束分号之前）直接插入绘图命令。第二种是添加标准的 \Tikz{}
+命令，但使用指定的 \PGFPlots{} 坐标。两者都是
+\Tikz{} 的概念。第一种
+正是我们这里想要的：我们想标识出线上
+“某处”的两个坐标。本例中，我们定义两个命名坐标：坐标 $A$ 位于
+线的 25\% 处，坐标 $B$ 位于线的 40\% 处。然后，我们用
+\verb#\draw (A) -| (B)# 在这两点之间画一个三角形。第二种
+只在你事先知道某些绝对坐标时才有用。
+
+回到我们最初带回归直线的做法，可以看到它
+使用的是第一种概念：它在 |\addplot| 之后、
+结束分号之前引入命名坐标。语句 |\xdef\slope| 引入一个新的
+宏。它包含 |\pgfplotstableregressiona| 的值（因“eXpanded DEFinition”而被展开），
+即回归直线的斜率。除了斜率三角形之外，我们还加了一个节点，
+在其中用 |\pgfmathprintnumber| 排版该值。
+
+注意，上面的例子其实是一个“顺利的情形”：很容易发生
+坐标轴环境内部添加的标签被裁剪掉的
+情况：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    tiny,
+]
+    \addplot table {data_d2.dat}
+        node [pos=1,pin=0:Special.] {}
+    ;
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+上面的例子把 |pos| 标签放置与节点的标签结合了起来。
+注意，小号样式 |tiny| 安装了一个 \PGFPlots{} 预设，它更适合
+非常小的图——它是众多受支持的缩放
+参数之一。这里的问题显而易见：我们额外节点的文字被裁剪
+掉了。根据你的数据，这里有几种
+解决方案：
+%
+\begin{itemize}
+    \item 使用 |clip=false| 完全禁用绘图路径的裁剪，
+    \item 使用 |clip mode=individual| 只对绘图路径启用裁剪，
+    \item 把节点画在坐标轴环境之外、但仍在
+        picture 环境内部。
+\end{itemize}
+%
+第一种做法对大多数图都相当有效：
+%
+\begin{codeexample}[]
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    tiny,
+    clip=false,
+]
+    \addplot table {data_d2.dat}
+        node [pos=1,pin=0:Special.] {}
+    ;
+\end{loglogaxis}
+\end{tikzpicture}
+\end{codeexample}
+%
+注意，这种把节点放在结束分号之前的做法意味着节点会
+继承坐标轴线的样式和颜色。
+
+
+\subsection{小结}
+
+我们学习了如何定义一个（对数）坐标轴，以及如何指定基本的
+坐标轴描述。我们还再次看到了如何使用一条或多条
+|\addplot table| 命令把表数据读入 \PGFPlots{}。我们简要了解了
+回归分析和 \Tikz{} 绘图标注。
+
+我们还遇到了 |tiny| 样式，它是自定义坐标轴
+尺寸的方式之一。其他方式还有 |width|、|height|，以及其他预定义尺寸
+样式如 |normalsize|、|small| 或 |footnotesize|，还有两种不同的缩放
+模式 |/pgfplots/scale| 和 |/tikz/scale|（前者只缩放坐标轴，
+后者同时缩放标签）。
+
+下一步可能包括：如何用线图可视化函数，如何正确对齐
+相邻的图形（即使坐标轴描述各不相同），如何使用
+\PGFPlots{} 的散点图，或如何绘制二元函数。
+
+%The steps are explained in all detail in the reference
+%Chapter~\ref{cha:pgfplots:reference}.
